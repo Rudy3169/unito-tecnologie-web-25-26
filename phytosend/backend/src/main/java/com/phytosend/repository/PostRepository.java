@@ -7,9 +7,9 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    // Metodo personalizzato per trovare i post con un certo tag (es. "SOS")
+    // Metodo personalizzato per trovare i post con un certo tag
     List<Post> findByTag(String tag);
 
-    // Trova i post più recenti ordinati per data (utile per la bacheca)
+    // Trova i post più recenti ordinati per data
     List<Post> findAllByOrderByDataCreazioneDesc();
 }
