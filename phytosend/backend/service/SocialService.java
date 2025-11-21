@@ -1,0 +1,58 @@
+package com.phytosend.backend.service;
+
+import com.phytosend.backend.entity.Commento;
+import com.phytosend.backend.entity.Post;
+import com.phytosend.backend.entity.Utente;
+import com.phytosend.backend.repository.CommentoRepository;
+import com.phytosend.backend.repository.PostRepository;
+import com.phytosend.backend.repository.UtenteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class SocialService {
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private CommentoRepository commentoRepository;
+
+    @Autowired
+    private UtenteRepository utenteRepository; // Serve per recuperare l'autore
+
+    // CREA UN NUOVO POST
+    public Post creaPost(Long utenteId, Post post) {
+        Utente autore = utenteRepository.findById(utenteId)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        post.setAutore(autore);
+        post.setDataCreazione(LocalDateTime.now());
+        return postRepository.save(post);
+    }
+
+    // LEGGI TUTTI I POST (BACHECA)
+    public List<Post> getBacheca() {
+        return postRepository.findAllByOrderByDataCreazioneDesc();
+    }
+
+    // AGGIUNGI UN COMMENTO A UN POST
+    public Commento aggiungiCommento(Long postId, Long utenteId, String testoCommento) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post non trovato"));
+
+        Utente autore = utenteRepository.findById(utenteId)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        Commento nuovoCommento = new Commento();
+        nuovoCommento.setPost(post);
+        nuovoCommento.setAutore(autore);
+        nuovoCommento.setTesto(testoCommento);
+        nuovoCommento.setDataCreazione(LocalDateTime.now());
+
+        return commentoRepository.save(nuovoCommento);
+    }
+}
