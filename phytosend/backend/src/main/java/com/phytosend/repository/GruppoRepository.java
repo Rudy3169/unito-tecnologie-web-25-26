@@ -1,6 +1,6 @@
-package com.phytosend.backend.repository;
+package com.phytosend.repository;
 
-import com.phytosend.backend.entity.Gruppo;
+import com.phytosend.entity.Gruppo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;

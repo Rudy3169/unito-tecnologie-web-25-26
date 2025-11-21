@@ -1,7 +1,7 @@
-package com.phytosend.backend.service;
+package com.phytosend.service;
 
-import com.phytosend.backend.entity.Utente;
-import com.phytosend.backend.repository.UtenteRepository;
+import com.phytosend.entity.Utente;
+import com.phytosend.repository.UtenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

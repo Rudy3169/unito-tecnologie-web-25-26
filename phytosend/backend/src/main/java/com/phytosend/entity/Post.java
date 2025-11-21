@@ -1,4 +1,4 @@
-package com.phytosend.backend.entity;
+package com.phytosend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

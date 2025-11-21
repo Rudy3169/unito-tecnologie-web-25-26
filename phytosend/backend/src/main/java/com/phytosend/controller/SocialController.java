@@ -1,8 +1,8 @@
-package com.phytosend.backend.controller;
+package com.phytosend.controller;
 
-import com.phytosend.backend.entity.Commento;
-import com.phytosend.backend.entity.Post;
-import com.phytosend.backend.service.SocialService;
+import com.phytosend.entity.Commento;
+import com.phytosend.entity.Post;
+import com.phytosend.service.SocialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

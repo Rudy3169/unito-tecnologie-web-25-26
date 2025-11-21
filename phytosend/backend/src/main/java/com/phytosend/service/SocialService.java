@@ -1,11 +1,11 @@
-package com.phytosend.backend.service;
+package com.phytosend.service;
 
-import com.phytosend.backend.entity.Commento;
-import com.phytosend.backend.entity.Post;
-import com.phytosend.backend.entity.Utente;
-import com.phytosend.backend.repository.CommentoRepository;
-import com.phytosend.backend.repository.PostRepository;
-import com.phytosend.backend.repository.UtenteRepository;
+import com.phytosend.entity.Commento;
+import com.phytosend.entity.Post;
+import com.phytosend.entity.Utente;
+import com.phytosend.repository.CommentoRepository;
+import com.phytosend.repository.PostRepository;
+import com.phytosend.repository.UtenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

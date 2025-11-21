@@ -1,6 +1,6 @@
-package com.phytosend.backend.repository;
+package com.phytosend.repository;
 
-import com.phytosend.backend.entity.Commento;
+import com.phytosend.entity.Commento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

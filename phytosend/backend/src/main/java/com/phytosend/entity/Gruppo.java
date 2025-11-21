@@ -1,4 +1,4 @@
-package com.phytosend.backend.entity;
+package com.phytosend.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

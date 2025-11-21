@@ -1,4 +1,4 @@
-package com.phytosend.backend.entity;
+package com.phytosend.entity;
 
 public enum RuoloUtente {
     BASE,        // Utente base

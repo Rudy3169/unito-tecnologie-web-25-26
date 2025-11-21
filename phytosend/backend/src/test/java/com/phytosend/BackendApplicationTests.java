@@ -1,4 +1,4 @@
-package com.phytosend.backend;
+package com.phytosend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

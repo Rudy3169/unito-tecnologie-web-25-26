@@ -1,7 +1,7 @@
-package com.phytosend.backend.controller;
+package com.phytosend.controller;
 
-import com.phytosend.backend.entity.Utente;
-import com.phytosend.backend.service.UtenteService;
+import com.phytosend.entity.Utente;
+import com.phytosend.service.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
