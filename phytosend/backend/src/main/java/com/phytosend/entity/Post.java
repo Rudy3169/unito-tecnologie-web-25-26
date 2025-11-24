@@ -16,24 +16,24 @@ public class Post {
     private Long id;
 
     private String titolo;
-    private String testo;
-    private String fotoUrl; // Per ora salviamo solo l'URL o il nome del file
-    private String tag;     // Es. "SOS", "Crescita", "Info"
+    private String descrizione;
+    private String URLFoto;
 
     private LocalDateTime dataCreazione;
 
-    // RELAZIONE: Chi ha scritto il post?
+    // RELAZIONI
+    // Ogni post ha un autore (utente)
     @ManyToOne
     @JoinColumn(name = "utente_id")
     private Utente autore;
 
-    // RELAZIONE: Di quale pianta si parla? (Opzionale)
+    // Ogni post fa riferimento a una pianta
     @ManyToOne
     @JoinColumn(name = "pianta_id")
     private Pianta piantaRiferimento;
 
-    // RELAZIONE: I commenti sotto questo post
-    // JsonIgnore evita che quando scarichi un post, scarichi i commenti, che scaricano il post... (loop infinito)
+    // Ogni post può avere più commenti
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Commento> commenti;
 }

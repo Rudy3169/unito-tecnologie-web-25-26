@@ -1,8 +1,7 @@
 package com.phytosend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data; // Genera getter, setter, toString, ecc.
-import java.util.List;
+import lombok.Data;
 
 @Data
 @Entity
@@ -19,13 +18,12 @@ public class Utente {
     @Column(unique = true)
     private String email;
 
-    private String password; // In un progetto reale andrebbe hashata!
+    private String password;
 
-    // Requisito: 2 tipologie di utenti
     @Enumerated(EnumType.STRING)
-    private RuoloUtente ruolo; // Definisci un enum con BASE, ESPERTO
+    private RuoloUtente ruolo;
 
-    // Relazione: Un utente ha molte piante
-    @OneToMany(mappedBy = "proprietario", cascade = CascadeType.ALL)
-    private List<Pianta> piante;
+    // RELAZIONE: ogni utente ha un solo giardino
+    @OneToOne(mappedBy = "proprietario", cascade = CascadeType.ALL)
+    private Giardino giardino;
 }

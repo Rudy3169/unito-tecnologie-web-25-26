@@ -14,13 +14,13 @@ public class EventoCura {
     private Long id;
 
     private LocalDate dataPrevista;
-    private String tipo; // Es. "ACQUA", "CONCIME", "TRAVASO"
+    private String tipo; // "ACQUA", "CONCIME", "TRAVASO"
 
-    private boolean completato; // true se l'utente ha spuntato la casella
+    private boolean completato;
 
     private String note;
 
-    // RELAZIONE: Un evento appartiene a una specifica pianta
+    // RELAZIONE: Ogni evento di cura è associato a una pianta
     @ManyToOne
     @JoinColumn(name = "pianta_id")
     private Pianta pianta;

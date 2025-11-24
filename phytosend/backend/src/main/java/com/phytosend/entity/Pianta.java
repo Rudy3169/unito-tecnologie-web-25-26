@@ -3,6 +3,7 @@ package com.phytosend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
@@ -13,14 +14,19 @@ public class Pianta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nomeComune; // Es. "Ficus"
-    private String soprannome; // Es. "Fuffy"
-    private String specie;
+    private String urlFotoPersonale;
 
     private LocalDate dataAcquisto;
 
-    // Relazione con l'utente
+    // RELAZIONI
+    // Ogni pianta appartiene a un giardino
     @ManyToOne
-    @JoinColumn(name = "utente_id")
-    private Utente proprietario;
+    @JoinColumn(name = "giardino_id")
+    @JsonIgnore
+    private Giardino giardino;
+
+    // Ogni pianta ha una scheda botanica
+    @ManyToOne
+    @JoinColumn(name = "scheda_botanica_id")
+    private SchedaBotanica scheda;
 }

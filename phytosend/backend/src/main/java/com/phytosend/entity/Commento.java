@@ -17,12 +17,13 @@ public class Commento {
     private String testo;
     private LocalDateTime dataCreazione;
 
-    // RELAZIONE: Chi ha scritto il commento?
+    // RELAZIONI
+    // Ogni commento ha un autore (utente)
     @ManyToOne
     @JoinColumn(name = "utente_id")
     private Utente autore;
 
-    // RELAZIONE: A quale post appartiene?
+    // Ogni commento appartiene a un post
     @ManyToOne
     @JoinColumn(name = "post_id")
     @JsonIgnore // Evita il loop infinito JSON

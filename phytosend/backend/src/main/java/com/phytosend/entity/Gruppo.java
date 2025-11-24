@@ -13,16 +13,18 @@ public class Gruppo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome;       // Es. "Scambio Talee Torino"
+    private String nome;       // Es. "Scambio Talee"
     private String descrizione;
-    private String zona;       // Es. "Torino Nord"
+    private String paese;
+    private String citta;
 
-    // RELAZIONE: Chi ha creato il gruppo?
+    // RELAZIONI
+    // Ogni gruppo ha un solo admin
     @ManyToOne
     @JoinColumn(name = "admin_id")
     private Utente admin;
 
-    // RELAZIONE: Chi sono i membri? (ManyToMany genera una tabella di mezzo automatica)
+    // Ogni gruppo ha più membri (utenti)
     @ManyToMany
     @JoinTable(
             name = "membri_gruppo",
