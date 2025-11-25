@@ -7,6 +7,8 @@ import java.util.Optional;
 
 @Repository
 public interface UtenteRepository extends JpaRepository<Utente, Long> {
-    // Metodo utile per il login
-    Optional<Utente> findByEmailAndPassword(String email, String password);
+    Optional<Utente> findByEmail(String email);     // Per il login
+    boolean existsByEmail(String email);            // Per evitare doppioni in registrazione
+    Optional<Utente> findByNome(String nome);       // Per trovare utente per nome
+    Optional<Utente> findByCognome(String cognome); // Per trovare utente per cognome
 }

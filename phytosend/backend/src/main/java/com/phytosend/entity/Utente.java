@@ -14,6 +14,11 @@ public class Utente {
 
     private String nome;
     private String cognome;
+    private String compleanno;
+    private String citta;
+
+    @Column(unique = true)
+    private String cellulare;
 
     @Column(unique = true)
     private String email;

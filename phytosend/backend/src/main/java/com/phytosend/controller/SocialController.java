@@ -24,7 +24,7 @@ public class SocialController {
     }
 
     // 2. POST /api/social/posts?utenteId=1 -> Crea un post
-    // Nota: stiamo passando l'ID utente come query param per semplicità (in un'app reale si userebbe il token di sessione)
+    // Nota: stiamo passando l'ID utente come query param per semplicità
     @PostMapping("/posts")
     public Post creaPost(@RequestParam Long utenteId, @RequestBody Post post) {
         return socialService.creaPost(utenteId, post);

@@ -22,7 +22,7 @@ public class PiantaService {
     // Metodo per creare una nuova pianta
     public Pianta aggiungiPiantaAlGiardino(Utente utente, SchedaBotanica scheda) {
         Pianta nuovaPianta = new Pianta();
-        nuovaPianta.setProprietario(utente);
+        nuovaPianta.setGiardino(utente.getGiardino());
         nuovaPianta.setScheda(scheda);
         nuovaPianta.setDataAcquisto(LocalDate.now());
 
