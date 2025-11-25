@@ -57,7 +57,7 @@ public class SchedaBotanicaService {
             p1.setEsposizione("Luce indiretta");
             p1.setIrrigazione("Quando il terriccio è asciutto");
             p1.setFrequenzaAcquaGiorni(7); // Ogni settimana
-            p1.setDescrizione("La pianta del formaggio svizzero, famosa per le foglie bucate.");
+            p1.setUtilizzi("La pianta del formaggio svizzero, famosa per le foglie bucate.");
             p1.setUrlFotoDefault("https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=600&q=80");
 
             SchedaBotanica p2 = new SchedaBotanica();
@@ -66,7 +66,7 @@ public class SchedaBotanicaService {
             p2.setEsposizione("Qualsiasi, anche poca luce");
             p2.setIrrigazione("Raramente, teme i ristagni");
             p2.setFrequenzaAcquaGiorni(21); // Ogni 3 settimane
-            p2.setDescrizione("Indistruttibile e purifica l'aria.");
+            p2.setUtilizzi("Indistruttibile e purifica l'aria.");
             p2.setUrlFotoDefault("https://images.unsplash.com/photo-1599598425947-d352b9785022?auto=format&fit=crop&w=600&q=80");
 
             schedaRepository.save(p1);
