@@ -7,26 +7,26 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
-@Table(name = "piante")
-public class Pianta {
+@Table(name = "plants")
+public class Plant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String urlFotoPersonale;
+    private String urlPhoto;
 
-    private LocalDate dataAcquisto;
+    private LocalDate purchaseDate;
 
     // RELAZIONI
     // Ogni pianta appartiene a un giardino
     @ManyToOne
-    @JoinColumn(name = "giardino_id")
+    @JoinColumn(name = "garden_id")
     @JsonIgnore
-    private Giardino giardino;
+    private Garden garden;
 
     // Ogni pianta ha una scheda botanica
     @ManyToOne
-    @JoinColumn(name = "scheda_botanica_id")
-    private SchedaBotanica scheda;
+    @JoinColumn(name = "botanical_card_id")
+    private BotanicalCard card;
 }

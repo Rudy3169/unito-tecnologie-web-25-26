@@ -7,21 +7,21 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "commenti")
-public class Commento {
+@Table(name = "comments")
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String testo;
-    private LocalDateTime dataCreazione;
+    private String text;
+    private LocalDateTime creationDate;
 
     // RELAZIONI
     // Ogni commento ha un autore (utente)
     @ManyToOne
-    @JoinColumn(name = "utente_id")
-    private Utente autore;
+    @JoinColumn(name = "user_id")
+    private User author;
 
     // Ogni commento appartiene a un post
     @ManyToOne

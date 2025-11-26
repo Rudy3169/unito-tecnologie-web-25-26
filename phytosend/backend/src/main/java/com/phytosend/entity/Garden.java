@@ -8,22 +8,22 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "giardini")
-public class Giardino {
+public class Garden {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome; // opzionale
+    private String name; // opzionale
 
     //RELAZIONI
 
     // Ogni giardino ha un solo proprietario (utente)
     @OneToOne
-    @JoinColumn(name = "utente_id")
+    @JoinColumn(name = "user_id")
     @JsonIgnore
-    private Utente proprietario;
+    private User owner;
 
     // Ogni giardino può contenere più piante
-    @OneToMany(mappedBy = "giardino", cascade = CascadeType.ALL) // Nota: mappedBy="giardino"
-    private List<Pianta> piante;
+    @OneToMany(mappedBy = "garden", cascade = CascadeType.ALL) // Nota: mappedBy="giardino"
+    private List<Plant> plants;
 }

@@ -5,20 +5,20 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "utenti")
-public class Utente {
+@Table(name = "users")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome;
-    private String cognome;
-    private String compleanno;
-    private String citta;
+    private String name;
+    private String surname;
+    private String birthDate;
+    private String city;
 
     @Column(unique = true)
-    private String cellulare;
+    private String phoneNumber;
 
     @Column(unique = true)
     private String email;
@@ -26,9 +26,9 @@ public class Utente {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private RuoloUtente ruolo;
+    private UserRole role;
 
     // RELAZIONE: ogni utente ha un solo giardino
-    @OneToOne(mappedBy = "proprietario", cascade = CascadeType.ALL)
-    private Giardino giardino;
+    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
+    private Garden garden;
 }

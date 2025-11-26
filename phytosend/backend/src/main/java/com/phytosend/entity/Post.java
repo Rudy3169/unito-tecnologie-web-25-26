@@ -15,25 +15,25 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String titolo;
-    private String descrizione;
-    private String URLFoto;
+    private String title;
+    private String description;
+    private String URLPhoto;
 
-    private LocalDateTime dataCreazione;
+    private LocalDateTime creationDate;
 
     // RELAZIONI
     // Ogni post ha un autore (utente)
     @ManyToOne
-    @JoinColumn(name = "utente_id")
-    private Utente autore;
+    @JoinColumn(name = "user_id")
+    private User author;
 
     // Ogni post fa riferimento a una pianta
     @ManyToOne
-    @JoinColumn(name = "pianta_id")
-    private Pianta piantaRiferimento;
+    @JoinColumn(name = "plant_id")
+    private Plant plant;
 
     // Ogni post può avere più commenti
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Commento> commenti;
+    private List<Comment> comments;
 }

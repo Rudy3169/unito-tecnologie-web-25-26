@@ -6,10 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
-    // Metodo personalizzato per trovare i post con un certo tag
-    List<Post> findByTag(String tag);
-
+public interface PostRepository extends JpaRepository<Post, Long> { ;
     // Trova i post più recenti ordinati per data
-    List<Post> findAllByOrderByDataCreazioneDesc();
+    List<Post> findAllByOrderByCreationDateDesc();
 }

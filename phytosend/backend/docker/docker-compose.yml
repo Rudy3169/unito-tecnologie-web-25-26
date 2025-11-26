@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: phytosend-db
+    restart: always
+    environment:
+      POSTGRES_DB: phytosend_db
+      POSTGRES_USER: phytouser
+      POSTGRES_PASSWORD: phytopassword
+    ports:
+      - "5432:5432"
+    volumes:
+      # Salverà i dati nella cartella 'postgre'
+      - ./postgre:/var/lib/postgresql/data

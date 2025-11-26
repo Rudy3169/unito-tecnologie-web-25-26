@@ -6,22 +6,22 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "eventi_cura")
-public class EventoCura {
+@Table(name = "care_events")
+public class CareEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate dataPrevista;
-    private String tipo; // "ACQUA", "CONCIME", "TRAVASO"
+    private LocalDate programmedDate;
+    private String type; // "ACQUA", "CONCIME", "TRAVASO"
 
-    private boolean completato;
+    private boolean completed;
 
-    private String note;
+    private String notes;
 
     // RELAZIONE: Ogni evento di cura è associato a una pianta
     @ManyToOne
-    @JoinColumn(name = "pianta_id")
-    private Pianta pianta;
+    @JoinColumn(name = "plant_id")
+    private Plant plant;
 }
