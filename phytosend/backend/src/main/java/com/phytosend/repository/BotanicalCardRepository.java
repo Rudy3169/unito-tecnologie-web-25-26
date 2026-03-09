@@ -11,4 +11,7 @@ public interface BotanicalCardRepository extends JpaRepository<BotanicalCard, Lo
 
     // Metodo per verificare l'esistenza di una scheda botanica tramite il nome scientifico
     boolean existsByScientificNameContainingIgnoreCase(String scientificName);
+
+    // Metodo per verificare l'esistenza esatta
+    boolean existsByScientificName(String scientificName);
 }

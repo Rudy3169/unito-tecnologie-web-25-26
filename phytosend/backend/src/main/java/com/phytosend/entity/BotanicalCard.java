@@ -20,13 +20,8 @@ public class BotanicalCard {
     private String exposure;
     private String irrigation;
     private int waterFrequencyDays;
-    private String pruning;
     private String fertilization;
-    private String repotting;
     private String soil;
-
-    @Column(length = 2000)
-    private String utilizations;
 
     private String urlDefaultPhoto; // La foto "ufficiale" del catalogo
 }

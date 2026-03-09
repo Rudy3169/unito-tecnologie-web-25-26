@@ -22,6 +22,9 @@ public class BotanicalCardService {
 
     // Cerca una pianta specifica per ID
     public BotanicalCard findById(Long id) {
+        if (id == null) {
+            throw new RuntimeException("ID cannot be null");
+        }
         return cardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Scheda botanica non trovata con ID: " + id));
     }
@@ -42,6 +45,9 @@ public class BotanicalCardService {
     }
 
     public void deleteCard(Long id) {
+        if (id == null) {
+            throw new RuntimeException("ID cannot be null");
+        }
         cardRepository.deleteById(id);
     }
 }
