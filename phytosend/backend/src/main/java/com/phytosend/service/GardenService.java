@@ -2,15 +2,18 @@ package com.phytosend.service;
 
 import com.phytosend.entity.Garden;
 import com.phytosend.entity.User;
+import com.phytosend.exception.ResourceNotFoundException;
 import com.phytosend.repository.GardenRepository;
-import com.phytosend.repository.UserRepository; // Assumo tu abbia questo
+import com.phytosend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class GardenService {
 
     @Autowired
@@ -24,17 +27,17 @@ public class GardenService {
         List<Garden> gardens = gardenRepository.findByOwnerId(userId);
 
         if (gardens.isEmpty()) {
-            // Opzionale: Se non esiste, potresti crearlo al volo o lanciare eccezione
-            throw new RuntimeException("Nessun giardino trovato per l'utente " + userId);
+            throw new ResourceNotFoundException("Nessun giardino trovato per l'utente " + userId);
         }
         // Essendo OneToOne, ci aspettiamo un solo giardino, prendiamo il primo
         return gardens.get(0);
     }
 
     // --- CREA UN GIARDINO (Se non fatto in registrazione) ---
+    @Transactional
     public Garden createGarden(@NonNull Long userId, String gardenName) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato"));
 
         // Controllo se ha già un giardino
         if (!gardenRepository.findByOwnerId(userId).isEmpty()) {
@@ -49,9 +52,10 @@ public class GardenService {
     }
 
     // --- AGGIORNA NOME GIARDINO ---
+    @Transactional
     public Garden updateGardenName(@NonNull Long gardenId, String newName) {
         Garden garden = gardenRepository.findById(gardenId)
-                .orElseThrow(() -> new RuntimeException("Giardino non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Giardino non trovato"));
 
         garden.setName(newName);
         return gardenRepository.save(garden);

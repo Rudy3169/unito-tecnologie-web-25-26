@@ -15,7 +15,7 @@ public class AdminController {
 
     @PostMapping("/import-plants")
     public ResponseEntity<String> importPlants(@RequestParam(defaultValue = "5") int pages) {
-        String result = perenualService.importPlants(pages); // Importa 'pages' pagine, default 5 (approx 150 piante)
-        return ResponseEntity.ok(result);
+        perenualService.importPlants(pages); // Importazione asincrona
+        return ResponseEntity.accepted().body("Importazione avviata in background. L'operazione potrebbe richiedere del tempo.");
     }
 }

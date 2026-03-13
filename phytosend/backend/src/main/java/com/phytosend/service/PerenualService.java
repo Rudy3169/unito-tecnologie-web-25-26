@@ -4,17 +4,21 @@ import com.phytosend.dto.perenual.PerenualListResponse;
 import com.phytosend.dto.perenual.PerenualPlantDto;
 import com.phytosend.entity.BotanicalCard;
 import com.phytosend.repository.BotanicalCardRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.lang.NonNull;
 
 @Service
+@Slf4j
 public class PerenualService {
     
     // Campo final controllato nel costruttore: non serve @NonNull sul campo
@@ -33,7 +37,8 @@ public class PerenualService {
         this.restTemplate = restTemplate;
     }
 
-    public String importPlants(int maxPages) {
+    @Async
+    public CompletableFuture<String> importPlants(int maxPages) {
         int importedCount = 0;
         int currentPage = 1;
 
@@ -71,12 +76,12 @@ public class PerenualService {
 
             } catch (Exception e) {
                 // Log and continue or break? 
-                System.err.println("Error importing page " + currentPage + ": " + e.getMessage());
-                return "Error imported " + importedCount + " plants. Stopped at page " + currentPage + ". Error: " + e.getMessage();
+                log.error("Error importing page {}: {}", currentPage, e.getMessage());
+                return CompletableFuture.completedFuture("Error imported " + importedCount + " plants. Stopped at page " + currentPage + ". Error: " + e.getMessage());
             }
         }
         
-        return "Imported " + importedCount + " plants successfully from " + (currentPage - 1) + " pages.";
+        return CompletableFuture.completedFuture("Imported " + importedCount + " plants successfully from " + (currentPage - 1) + " pages.");
     }
 
     @NonNull

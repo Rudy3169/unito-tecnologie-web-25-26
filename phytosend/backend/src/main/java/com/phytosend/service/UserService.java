@@ -3,6 +3,7 @@ package com.phytosend.service;
 import com.phytosend.entity.User;
 import com.phytosend.entity.UserRole;
 import com.phytosend.entity.Garden;
+import com.phytosend.exception.ResourceNotFoundException;
 import com.phytosend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -11,12 +12,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class UserService implements UserDetailsService {
 
     @Autowired
@@ -44,6 +47,7 @@ public class UserService implements UserDetailsService {
 
 
     // --- REGISTRAZIONE ---
+    @Transactional
     public User registerUser(User newUser) {
         // Verifica se l'email esiste già
         if (userRepository.existsByEmail(newUser.getEmail())) {
@@ -86,7 +90,7 @@ public class UserService implements UserDetailsService {
     // --- LETTURA ---
     public User findById(@NonNull Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utente (" + id + ") non trovato!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utente con ID " + id + " non trovato"));
     }
 
     public List<User> findAll() {
@@ -94,6 +98,7 @@ public class UserService implements UserDetailsService {
     }
 
     // --- AGGIORNAMENTO PROFILO ---
+    @Transactional
     public User aggiornaProfilo(@NonNull Long id, User updatedData) {
         User exsisting = findById(id);
 
@@ -105,6 +110,7 @@ public class UserService implements UserDetailsService {
     }
 
     // --- GESTIONE RUOLI (Upgrade/Downgrade) ---
+    @Transactional
     public User changeRole(@NonNull Long id, UserRole newRole) {
         User user = findById(id);
         user.setRole(newRole);
@@ -112,6 +118,7 @@ public class UserService implements UserDetailsService {
     }
 
     // Metodo specifico per l'upgrade a PRO
+    @Transactional
     public User Upgrade(@NonNull Long id) {
         return changeRole(id, UserRole.PRO);
     }

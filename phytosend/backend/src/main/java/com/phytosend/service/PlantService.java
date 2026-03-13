@@ -4,14 +4,17 @@ import com.phytosend.entity.CareEvent;
 import com.phytosend.entity.Plant;
 import com.phytosend.entity.BotanicalCard;
 import com.phytosend.entity.User;
+import com.phytosend.exception.ResourceNotFoundException;
 import com.phytosend.repository.CareEventRepository;
 import com.phytosend.repository.PlantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
 @Service
+@Transactional(readOnly = true)
 public class PlantService {
 
     @Autowired
@@ -21,6 +24,7 @@ public class PlantService {
     private CareEventRepository careEventRepository; // Per creare le notifiche
 
     // Metodo per creare una nuova pianta
+    @Transactional
     public Plant addPlantToGarden(User user, BotanicalCard card) {
         Plant newPlant = new Plant();
         newPlant.setGarden(user.getGarden());
@@ -49,7 +53,11 @@ public class PlantService {
     }
 
     // Metodo per rimuovere una pianta
+    @Transactional
     public void rimuoviPianta(@NonNull Long plantId) {
+        if (!plantRepository.existsById(plantId)) {
+            throw new ResourceNotFoundException("Pianta con ID " + plantId + " non trovata");
+        }
         plantRepository.deleteById(plantId);
     }
 }
