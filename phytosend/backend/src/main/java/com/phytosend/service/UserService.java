@@ -5,16 +5,42 @@ import com.phytosend.entity.UserRole;
 import com.phytosend.entity.Garden;
 import com.phytosend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato con email: " + email));
+        
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                new ArrayList<>() // Authorities (da implementare se necessario)
+        );
+    }
+    
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+
 
     // --- REGISTRAZIONE ---
     public User registerUser(User newUser) {
@@ -31,8 +57,8 @@ public class UserService {
             newUser.setRole(UserRole.BASE);
         }
 
-        // Salva la password in chiaro
-        newUser.setPassword(newUser.getPassword());
+        // Salva la password hashata
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
         // Inizializza il giardino associato all'utente
          Garden garden = new Garden();
@@ -48,8 +74,8 @@ public class UserService {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // Verifica password
-            if (user.getPassword().equals(password)) {
+            // Verifica password con l'hash
+            if (passwordEncoder.matches(password, user.getPassword())) {
                 return user;
             }
         }

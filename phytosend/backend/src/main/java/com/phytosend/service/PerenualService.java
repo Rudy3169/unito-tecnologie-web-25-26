@@ -24,7 +24,8 @@ public class PerenualService {
     @Autowired
     private BotanicalCardRepository cardRepository;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private RestTemplate restTemplate;
 
     public String importPlants(int maxPages) {
         int importedCount = 0;

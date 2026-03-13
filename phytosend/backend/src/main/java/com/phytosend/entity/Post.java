@@ -2,6 +2,7 @@ package com.phytosend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,8 +16,12 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Il titolo è obbligatorio")
     private String title;
+
+    @NotBlank(message = "La descrizione è obbligatoria")
     private String description;
+
     private String URLPhoto;
 
     private LocalDateTime creationDate;

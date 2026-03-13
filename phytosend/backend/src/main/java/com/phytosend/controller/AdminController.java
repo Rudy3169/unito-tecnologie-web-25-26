@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:5173")
+// @CrossOrigin rimosso: gestito globalmente in SecurityConfig
 public class AdminController {
 
     @Autowired
