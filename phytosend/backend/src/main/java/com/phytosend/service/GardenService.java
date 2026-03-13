@@ -5,10 +5,10 @@ import com.phytosend.entity.User;
 import com.phytosend.repository.GardenRepository;
 import com.phytosend.repository.UserRepository; // Assumo tu abbia questo
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class GardenService {
@@ -20,7 +20,7 @@ public class GardenService {
     private UserRepository userRepository;
 
     // --- TROVA IL GIARDINO DI UN UTENTE ---
-    public Garden getGardenByUserId(Long userId) {
+    public Garden getGardenByUserId(@NonNull Long userId) {
         List<Garden> gardens = gardenRepository.findByOwnerId(userId);
 
         if (gardens.isEmpty()) {
@@ -32,7 +32,7 @@ public class GardenService {
     }
 
     // --- CREA UN GIARDINO (Se non fatto in registrazione) ---
-    public Garden createGarden(Long userId, String gardenName) {
+    public Garden createGarden(@NonNull Long userId, String gardenName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
@@ -49,7 +49,7 @@ public class GardenService {
     }
 
     // --- AGGIORNA NOME GIARDINO ---
-    public Garden updateGardenName(Long gardenId, String newName) {
+    public Garden updateGardenName(@NonNull Long gardenId, String newName) {
         Garden garden = gardenRepository.findById(gardenId)
                 .orElseThrow(() -> new RuntimeException("Giardino non trovato"));
 

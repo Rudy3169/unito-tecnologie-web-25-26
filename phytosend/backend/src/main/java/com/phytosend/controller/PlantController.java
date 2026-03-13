@@ -1,11 +1,11 @@
 package com.phytosend.controller;
 
 import com.phytosend.dto.PlantDto;
-import com.phytosend.entity.Plant;
 import com.phytosend.service.DtoConverter;
 import com.phytosend.service.PlantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +22,7 @@ public class PlantController {
 
     // Route 1: GET tutte le piante di un utente
     @GetMapping("/{utenteId}/piante")
-    public List<PlantDto> getPianteUtente(@PathVariable Long utenteId) {
+    public List<PlantDto> getPianteUtente(@PathVariable @NonNull Long utenteId) {
         return plantService.findPlant(utenteId).stream()
                 .map(dtoConverter::toPlantDto)
                 .collect(Collectors.toList());

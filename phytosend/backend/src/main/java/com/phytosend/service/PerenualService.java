@@ -11,21 +11,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
+import org.springframework.lang.NonNull;
 
 @Service
 public class PerenualService {
-
-    @Value("${perenual.api.key}")
-    private String apiKey;
+    
+    // Campo final controllato nel costruttore: non serve @NonNull sul campo
+    private final String apiKey;
+    private final BotanicalCardRepository cardRepository;
+    private final RestTemplate restTemplate;
 
     private static final String BASE_URL = "https://perenual.com/api/species-list";
 
     @Autowired
-    private BotanicalCardRepository cardRepository;
-
-    @Autowired
-    private RestTemplate restTemplate;
+    public PerenualService(@Value("${perenual.api.key}") String apiKey,
+                           BotanicalCardRepository cardRepository,
+                           RestTemplate restTemplate) {
+        this.apiKey = Objects.requireNonNull(apiKey, "API Key must not be null");
+        this.cardRepository = cardRepository;
+        this.restTemplate = restTemplate;
+    }
 
     public String importPlants(int maxPages) {
         int importedCount = 0;
@@ -33,7 +39,7 @@ public class PerenualService {
 
         // Loop through pages
         while (currentPage <= maxPages) {
-            String url = String.format("%s?key=%s&page=%d", BASE_URL, apiKey, currentPage);
+            String url = BASE_URL + "?key=" + Objects.requireNonNull(apiKey) + "&page=" + currentPage;
             try {
                 ResponseEntity<PerenualListResponse> responseEntity = restTemplate.getForEntity(url, PerenualListResponse.class);
                 PerenualListResponse response = responseEntity.getBody();
@@ -49,7 +55,7 @@ public class PerenualService {
                         : null;
 
                     if (scientificName != null && !cardRepository.existsByScientificNameContainingIgnoreCase(scientificName)) {
-                        BotanicalCard card = mapDtoToEntity(dto, scientificName);
+                        BotanicalCard card = mapDtoToEntity(dto, Objects.requireNonNull(scientificName));
                         cardRepository.save(card);
                         importedCount++;
                     }
@@ -73,6 +79,7 @@ public class PerenualService {
         return "Imported " + importedCount + " plants successfully from " + (currentPage - 1) + " pages.";
     }
 
+    @NonNull
     private BotanicalCard mapDtoToEntity(PerenualPlantDto dto, String scientificName) {
         BotanicalCard card = new BotanicalCard();
         card.setCommonName(dto.getCommonName() != null ? dto.getCommonName() : scientificName); // Fallback

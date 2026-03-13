@@ -7,6 +7,7 @@ import com.phytosend.repository.CommentRepository;
 import com.phytosend.repository.PostRepository;
 import com.phytosend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ public class SocialService {
     private UserRepository userRepository; // Serve per recuperare l'autore
 
     // CREA UN NUOVO POST
-    public Post createPost(Long userId, Post post) {
+    public Post createPost(@NonNull Long userId, Post post) {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
@@ -40,7 +41,7 @@ public class SocialService {
     }
 
     // AGGIUNGI UN COMMENTO A UN POST
-    public Comment addComment(Long postId, Long userId, String textComment) {
+    public Comment addComment(@NonNull Long postId, @NonNull Long userId, String textComment) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post non trovato"));
 

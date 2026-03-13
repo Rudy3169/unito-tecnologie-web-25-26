@@ -7,6 +7,7 @@ import com.phytosend.entity.User;
 import com.phytosend.repository.CareEventRepository;
 import com.phytosend.repository.PlantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 
@@ -43,12 +44,12 @@ public class PlantService {
     }
 
     // Metodo per trovare tutte le piante di un utente
-    public java.util.List<Plant> findPlant(Long utenteId) {
+    public java.util.List<Plant> findPlant(@NonNull Long utenteId) {
         return plantRepository.findByOwnerId(utenteId);
     }
 
     // Metodo per rimuovere una pianta
-    public void rimuoviPianta(Long plantId) {
+    public void rimuoviPianta(@NonNull Long plantId) {
         plantRepository.deleteById(plantId);
     }
 }

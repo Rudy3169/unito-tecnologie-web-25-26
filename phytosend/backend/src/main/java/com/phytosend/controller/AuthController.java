@@ -2,7 +2,6 @@ package com.phytosend.controller;
 
 import com.phytosend.dto.LoginRequest;
 import com.phytosend.dto.LoginResponse;
-import com.phytosend.dto.UserDto;
 import com.phytosend.entity.User;
 import com.phytosend.security.JwtUtil;
 import com.phytosend.service.DtoConverter;

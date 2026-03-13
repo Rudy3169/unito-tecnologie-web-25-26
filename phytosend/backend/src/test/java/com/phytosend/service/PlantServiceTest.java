@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,6 +55,7 @@ class PlantServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void addPlantToGarden_Success() {
         // Arrange
         when(plantRepository.save(any(Plant.class))).thenAnswer(invocation -> {

@@ -1,6 +1,5 @@
 package com.phytosend.service;
 
-import com.phytosend.entity.Garden;
 import com.phytosend.entity.User;
 import com.phytosend.entity.UserRole;
 import com.phytosend.repository.UserRepository;
@@ -11,8 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +42,7 @@ class UserServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void registerUser_Success() {
         // Arrange
         when(userRepository.existsByEmail(anyString())).thenReturn(false);

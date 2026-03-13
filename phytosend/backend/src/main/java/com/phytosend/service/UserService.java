@@ -5,6 +5,7 @@ import com.phytosend.entity.UserRole;
 import com.phytosend.entity.Garden;
 import com.phytosend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -83,7 +84,7 @@ public class UserService implements UserDetailsService {
     }
 
     // --- LETTURA ---
-    public User findById(Long id) {
+    public User findById(@NonNull Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utente (" + id + ") non trovato!"));
     }
@@ -93,7 +94,7 @@ public class UserService implements UserDetailsService {
     }
 
     // --- AGGIORNAMENTO PROFILO ---
-    public User aggiornaProfilo(Long id, User updatedData) {
+    public User aggiornaProfilo(@NonNull Long id, User updatedData) {
         User exsisting = findById(id);
 
         // Aggiorna solo i campi modificabili dall'utente
@@ -104,14 +105,14 @@ public class UserService implements UserDetailsService {
     }
 
     // --- GESTIONE RUOLI (Upgrade/Downgrade) ---
-    public User changeRole(Long id, UserRole newRole) {
+    public User changeRole(@NonNull Long id, UserRole newRole) {
         User user = findById(id);
         user.setRole(newRole);
         return userRepository.save(user);
     }
 
     // Metodo specifico per l'upgrade a PRO
-    public User Upgrade(Long id) {
+    public User Upgrade(@NonNull Long id) {
         return changeRole(id, UserRole.PRO);
     }
 }

@@ -5,6 +5,7 @@ import com.phytosend.entity.Garden;
 import com.phytosend.service.DtoConverter;
 import com.phytosend.service.GardenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class GardenController {
 
     // GET /api/gardens/user/{userId}
     @GetMapping("/user/{userId}")
-    public ResponseEntity<GardenDto> getUserGarden(@PathVariable Long userId) {
+    public ResponseEntity<GardenDto> getUserGarden(@PathVariable @NonNull Long userId) {
         // Le eccezioni sono gestite da GlobalExceptionHandler
         Garden garden = gardenService.getGardenByUserId(userId);
         return ResponseEntity.ok(dtoConverter.toGardenDto(garden));
@@ -29,14 +30,14 @@ public class GardenController {
 
     // POST /api/gardens/user/{userId}
     @PostMapping("/user/{userId}")
-    public ResponseEntity<GardenDto> createGarden(@PathVariable Long userId, @RequestParam(defaultValue = "Il mio Giardino") String name) {
+    public ResponseEntity<GardenDto> createGarden(@PathVariable @NonNull Long userId, @RequestParam(defaultValue = "Il mio Giardino") String name) {
         Garden newGarden = gardenService.createGarden(userId, name);
         return ResponseEntity.ok(dtoConverter.toGardenDto(newGarden));
     }
 
     // PUT /api/gardens/{gardenId}
     @PutMapping("/{gardenId}")
-    public ResponseEntity<GardenDto> updateGardenName(@PathVariable Long gardenId, @RequestBody String newName) {
+    public ResponseEntity<GardenDto> updateGardenName(@PathVariable @NonNull Long gardenId, @RequestBody String newName) {
         Garden updated = gardenService.updateGardenName(gardenId, newName);
         return ResponseEntity.ok(dtoConverter.toGardenDto(updated));
     }

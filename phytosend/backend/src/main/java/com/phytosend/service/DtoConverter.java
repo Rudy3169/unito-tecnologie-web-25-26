@@ -5,10 +5,6 @@ import com.phytosend.dto.PlantDto;
 import com.phytosend.dto.UserDto;
 import com.phytosend.entity.Garden;
 import com.phytosend.entity.Plant;
-import com.phytosend.entity.Post;
-import com.phytosend.entity.Comment;
-import com.phytosend.dto.PostDto;
-import com.phytosend.dto.CommentDto;
 import com.phytosend.entity.User;
 import org.springframework.stereotype.Service;
 
