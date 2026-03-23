@@ -21,13 +21,20 @@ import org.springframework.lang.NonNull;
 @Slf4j
 public class PerenualService {
     
-    // Campo final controllato nel costruttore: non serve @NonNull sul campo
+    // Configurazione delegata
     private final String apiKey;
     private final BotanicalCardRepository cardRepository;
     private final RestTemplate restTemplate;
 
     private static final String BASE_URL = "https://perenual.com/api/species-list";
 
+    /**
+     * Costruttore configurato autonomamente da Spring per preparare il servizio Perenual.
+     *
+     * @param apiKey chiave API iniettata dai file properties
+     * @param cardRepository repository per l'archiviazione
+     * @param restTemplate client HTTP sincrono per API esterne
+     */
     @Autowired
     public PerenualService(@Value("${perenual.api.key}") String apiKey,
                            BotanicalCardRepository cardRepository,
@@ -37,6 +44,13 @@ public class PerenualService {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * Lancia l'importazione automatica delle specie vegetali dall'API Perenual.
+     * Esecuzione asincrona (in background) per non bloccare il chiamante a causa dei limiti di rate dell'API e del DB.
+     *
+     * @param maxPages il massimo numero di pagine dell'API da ispezionare
+     * @return stringa asincrona riportante i conteggi dell'esito
+     */
     @Async
     public CompletableFuture<String> importPlants(int maxPages) {
         int importedCount = 0;
@@ -84,6 +98,14 @@ public class PerenualService {
         return CompletableFuture.completedFuture("Imported " + importedCount + " plants successfully from " + (currentPage - 1) + " pages.");
     }
 
+    /**
+     * Traduce il set di dati di terze parti (PerenualPlantDto) nel formato BotanicalCard standard locale.
+     * Include il mapping per l'acqua, l'esposizione al sole e la classificazione per immagini.
+     *
+     * @param dto il DTO proveniente dal payload della risposta
+     * @param scientificName stringa estratta del nome scientifico per sicurezza
+     * @return l'entità BotanicalCard mappata e pronta all'inserimento SQL
+     */
     @NonNull
     private BotanicalCard mapDtoToEntity(PerenualPlantDto dto, String scientificName) {
         BotanicalCard card = new BotanicalCard();

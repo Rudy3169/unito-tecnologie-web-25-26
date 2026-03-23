@@ -13,6 +13,13 @@ import java.util.stream.Collectors;
 @Service
 public class DtoConverter {
 
+    /**
+     * Converte un'entità User del database in un Data Transfer Object.
+     * Utile per omettere campi sensibili come la password in fase di risposta API.
+     *
+     * @param user l'entità origine
+     * @return l'oggetto UserDto popolato
+     */
     public UserDto toUserDto(User user) {
         if (user == null) return null;
         UserDto dto = new UserDto();
@@ -26,6 +33,13 @@ public class DtoConverter {
         return dto;
     }
 
+    /**
+     * Mappa l'entità Plant (giardino) nel suo rispettivo PlantDto, astraendo le relazioni complesse (Garden)
+     * per evitare riferimenti circolari nella serializzazione JSON.
+     *
+     * @param plant l'entità origine
+     * @return oggetto PlantDto
+     */
     public PlantDto toPlantDto(Plant plant) {
         if (plant == null) return null;
         PlantDto dto = new PlantDto();
@@ -39,6 +53,13 @@ public class DtoConverter {
         return dto;
     }
 
+    /**
+     * Converte i dati di un Garden, popolando il nome padrone e impacchettando ricorsivamente
+     * la sua lista di piante in una collection di DTO.
+     *
+     * @param garden entità master Garden
+     * @return il formato alleggerito GardenDto
+     */
     public GardenDto toGardenDto(Garden garden) {
         if (garden == null) return null;
         GardenDto dto = new GardenDto();
@@ -56,6 +77,12 @@ public class DtoConverter {
         return dto;
     }
 
+    /**
+     * Converte un intero Post social nei suoi dati serializzabili, inclusi l'autore e la pianta correlata.
+     *
+     * @param post entità social post
+     * @return il corrispondente PostDto
+     */
     public com.phytosend.dto.PostDto toPostDto(com.phytosend.entity.Post post) {
         if (post == null) return null;
         com.phytosend.dto.PostDto dto = new com.phytosend.dto.PostDto();
@@ -69,6 +96,12 @@ public class DtoConverter {
         return dto;
     }
 
+    /**
+     * Isola il commento dalle referenze pesanti per prepararlo alla trasmissione client-side.
+     *
+     * @param comment il commento originario persistito
+     * @return CommentDto standardizzato
+     */
     public com.phytosend.dto.CommentDto toCommentDto(com.phytosend.entity.Comment comment) {
         if (comment == null) return null;
         com.phytosend.dto.CommentDto dto = new com.phytosend.dto.CommentDto();

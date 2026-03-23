@@ -23,6 +23,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtService;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Intercetta ogni richiesta HTTP per estrarre e validare il token JWT dall'header Authorization.
+     * Se il token è valido, imposta l'identità dell'utente nel contesto di sicurezza di Spring.
+     *
+     * @param request  la richiesta HTTP in ingresso
+     * @param response la risposta HTTP
+     * @param filterChain la catena di filtri per la chiamata successiva
+     * @throws ServletException in caso di errori del servlet
+     * @throws IOException in caso di errori di Input/Output durante la lettura della richiesta
+     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

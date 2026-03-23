@@ -31,6 +31,13 @@ public class AuthController {
     @Autowired
     private DtoConverter dtoConverter;
 
+    /**
+     * Gestisce la richiesta di autenticazione per un utente esistente.
+     * Valida le credenziali e, in caso di successo, restituisce un token JWT firmato per l'accesso.
+     *
+     * @param request l'oggetto contenente email e password
+     * @return la risposta con il token JWT e i dati base dell'utente
+     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         // Authenticate user
@@ -53,9 +60,14 @@ public class AuthController {
 
         return ResponseEntity.ok(new LoginResponse(token, dtoConverter.toUserDto(user)));
     }
-    
+    /**
+     * Registra un nuovo utente nel sistema.
+     * Verifica la validità dei campi, salva l'utente e genera un token JWT per il login automatico.
+     *
+     * @param user i dati del nuovo utente da registrare
+     * @return la risposta con il token JWT e i dati base del nuovo utente
+     */
     @PostMapping("/register")
-    // Note: Ensure User is valid
     public ResponseEntity<LoginResponse> register(@Valid @RequestBody User user) {
         User createdUser = userService.registerUser(user);
         UserDetails userDetails = userService.loadUserByUsername(createdUser.getEmail());

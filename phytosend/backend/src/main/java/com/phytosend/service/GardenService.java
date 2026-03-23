@@ -22,7 +22,13 @@ public class GardenService {
     @Autowired
     private UserRepository userRepository;
 
-    // --- TROVA IL GIARDINO DI UN UTENTE ---
+    /**
+     * Recupera l'unico giardino associato all'ID utente fornito.
+     * Dato che il sistema è impostato in OneToOne, restituisce il primo elemento o va in eccezione.
+     *
+     * @param userId l'ID utente di cui cercare il giardino
+     * @return Garden trovato
+     */
     public Garden getGardenByUserId(@NonNull Long userId) {
         List<Garden> gardens = gardenRepository.findByOwnerId(userId);
 
@@ -33,7 +39,13 @@ public class GardenService {
         return gardens.get(0);
     }
 
-    // --- CREA UN GIARDINO (Se non fatto in registrazione) ---
+    /**
+     * Inizializza e associa un nuovo giardino allo user, verificando che non ne esista già uno.
+     *
+     * @param userId l'id del proprietario
+     * @param gardenName un nome da assegnare o nullo per il fallback di default
+     * @return il nuovo Garden salvato
+     */
     @Transactional
     public Garden createGarden(@NonNull Long userId, String gardenName) {
         User user = userRepository.findById(userId)
@@ -51,7 +63,13 @@ public class GardenService {
         return gardenRepository.save(garden);
     }
 
-    // --- AGGIORNA NOME GIARDINO ---
+    /**
+     * Aggiorna solamente la stringa descrittiva del nome del giardino.
+     *
+     * @param gardenId identificativo del giardino bersaglio
+     * @param newName il nuovo nome da applicare
+     * @return l'identità del Garden col nuovo nome salvata nel repository
+     */
     @Transactional
     public Garden updateGardenName(@NonNull Long gardenId, String newName) {
         Garden garden = gardenRepository.findById(gardenId)

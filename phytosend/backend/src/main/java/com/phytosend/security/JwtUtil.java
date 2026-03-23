@@ -24,15 +24,35 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
+    /**
+     * Estrae l'identificativo utente (il subject dell'email) dal token JWT fornito.
+     *
+     * @param token il token JSON Web Token sorgente
+     * @return il nome utente estratto
+     */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    /**
+     * Interroga il token decodificato per recuperare uno specifico claim in base al function resolver.
+     *
+     * @param token il token JWT da scansionare
+     * @param claimsResolver funzione per mappare la richiesta al claim
+     * @param <T> il tipo di ritorno atteso del claim (es. Date, String)
+     * @return il valore desiderato estratto dai payload claims
+     */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
+    /**
+     * Genera un token JWT di base senza claims aggiuntivi per i dettagli utente.
+     *
+     * @param userDetails l'utente autenticato per il quale generare il token
+     * @return la stringa codificata del token
+     */
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
@@ -51,6 +71,13 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Verifica la correttezza del token confrontando l'username del claim e controllandone la validità temporale.
+     *
+     * @param token il JWT token dal lato client
+     * @param userDetails i dettagli utente correnti provenienti dal datastore
+     * @return true se il token è ancora valido e appartiene all'utente
+     */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);

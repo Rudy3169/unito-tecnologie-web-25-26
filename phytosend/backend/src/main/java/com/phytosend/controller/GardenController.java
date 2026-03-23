@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/gardens")
-// @CrossOrigin rimosso: gestito globalmente in SecurityConfig
 public class GardenController {
 
     @Autowired
@@ -20,22 +19,38 @@ public class GardenController {
     @Autowired
     private DtoConverter dtoConverter;
 
-    // GET /api/gardens/user/{userId}
+    /**
+     * Recupera le informazioni sul giardino di proprietà di uno specifico utente identificato dal suo ID.
+     *
+     * @param userId l'ID utente loggato o richiesto
+     * @return il DTO rappresentante il giardino dell'utente
+     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<GardenDto> getUserGarden(@PathVariable @NonNull Long userId) {
-        // Le eccezioni sono gestite da GlobalExceptionHandler
         Garden garden = gardenService.getGardenByUserId(userId);
         return ResponseEntity.ok(dtoConverter.toGardenDto(garden));
     }
 
-    // POST /api/gardens/user/{userId}
+    /**
+     * Inizializza un giardino nuovo, assegnandolo subito in proprietà all'utente.
+     *
+     * @param userId l'ID del proprietario
+     * @param name il nome descrittivo del giardino (es. "Mio Orto")
+     * @return i dettagli del giardino creato in DTO
+     */
     @PostMapping("/user/{userId}")
     public ResponseEntity<GardenDto> createGarden(@PathVariable @NonNull Long userId, @RequestParam(defaultValue = "Il mio Giardino") String name) {
         Garden newGarden = gardenService.createGarden(userId, name);
         return ResponseEntity.ok(dtoConverter.toGardenDto(newGarden));
     }
 
-    // PUT /api/gardens/{gardenId}
+    /**
+     * Applica una modifica al nome di visualizzazione del giardino specificato.
+     *
+     * @param gardenId l'ID univoco del giardino
+     * @param newName la nuova stringa per rinominarlo
+     * @return DTO aggiornato post-rinomina
+     */
     @PutMapping("/{gardenId}")
     public ResponseEntity<GardenDto> updateGardenName(@PathVariable @NonNull Long gardenId, @RequestBody String newName) {
         Garden updated = gardenService.updateGardenName(gardenId, newName);

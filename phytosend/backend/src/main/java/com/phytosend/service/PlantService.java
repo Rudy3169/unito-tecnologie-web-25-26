@@ -23,7 +23,15 @@ public class PlantService {
     @Autowired
     private CareEventRepository careEventRepository; // Per creare le notifiche
 
-    // Metodo per creare una nuova pianta
+    /**
+     * Inserisce fisicamente una pianta associandole la relativa scheda botanica nel giardino dell'utente.
+     * Si occupa inoltre di programmare in automatico il primissimo evento di innaffiatura (CareEvent) 
+     * in base alla frequenza dichiarata dalla specie.
+     *
+     * @param user il proprietario chiamante
+     * @param card la scheda botanica che detta i parametri della pianta
+     * @return l'istanza della Plant persistita
+     */
     @Transactional
     public Plant addPlantToGarden(User user, BotanicalCard card) {
         Plant newPlant = new Plant();
@@ -34,11 +42,9 @@ public class PlantService {
         // Salviamo la pianta
         newPlant = plantRepository.save(newPlant);
 
-        // Crea il primo evento di cura
         CareEvent firstEvent = new CareEvent();
         firstEvent.setPlant(newPlant);
         firstEvent.setType("ACQUA");
-        // Usiamo la frequenza scritta nella scheda botanica per calcolare la data
         firstEvent.setProgrammedDate(LocalDate.now().plusDays(card.getWaterFrequencyDays()));
         firstEvent.setCompleted(false);
 
@@ -47,12 +53,22 @@ public class PlantService {
         return newPlant;
     }
 
-    // Metodo per trovare tutte le piante di un utente
+    /**
+     * Lista in sola lettura tutte le piante relative ad un utente per il popolamento UI.
+     *
+     * @param utenteId identificativo
+     * @return lista listata da Spring Data di entità Plant
+     */
     public java.util.List<Plant> findPlant(@NonNull Long utenteId) {
         return plantRepository.findByOwnerId(utenteId);
     }
 
-    // Metodo per rimuovere una pianta
+    /**
+     * Esegue l'azione distruttiva per sganciare ed eliminare una pianta specifica dal DB.
+     * Attenzione: la JPA configurerà i clear a cascata sulle careEvent collegate.
+     *
+     * @param plantId ID della pianta radice da distruggere
+     */
     @Transactional
     public void rimuoviPianta(@NonNull Long plantId) {
         if (!plantRepository.existsById(plantId)) {

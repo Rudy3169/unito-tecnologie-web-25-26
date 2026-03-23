@@ -16,14 +16,22 @@ public class BotanicalCardService {
     @Autowired
     private BotanicalCardRepository cardRepository;
 
-    // --- RICERCA E LETTURA (Per tutti gli utenti) ---
-
-    // Restituisce tutto il catalogo (utile per la pagina "Esplora")
+    /**
+     * Recupera l'intero catalogo di schede botaniche dal database.
+     * Utilizzato primariamente per l'esplorazione del catalogo pubblico.
+     *
+     * @return una lista di tutte le entità BotanicalCard
+     */
     public List<BotanicalCard> findAll() {
         return cardRepository.findAll();
     }
 
-    // Cerca una pianta specifica per ID
+    /**
+     * Esegue la ricerca di una scheda botanica tramite il suo identificativo univoco.
+     *
+     * @param id l'ID primario della scheda
+     * @return la scheda trovata o un'eccezione se inesistente
+     */
     public BotanicalCard findById(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID cannot be null");
@@ -32,13 +40,23 @@ public class BotanicalCardService {
                 .orElseThrow(() -> new ResourceNotFoundException("Scheda botanica non trovata con ID: " + id));
     }
 
-    // Cerca piante per nome comune
+    /**
+     * Cerca schede botaniche filtrando per porzioni del nome comune, ignorando le maiuscole.
+     *
+     * @param query il termine di ricerca inserito dall'utente
+     * @return la lista delle piante che soddisfano i criteri
+     */
     public List<BotanicalCard> searchByNome(String query) {
         return cardRepository.findByCommonNameContainingIgnoreCase(query);
     }
 
-    // --- GESTIONE CATALOGO (Per Admin o logica interna) ---
-
+    /**
+     * Salva o aggiorna una scheda botanica nel data store.
+     * Inserisce la logica di controllo per prevenire l'inserimento di duplicati basati sul nome scientifico.
+     *
+     * @param card l'oggetto BotanicalCard da salvare
+     * @return la scheda persistita
+     */
     @Transactional
     public BotanicalCard saveCard(BotanicalCard card) {
         // Controllo duplicati base
@@ -48,6 +66,11 @@ public class BotanicalCardService {
         return cardRepository.save(card);
     }
 
+    /**
+     * Elimina definitivamente una specifica scheda botanica dal catalogo.
+     *
+     * @param id identificativo univoco della scheda
+     */
     @Transactional
     public void deleteCard(Long id) {
         if (id == null) {

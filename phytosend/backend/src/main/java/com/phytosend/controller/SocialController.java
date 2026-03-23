@@ -17,7 +17,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/social")
-// @CrossOrigin rimosso: gestito globalmente in SecurityConfig
 public class SocialController {
 
     @Autowired
@@ -26,31 +25,62 @@ public class SocialController {
     @Autowired
     private DtoConverter dtoConverter;
 
-    // 1. GET /api/social/posts -> Ottieni la bacheca
+    /**
+     * Fornisce l'intera bacheca social pubblica, contenente i post ordinati cronologicamente
+     * dalla data più recente, divisa in pagine.
+     *
+     * @param page parametro opzionale della pagina (default 0)
+     * @param size parametro opzionale limitatore (default 10)
+     * @return pagina dei post pubblicati (PostDto)
+     */
     @GetMapping("/posts")
-    public List<PostDto> getBacheca() {
-        return socialService.getFeed().stream()
-                .map(dtoConverter::toPostDto)
-                .collect(Collectors.toList());
+    public org.springframework.data.domain.Page<PostDto> getBacheca(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return socialService.getFeed(page, size).map(dtoConverter::toPostDto);
     }
 
-    // 2. POST /api/social/posts?utenteId=1 -> Crea un post
-    // Nota: stiamo passando l'ID utente come query param per semplicità
+    /**
+     * Crea un nuovo post all'interno della piattaforma social e lo attribuisce all'autore.
+     *
+     * @param utenteId ID dell'autore (sostituito in query string per uso in dev localmente)
+     * @param post entità post contente il testo ed eventuale foto
+     * @return il post creato in DTO
+     */
     @PostMapping("/posts")
     public PostDto creaPost(@RequestParam @NonNull Long utenteId, @Valid @RequestBody Post post) {
         Post created = socialService.createPost(utenteId, post);
         return dtoConverter.toPostDto(created);
     }
 
-    // 3. POST /api/social/posts/1/commenti?utenteId=2 -> Aggiungi commento al post 1
-    // Usa @PathVariable per l'ID del post e @RequestBody per il testo
+    /**
+     * Aggiunge un commento al thread di uno specifico post esistente.
+     *
+     * @param postId ID del post padre
+     * @param utenteId ID dell'autore del commento
+     * @param body map JSON attesa contenente la chiave 'testo' del commento (es. { "testo": "Bel ficus!" })
+     * @return la risposta commento creata
+     */
     @PostMapping("/posts/{postId}/commenti")
     public CommentDto commentaPost(@PathVariable @NonNull Long postId,
                                 @RequestParam @NonNull Long utenteId,
                                 @RequestBody Map<String, String> body) {
-        // Ci aspettiamo un JSON tipo: { "testo": "Bel ficus!" }
         String testo = body.get("testo");
         Comment comment = socialService.addComment(postId, utenteId, testo);
         return dtoConverter.toCommentDto(comment);
+    }
+
+    /**
+     * Rimuove interamente un post specifico, assicurando prima che l'invocante
+     * sia l'effettivo autore o un admin autorizzato.
+     *
+     * @param postId l'ID del post da eliminare
+     * @param utenteId l'ID utente loggato richiamante
+     * @return stato vuoto al completamento
+     */
+    @DeleteMapping("/posts/{postId}")
+    public org.springframework.http.ResponseEntity<Void> deletePost(@PathVariable @NonNull Long postId, @RequestParam @NonNull Long utenteId) {
+        socialService.deletePost(postId, utenteId);
+        return org.springframework.http.ResponseEntity.noContent().build();
     }
 }

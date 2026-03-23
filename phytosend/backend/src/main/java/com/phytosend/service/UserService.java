@@ -28,6 +28,13 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Mappatura standard Spring Security per caricare il contenitore di permessi partendo dall'email.
+     *
+     * @param email identificativo stringa primario
+     * @return UserDetails interfacciato da convertire in Token
+     * @throws UsernameNotFoundException in caso di mismatch email sul db
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
@@ -40,13 +47,23 @@ public class UserService implements UserDetailsService {
         );
     }
     
+    /**
+     * Ritorna l'entità proprietaria associata alla mail.
+     */
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
     }
 
 
 
-    // --- REGISTRAZIONE ---
+    /**
+     * Processo core della registrazione utente.
+     * Controlla duplicati per chiave email, fa il setup della cartografia e assegna un giardino vuoto iniziale.
+     * Si occupa anche di triggerare la procedura di Hashing sulla password inserita in plain text.
+     *
+     * @param newUser scheletro dell'utente dalla form UI
+     * @return profilo generato in output
+     */
     @Transactional
     public User registerUser(User newUser) {
         // Verifica se l'email esiste già
@@ -73,7 +90,13 @@ public class UserService implements UserDetailsService {
         return userRepository.save(newUser);
     }
 
-    // --- LOGIN (Autenticazione Semplificata) ---
+    /**
+     * Flusso di confronto tra le password criptate usato nell'accesso semplificato per generare responsi JWT positivi.
+     *
+     * @param email login email
+     * @param password secret plain per confronto col digest hashato nel db
+     * @return utente loggato con i permessi aggiornati
+     */
     public User login(String email, String password) {
         Optional<User> userOpt = userRepository.findByEmail(email);
 
@@ -87,17 +110,35 @@ public class UserService implements UserDetailsService {
         throw new RuntimeException("Email o Password non valide!");
     }
 
-    // --- LETTURA ---
+    /**
+     * Semplice lookup ad utente per ID.
+     */
     public User findById(@NonNull Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utente con ID " + id + " non trovato"));
     }
 
+    /**
+     * Retrieve completo della tabella.
+     */
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
-    // --- AGGIORNAMENTO PROFILO ---
+    /**
+     * Retrieve della tabella in pagine.
+     */
+    public org.springframework.data.domain.Page<User> findAll(int page, int size) {
+        return userRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size));
+    }
+
+    /**
+     * Funzione mirata all'editing autorizzato del solo profilo UI: sovrascrive unicamente telefono e città.
+     *
+     * @param id primary key utente
+     * @param updatedData body precompilato nel mapping REST
+     * @return status nuovo
+     */
     @Transactional
     public User aggiornaProfilo(@NonNull Long id, User updatedData) {
         User exsisting = findById(id);
@@ -109,7 +150,13 @@ public class UserService implements UserDetailsService {
         return userRepository.save(exsisting);
     }
 
-    // --- GESTIONE RUOLI (Upgrade/Downgrade) ---
+    /**
+     * Metodo di amministrazione per il cambio dei ruoli applicativi, ricalcola i grants su spring context.
+     *
+     * @param id user
+     * @param newRole enumerazione ruolo di rimpiazzamento
+     * @return utente in upgrade state
+     */
     @Transactional
     public User changeRole(@NonNull Long id, UserRole newRole) {
         User user = findById(id);
@@ -117,7 +164,9 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    // Metodo specifico per l'upgrade a PRO
+    /**
+     * Abbreviazione wrapper per l'upgrade veloce d'utente al tier PRO (es. dopo acquisto abbonamento / premio interno).
+     */
     @Transactional
     public User Upgrade(@NonNull Long id) {
         return changeRole(id, UserRole.PRO);

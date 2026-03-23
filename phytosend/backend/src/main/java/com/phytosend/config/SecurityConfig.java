@@ -39,28 +39,44 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
+    // Configurazione della catena di filtri di sicurezza
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Login, Register e Swagger pubblici
-                .anyRequest().authenticated() // Tutto il resto richiede token
-            )
-            // Imposta sessione stateless per JWT
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Login,
+                                                                                                          // Register e
+                                                                                                          // Swagger
+                                                                                                          // pubblici
+                        .anyRequest().authenticated() // Tutto il resto richiede token
+                )
+                // Imposta sessione stateless per JWT
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    /**
+     * Gestisce l'autenticazione tramite l'AuthenticationManager esposto dalla configurazione globale.
+     *
+     * @param config la configurazione di autenticazione Spring
+     * @return il manager di autenticazione configurato
+     * @throws Exception se non riesce a recuperare il manager
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Fornisce il provider di autenticazione basato su DAO che incapsula la gestione del UserDetailsService e della crittografia password.
+     *
+     * @return un'istanza di AuthenticationProvider
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
@@ -68,11 +84,21 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    /**
+     * Fornisce l'algoritmo di hash (BCrypt) utilizzato per codificare e verificare le password degli utenti in modo sicuro.
+     *
+     * @return un'istanza di BCryptPasswordEncoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configura le regole CORS (Cross-Origin Resource Sharing) per permettere al frontend di interagire col backend in sicurezza.
+     *
+     * @return la sorgente di configurazione CORS che accetta specifici origini, metodi HTTP e header
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
