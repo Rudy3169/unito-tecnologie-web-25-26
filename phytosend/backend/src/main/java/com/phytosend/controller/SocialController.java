@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 
 @RestController
@@ -26,8 +24,8 @@ public class SocialController {
     private DtoConverter dtoConverter;
 
     /**
-     * Fornisce l'intera bacheca social pubblica, contenente i post ordinati cronologicamente
-     * dalla data più recente, divisa in pagine.
+     * Fornisce l'intera bacheca social pubblica, contenente i post ordinati
+     * cronologicamente dalla data più recente, divisa in pagine.
      *
      * @param page parametro opzionale della pagina (default 0)
      * @param size parametro opzionale limitatore (default 10)
@@ -41,10 +39,12 @@ public class SocialController {
     }
 
     /**
-     * Crea un nuovo post all'interno della piattaforma social e lo attribuisce all'autore.
+     * Crea un nuovo post all'interno della piattaforma social e lo attribuisce
+     * all'autore.
      *
-     * @param utenteId ID dell'autore (sostituito in query string per uso in dev localmente)
-     * @param post entità post contente il testo ed eventuale foto
+     * @param utenteId ID dell'autore (sostituito in query string per uso in dev
+     *                 localmente)
+     * @param post     entità post contente il testo ed eventuale foto
      * @return il post creato in DTO
      */
     @PostMapping("/posts")
@@ -56,15 +56,16 @@ public class SocialController {
     /**
      * Aggiunge un commento al thread di uno specifico post esistente.
      *
-     * @param postId ID del post padre
+     * @param postId   ID del post padre
      * @param utenteId ID dell'autore del commento
-     * @param body map JSON attesa contenente la chiave 'testo' del commento (es. { "testo": "Bel ficus!" })
+     * @param body     map JSON attesa contenente la chiave 'testo' del commento
+     *                 (es. { "testo": "Bel ficus!" })
      * @return la risposta commento creata
      */
     @PostMapping("/posts/{postId}/commenti")
     public CommentDto commentaPost(@PathVariable @NonNull Long postId,
-                                @RequestParam @NonNull Long utenteId,
-                                @RequestBody Map<String, String> body) {
+            @RequestParam @NonNull Long utenteId,
+            @RequestBody Map<String, String> body) {
         String testo = body.get("testo");
         Comment comment = socialService.addComment(postId, utenteId, testo);
         return dtoConverter.toCommentDto(comment);
@@ -74,12 +75,13 @@ public class SocialController {
      * Rimuove interamente un post specifico, assicurando prima che l'invocante
      * sia l'effettivo autore o un admin autorizzato.
      *
-     * @param postId l'ID del post da eliminare
+     * @param postId   l'ID del post da eliminare
      * @param utenteId l'ID utente loggato richiamante
      * @return stato vuoto al completamento
      */
     @DeleteMapping("/posts/{postId}")
-    public org.springframework.http.ResponseEntity<Void> deletePost(@PathVariable @NonNull Long postId, @RequestParam @NonNull Long utenteId) {
+    public org.springframework.http.ResponseEntity<Void> deletePost(@PathVariable @NonNull Long postId,
+            @RequestParam @NonNull Long utenteId) {
         socialService.deletePost(postId, utenteId);
         return org.springframework.http.ResponseEntity.noContent().build();
     }

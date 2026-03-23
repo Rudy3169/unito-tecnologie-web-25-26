@@ -7,8 +7,6 @@ import com.phytosend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 import org.springframework.lang.NonNull;
 
@@ -23,7 +21,8 @@ public class UserController {
     private DtoConverter dtoConverter;
 
     /**
-     * Recupera l'elenco di tutti gli utenti attualmente iscritti alla piattaforma impaginati.
+     * Recupera l'elenco di tutti gli utenti attualmente iscritti alla piattaforma
+     * impaginati.
      *
      * @param page offset (default 0)
      * @param size fetch limit (default 10)
@@ -38,7 +37,8 @@ public class UserController {
 
     /**
      * Registra un nuovo utente.
-     * (Preferibilmente utilizzare {@link AuthController#register(User)} per avere un token).
+     * (Preferibilmente utilizzare {@link AuthController#register(User)} per avere
+     * un token).
      *
      * @param user il corpo richiesta JSON per generare un nuovo profilo nel sistema
      * @return profilo utente creato
@@ -53,7 +53,7 @@ public class UserController {
      * Aggiorna specifiche porzioni del profilo utente modificabili.
      * I campi sensibili (come password) ignorano questo endpoint.
      *
-     * @param id identificativo dell'utente nel DB
+     * @param id          identificativo dell'utente nel DB
      * @param updatedData i nuovi dati modificabili inseriti dall'utente
      * @return i dati del profilo aggiornato in tempo reale
      */
