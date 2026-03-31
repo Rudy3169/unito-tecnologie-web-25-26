@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Palette Colori Tema Natura */
+    --color-bg-main: #fcfdfa;
+    /* Un bianco/crema per lo sfondo generale */
+    --color-bg-card: #ffffff;
+    /* Sfondo dei blocchi/post */
+    --color-primary: #2d5a27;
+    /* Verde scuro dominante per loghi, testi enfatici */
+    --color-primary-light: #52824b;
+    /* Verde intermedio (hover button) */
+    --color-primary-accent: #a3b899;
+    /* Verde pastello per elementi di contorno */
+    --color-earth: #8a6c4c;
+    /* Marrone terra accent */
+    --color-text-main: #1a201c;
+    /* Grigio fumo/verde strettissimo per testi */
+    --color-text-muted: #647466;
+    /* Grigio leggermente verde per label/note */
+    --color-border: #e6eee5;
+    /* Bordi verdi chiarissimi, per non usare il noioso grigio */
+    --color-error: #cc5543;
+
+    /* Forme e spaziatura */
+    --border-radius-soft: 16px;
+    --border-radius-hard: 8px;
+    --shadow-sm: 0 4px 12px rgba(45, 90, 39, 0.04);
+    --shadow-md: 0 8px 24px rgba(45, 90, 39, 0.08);
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--color-bg-main);
+    color: var(--color-text-main);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+button {
+    font-family: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+input,
+textarea {
+    font-family: inherit;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-hard);
+    padding: 0.75rem var(--spacing-md);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input:focus,
+textarea:focus {
+    border-color: var(--color-primary);
+}

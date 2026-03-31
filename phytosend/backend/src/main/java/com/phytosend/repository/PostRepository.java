@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post, Long> {
     ;
     // Trova i post più recenti ordinati per data con paginazione
-    org.springframework.data.domain.Page<Post> findAllByOrderByCreationDateDesc(
-            org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<Post> findAllByOrderByCreationDateDesc(org.springframework.data.domain.Pageable pageable);
 }

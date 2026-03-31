@@ -1,0 +1,28 @@
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    margin: 0 auto;
+    max-width: 1400px;
+    /* Limite per max-schermo ultrawide */
+}
+
+.main-content {
+    flex: 1;
+    padding: var(--spacing-xl);
+    /* Lasciamo spazio a sinistra se la sidebar è fixed (es. min-width su desktop) */
+    margin-left: 280px;
+}
+
+/* Fallback per schermi piccoli (responsive abbozzato) */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+
+    .main-content {
+        margin-left: 0;
+        margin-bottom: 70px;
+        /* Spazio per una bottom-navbar */
+        padding: var(--spacing-md);
+    }
+}
