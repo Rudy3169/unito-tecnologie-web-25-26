@@ -60,7 +60,7 @@ public class PlantService {
      * @return lista listata da Spring Data di entità Plant
      */
     public java.util.List<Plant> findPlant(@NonNull Long utenteId) {
-        return plantRepository.findByOwnerId(utenteId);
+        return plantRepository.findByGardenOwnerId(utenteId);
     }
 
     /**

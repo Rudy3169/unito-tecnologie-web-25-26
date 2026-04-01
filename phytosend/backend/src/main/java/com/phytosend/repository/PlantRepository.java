@@ -7,6 +7,6 @@ import java.util.List;
 
 @Repository
 public interface PlantRepository extends JpaRepository<Plant, Long> {
-    // Metodo personalizzato per trovare le piante di un certo proprietario
-    List<Plant> findByOwnerId(Long ownerId);
+    // Metodo personalizzato per trovare le piante di un certo proprietario (attraverso il giardino)
+    List<Plant> findByGardenOwnerId(Long ownerId);
 }

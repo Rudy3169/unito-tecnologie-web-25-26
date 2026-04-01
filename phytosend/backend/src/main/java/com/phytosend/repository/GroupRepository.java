@@ -7,9 +7,9 @@ import java.util.List;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
-    // Trova gruppi in una certa citta
-    List<Group> findByCityId(Long cityId);
+    // Trova gruppi in una certa città
+    List<Group> findByCity(String city);
 
     // Trova gruppi in un certo paese
-    List<Group> findByCountryId(Long countryId);
+    List<Group> findByCountry(String country);
 }
