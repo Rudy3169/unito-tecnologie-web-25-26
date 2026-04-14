@@ -21,7 +21,8 @@ public class DtoConverter {
      * @return l'oggetto UserDto popolato
      */
     public UserDto toUserDto(User user) {
-        if (user == null) return null;
+        if (user == null)
+            return null;
         UserDto dto = new UserDto();
         dto.setId(user.getId());
         dto.setName(user.getName());
@@ -34,14 +35,16 @@ public class DtoConverter {
     }
 
     /**
-     * Mappa l'entità Plant (giardino) nel suo rispettivo PlantDto, astraendo le relazioni complesse (Garden)
+     * Mappa l'entità Plant (giardino) nel suo rispettivo PlantDto, astraendo le
+     * relazioni complesse (Garden)
      * per evitare riferimenti circolari nella serializzazione JSON.
      *
      * @param plant l'entità origine
      * @return oggetto PlantDto
      */
     public PlantDto toPlantDto(Plant plant) {
-        if (plant == null) return null;
+        if (plant == null)
+            return null;
         PlantDto dto = new PlantDto();
         dto.setId(plant.getId());
         dto.setUrlPhoto(plant.getUrlPhoto());
@@ -54,14 +57,16 @@ public class DtoConverter {
     }
 
     /**
-     * Converte i dati di un Garden, popolando il nome padrone e impacchettando ricorsivamente
+     * Converte i dati di un Garden, popolando il nome padrone e impacchettando
+     * ricorsivamente
      * la sua lista di piante in una collection di DTO.
      *
      * @param garden entità master Garden
      * @return il formato alleggerito GardenDto
      */
     public GardenDto toGardenDto(Garden garden) {
-        if (garden == null) return null;
+        if (garden == null)
+            return null;
         GardenDto dto = new GardenDto();
         dto.setId(garden.getId());
         dto.setName(garden.getName());
@@ -78,13 +83,15 @@ public class DtoConverter {
     }
 
     /**
-     * Converte un intero Post social nei suoi dati serializzabili, inclusi l'autore e la pianta correlata.
+     * Converte un intero Post social nei suoi dati serializzabili, inclusi l'autore
+     * e la pianta correlata.
      *
      * @param post entità social post
      * @return il corrispondente PostDto
      */
     public com.phytosend.dto.PostDto toPostDto(com.phytosend.entity.Post post) {
-        if (post == null) return null;
+        if (post == null)
+            return null;
         com.phytosend.dto.PostDto dto = new com.phytosend.dto.PostDto();
         dto.setId(post.getId());
         dto.setTitle(post.getTitle());
@@ -97,13 +104,15 @@ public class DtoConverter {
     }
 
     /**
-     * Isola il commento dalle referenze pesanti per prepararlo alla trasmissione client-side.
+     * Isola il commento dalle referenze pesanti per prepararlo alla trasmissione
+     * client-side.
      *
      * @param comment il commento originario persistito
      * @return CommentDto standardizzato
      */
     public com.phytosend.dto.CommentDto toCommentDto(com.phytosend.entity.Comment comment) {
-        if (comment == null) return null;
+        if (comment == null)
+            return null;
         com.phytosend.dto.CommentDto dto = new com.phytosend.dto.CommentDto();
         dto.setId(comment.getId());
         dto.setText(comment.getText());

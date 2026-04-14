@@ -17,13 +17,14 @@ export function PostList({ posts, onToggleLike }: PostListProps) {
                 <PostCard
                     key={post.id}
                     id={post.id}
-                    username={post.username}
-                    location={post.location}
-                    imageUrl={post.imageUrl}
-                    caption={post.caption}
+                    title={post.title}
+                    description={post.description}
+                    urlphoto={post.urlphoto}
+                    creationDate={post.creationDate}
+                    author={post.author}
                     likesCount={post.likesCount}
                     isLikedByMe={post.isLikedByMe}
-                    onLike={onToggleLike} /* Lo passiamo al componente finale */
+                    onLike={onToggleLike}
                 />
             ))}
         </div>

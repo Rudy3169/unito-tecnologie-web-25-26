@@ -1,42 +1,46 @@
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import './PostCard.css';
 
+export interface AuthorDto {
+    id: number;
+    name: string;
+    surname: string;
+    email: string;
+    role: string;
+}
 export interface PostProps {
     id: number;
-    username: string;
-    location: string;
-    imageUrl: string;
-    caption: string;
-    likesCount: number;
-    // Nuovo stato: ho messo like io?
+    title: string;
+    description: string;
+    urlphoto: string;
+    creationDate: string;
+    author: AuthorDto;
+    likesCount?: number;
     isLikedByMe?: boolean;
 }
 
-// Aggiungiamo anche la funzione onClick alle prop!
+
 interface PostCardLayoutProps extends PostProps {
     onLike?: (id: number) => void;
 }
 
 export function PostCard({
-    id, username, location, imageUrl, caption, likesCount, isLikedByMe, onLike
+    id, title, description, urlphoto, author, likesCount, isLikedByMe, onLike
 }: PostCardLayoutProps) {
 
     return (
         <article className="post-card">
             <header className="post-header">
-                <div className="user-avatar">{username.charAt(0).toUpperCase()}</div>
-                <div className="user-info">
-                    <span className="username">{username}</span>
-                    <span className="location">{location}</span>
+                <div className="user-avatar">{author?.name?.charAt(0)?.toUpperCase() ?? '?'}</div>                <div className="user-info">
+                    <span className="username">{author?.name ?? 'Anonimo'}</span>
+                    <span className="location">{title}</span>
                 </div>
             </header>
 
-            <img src={imageUrl} alt={`Post di ${username}`} className="post-image" />
+            <img src={urlphoto} alt={`Post di ${author.name}`} className="post-image" />
 
             <div className="post-actions">
-                {/* IL PULSANTE CUORE ORA È CICCABILE */}
                 <button className="action-btn" onClick={() => onLike && onLike(id)}>
-                    {/* Se c'è il like, si colora di Error (Rosso) ed è riempito, altrimenti vuoto standard */}
                     <Heart
                         size={24}
                         fill={isLikedByMe ? "var(--color-error)" : "none"}
@@ -50,8 +54,8 @@ export function PostCard({
             <div className="post-content">
                 <span className="likes">{likesCount} like per madre natura</span>
                 <p className="post-caption">
-                    <span>{username}</span>
-                    {caption}
+                    <span>{author?.name ?? 'Anonimo'}</span>
+                    {description}
                 </p>
             </div>
         </article>
