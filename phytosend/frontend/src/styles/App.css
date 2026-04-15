@@ -1,28 +1,46 @@
-.app-container {
+/* ── Layout principale ── */
+.app-layout {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
-    margin: 0 auto;
-    max-width: 1400px;
-    /* Limite per max-schermo ultrawide */
 }
 
 .main-content {
-    flex: 1;
-    padding: var(--spacing-xl);
-    /* Lasciamo spazio a sinistra se la sidebar è fixed (es. min-width su desktop) */
-    margin-left: 280px;
+    padding-top: 80px;
+    max-width: 680px;
+    margin: 0 auto;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+    width: 100%;
 }
 
-/* Fallback per schermi piccoli (responsive abbozzato) */
+/* ── Copyright badge ── */
+.copyright-badge {
+    position: fixed;
+    bottom: 16px;
+    right: 20px;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    opacity: 0.55;
+    letter-spacing: 0.4px;
+    pointer-events: none;
+    /* non interferisce con i click */
+    user-select: none;
+    z-index: 50;
+    transition: opacity 0.2s;
+}
+
+.copyright-badge:hover {
+    opacity: 1;
+}
+
 @media (max-width: 768px) {
-    .app-container {
-        flex-direction: column;
+    .main-content {
+        padding-top: 66px;
+        padding-bottom: 74px;
     }
 
-    .main-content {
-        margin-left: 0;
-        margin-bottom: 70px;
-        /* Spazio per una bottom-navbar */
-        padding: var(--spacing-md);
+    .copyright-badge {
+        display: none;
     }
 }

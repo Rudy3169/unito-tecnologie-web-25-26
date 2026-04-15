@@ -132,3 +132,40 @@
     color: var(--color-primary);
     border-color: var(--color-primary-accent);
 }
+
+/* Pulsante pubblica */
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--spacing-md);
+    gap: var(--spacing-sm);
+}
+
+.submit-post-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: white;
+    border-radius: var(--border-radius-soft);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.3);
+    transition: box-shadow 0.2s, transform 0.15s, filter 0.2s;
+}
+
+.submit-post-btn:hover {
+    box-shadow: 0 8px 24px rgba(var(--color-primary-rgb), 0.45);
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+}
+
+.submit-post-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+}

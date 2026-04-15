@@ -47,7 +47,8 @@ class UserServiceTest {
     // ─── registerUser ─────────────────────────────────────────────────────────
 
     /**
-     * Caso felice: utente nuovo → password hashata, ruolo BASE assegnato di default,
+     * Caso felice: utente nuovo → password hashata, ruolo BASE assegnato di
+     * default,
      * giardino creato e associato automaticamente.
      */
     @Test
@@ -71,7 +72,8 @@ class UserServiceTest {
     }
 
     /**
-     * Se il ruolo è già impostato (es. ADMIN da seeder), deve essere preservato e non sovrascritto con BASE.
+     * Se il ruolo è già impostato (es. ADMIN da seeder), deve essere preservato e
+     * non sovrascritto con BASE.
      */
     @Test
     void registerUser_WithPresetRole_PreservesGivenRole() {
@@ -89,7 +91,8 @@ class UserServiceTest {
     }
 
     /**
-     * Email già registrata → deve essere lanciata RuntimeException senza salvare nulla.
+     * Email già registrata → deve essere lanciata RuntimeException senza salvare
+     * nulla.
      */
     @Test
     void registerUser_DuplicateEmail_ThrowsExceptionWithoutSaving() {
@@ -226,7 +229,8 @@ class UserServiceTest {
     }
 
     /**
-     * Upgrade(): shortcut per promuovere a PRO — verifica che il ruolo risultante sia PRO.
+     * Upgrade(): shortcut per promuovere a PRO — verifica che il ruolo risultante
+     * sia PRO.
      */
     @Test
     void upgrade_PromotesUserToPro() {

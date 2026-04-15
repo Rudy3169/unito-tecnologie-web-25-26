@@ -56,12 +56,12 @@
     border-radius: var(--border-radius-hard);
     font-weight: 600;
     font-size: 0.95rem;
-    box-shadow: 0 4px 12px rgba(45, 90, 39, 0.2);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
     transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .admin-btn:hover:not(:disabled) {
-    box-shadow: 0 6px 18px rgba(45, 90, 39, 0.35);
+    box-shadow: 0 6px 18px rgba(var(--color-primary-rgb), 0.35);
     transform: translateY(-1px);
 }
 

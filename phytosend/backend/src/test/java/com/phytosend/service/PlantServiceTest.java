@@ -211,12 +211,5 @@ class PlantServiceTest {
         // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> plantService.rimuoviPianta(999L));
         verify(plantRepository, never()).deleteById(any());
-    }}
-
-    
-
-    
-    
-
-    
-    
+    }
+}

@@ -10,7 +10,12 @@ export function HomeFeed() {
 
     const caricaPosts = () => {
         const token = localStorage.getItem('phytosend_token');
-        fetch('/api/social/posts', {
+        const userId = localStorage.getItem('phytosend_userId');
+        const url = userId
+            ? `/api/social/posts?utenteId=${userId}`
+            : '/api/social/posts';
+
+        fetch(url, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => {
@@ -21,7 +26,6 @@ export function HomeFeed() {
             .catch(err => console.error("Errore:", err));
     };
 
-
     useEffect(() => {
         caricaPosts();
     }, []);
@@ -31,7 +35,10 @@ export function HomeFeed() {
     };
 
     const handleToggleLike = (postId: number) => {
-        const nuoviPost = posts.map(post => {
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        setPosts(posts.map(post => {
             if (post.id === postId) {
                 const isOraLiked = !post.isLikedByMe;
                 return {
@@ -41,10 +48,17 @@ export function HomeFeed() {
                 };
             }
             return post;
-        });
+        }));
 
-        setPosts(nuoviPost);
+        fetch(`/api/social/posts/${postId}/like?utenteId=${userId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(err => {
+            console.error("Errore like:", err);
+            caricaPosts();
+        });
     };
+
 
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>

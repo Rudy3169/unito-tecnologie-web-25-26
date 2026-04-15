@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import { MessageCircle, X, Send, AlertCircle } from 'lucide-react';
 import './CommentSection.css';
 
@@ -18,6 +18,26 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+
+
+    useEffect(() => {
+        if (!isOpen) return;  // carica solo quando il modal si apre
+
+        const token = localStorage.getItem('phytosend_token');
+
+        fetch(`/api/social/posts/${postId}/commenti`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => {
+                setComments(data.map((c: { id: number; testo?: string; text?: string; author?: { name?: string } }) => ({
+                    id: c.id,
+                    text: c.testo ?? c.text ?? '',
+                    authorName: c.author?.name ?? 'Utente'
+                })));
+            })
+            .catch(err => console.error("Errore caricamento commenti:", err));
+    }, [isOpen, postId]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();

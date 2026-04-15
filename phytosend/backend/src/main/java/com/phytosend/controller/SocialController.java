@@ -7,11 +7,15 @@ import com.phytosend.entity.Post;
 import com.phytosend.service.DtoConverter;
 import com.phytosend.service.SocialService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+
+import jakarta.validation.Valid;
 
 import java.util.Map;
-import jakarta.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/social")
@@ -32,10 +36,21 @@ public class SocialController {
      * @return pagina dei post pubblicati (PostDto)
      */
     @GetMapping("/posts")
-    public org.springframework.data.domain.Page<PostDto> getBacheca(
+    public Page<PostDto> getBacheca(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return socialService.getFeed(page, size).map(dtoConverter::toPostDto);
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long utenteId // ← nuovo parametro
+    ) {
+        Page<Post> posts = socialService.getFeed(page, size);
+        return posts.map(post -> {
+            PostDto dto = dtoConverter.toPostDto(post);
+            if (utenteId != null && post.getLikedBy() != null) {
+                boolean liked = post.getLikedBy().stream()
+                        .anyMatch(u -> u.getId().equals(utenteId));
+                dto.setLikedByMe(liked);
+            }
+            return dto;
+        });
     }
 
     /**
@@ -85,4 +100,31 @@ public class SocialController {
         socialService.deletePost(postId, utenteId);
         return org.springframework.http.ResponseEntity.noContent().build();
     }
+
+    /**
+     * Recupera tutti i commenti associati a un determinato post.
+     *
+     * @param postId ID del post di cui si vogliono ottenere i commenti
+     * @return lista di commenti in formato DTO
+     */
+    @GetMapping("/posts/{postId}/commenti")
+    public List<CommentDto> getCommenti(@PathVariable @NonNull Long postId) {
+        return socialService.getCommentiDelPost(postId);
+    }
+
+    /**
+     * Aggiunge o rimuove un like a un post.
+     * 
+     * @param postId   ID del post
+     * @param utenteId ID dell'utente
+     * @return true se il like è stato aggiunto, false se è stato rimosso
+     */
+    @PostMapping("/posts/{postId}/like")
+    public ResponseEntity<Map<String, Object>> toggleLike(
+            @PathVariable Long postId,
+            @RequestParam Long utenteId) {
+        boolean isNowLiked = socialService.toggleLike(postId, utenteId);
+        return ResponseEntity.ok(Map.of("isLikedByMe", isNowLiked));
+    }
+
 }

@@ -1,38 +1,51 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Palette Colori Tema Natura */
-    --color-bg-main: #fcfdfa;
-    /* Un bianco/crema per lo sfondo generale */
-    --color-bg-card: #ffffff;
-    /* Sfondo dei blocchi/post */
-    --color-primary: #2d5a27;
-    /* Verde scuro dominante per loghi, testi enfatici */
-    --color-primary-light: #52824b;
-    /* Verde intermedio (hover button) */
-    --color-primary-accent: #a3b899;
-    /* Verde pastello per elementi di contorno */
-    --color-earth: #8a6c4c;
-    /* Marrone terra accent */
-    --color-text-main: #1a201c;
-    /* Grigio fumo/verde strettissimo per testi */
-    --color-text-muted: #647466;
-    /* Grigio leggermente verde per label/note */
-    --color-border: #e6eee5;
-    /* Bordi verdi chiarissimi, per non usare il noioso grigio */
-    --color-error: #cc5543;
+    /* ===== PRIMARY: Forest Teal (non più verde piatto) ===== */
+    --color-primary: #1e5e4b;
+    /* Verde foresta profondo con nota teal */
+    --color-primary-light: #2e8a6e;
+    /* Smeraldo medio */
+    --color-primary-accent: #9cc4b8;
+    /* Salvia pallida */
+    --color-primary-rgb: 30, 94, 75;
+    /* Per rgba() senza hardcoding */
 
-    /* Forme e spaziatura */
+    /* ===== SFONDI: Pergamena botanica ===== */
+    --color-bg-main: #f4f1eb;
+    /* Crema caldo (come carta da acquerello) */
+    --color-bg-card: #fdfcf8;
+    /* Quasi bianco con calore */
+
+    /* ===== ACCENTI ===== */
+    --color-earth: #7a5c3e;
+    /* Legno/radice caldo */
+
+    /* ===== TESTI ===== */
+    --color-text-main: #1a2120;
+    /* Quasi nero con sfumatura foresta */
+    --color-text-muted: #5a7870;
+    /* Grigio-teal morbido */
+
+    /* ===== BORDI ===== */
+    --color-border: #d6e5e0;
+    /* Salvia chiarissima */
+
+    /* ===== ERRORE ===== */
+    --color-error: #b54a3f;
+
+    /* ===== FORME ===== */
     --border-radius-soft: 16px;
     --border-radius-hard: 8px;
-    --shadow-sm: 0 4px 12px rgba(45, 90, 39, 0.04);
-    --shadow-md: 0 8px 24px rgba(45, 90, 39, 0.08);
+    --shadow-sm: 0 4px 12px rgba(var(--color-primary-rgb), 0.05);
+    --shadow-md: 0 8px 24px rgba(var(--color-primary-rgb), 0.1);
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
 }
 
+/* ===== RESET ===== */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -82,29 +95,23 @@ textarea:focus {
 /* ========== DARK MODE ========== */
 @media (prefers-color-scheme: dark) {
     :root {
-        /* Sfondi */
-        --color-bg-main: #0e1510;
-        --color-bg-card: #192219;
+        --color-bg-main: #0c1412;
+        --color-bg-card: #132019;
 
-        /* Verde — più luminoso per essere leggibile su scuro */
-        --color-primary: #6abd64;
-        --color-primary-light: #88d485;
-        --color-primary-accent: #3a5540;
+        --color-primary: #4aab8a;
+        --color-primary-light: #6ac4a4;
+        --color-primary-accent: #2a4f45;
+        --color-primary-rgb: 74, 171, 138;
 
-        /* Terra */
-        --color-earth: #b08a65;
+        --color-earth: #a07856;
 
-        /* Testi */
-        --color-text-main: #e6efe6;
-        --color-text-muted: #7a9b7c;
+        --color-text-main: #e2eeea;
+        --color-text-muted: #7aaa9e;
 
-        /* Bordo */
-        --color-border: #283d2a;
+        --color-border: #1f3d37;
 
-        /* Errore */
-        --color-error: #e07060;
+        --color-error: #e06a5e;
 
-        /* Ombre più marcate */
         --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
         --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
     }

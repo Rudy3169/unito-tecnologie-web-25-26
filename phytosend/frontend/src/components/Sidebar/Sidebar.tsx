@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusSquare, User, LogOut, Settings } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Home, Search, User, LogOut, Settings } from 'lucide-react';
 import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
 import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
 import './Sidebar.css';
@@ -10,64 +11,110 @@ interface SidebarProps {
 
 export function Sidebar({ userRole }: SidebarProps) {
     const location = useLocation();
+    const navigate = useNavigate();
+    const [query, setQuery] = useState('');
+
     const isActive = (path: string) => location.pathname === path ? 'active' : '';
 
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (query.trim()) navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('phytosend_role');
+        localStorage.removeItem('phytosend_token');
+        localStorage.removeItem('phytosend_userId');
+        window.location.reload();
+    };
+
     return (
-        <aside className="sidebar">
-            <div className="sidebar-logo-container">
-                <Link to="/">
+        <>
+            {/* ── DESKTOP: Top Navbar ── */}
+            <header className="navbar">
+                {/* Logo */}
+                <a href="/" className="navbar-logo">
                     <picture>
                         <source srcSet={logoDark} media="(prefers-color-scheme: dark)" />
-                        <img src={logoLight} alt="PhytoSend" className="sidebar-logo" />
+                        <img src={logoLight} alt="PhytoSend" className="navbar-logo-img" />
                     </picture>
-                </Link>
-            </div>
+                </a>
 
-            <nav className="sidebar-nav">
-                <Link to="/" className={`nav-item ${isActive('/')}`}>
-                    <Home className="nav-icon" />
-                    <span>Home</span>
-                </Link>
+                {/* Search form */}
+                <form className="navbar-search" onSubmit={handleSearch}>
+                    <Search size={16} className="navbar-search-icon" />
+                    <input
+                        type="text"
+                        className="navbar-search-input"
+                        placeholder="Cerca piante, utenti..."
+                        value={query}
+                        onChange={e => setQuery(e.target.value)}
+                    />
+                </form>
 
-                <Link to="/search" className={`nav-item ${isActive('/search')}`}>
-                    <Search className="nav-icon" />
-                    <span>Esplora Giardini</span>
-                </Link>
+                {/* Icone destra */}
+                <nav className="navbar-nav">
+                    {/* Home icon */}
+                    <a href="/" className={`navbar-icon-btn ${isActive('/')}`} title="Home">
+                        <Home size={22} />
+                    </a>
 
+                    {/* Admin icon */}
+                    {userRole === 'ADMIN' && (
+                        <Link to="/admin" className={`navbar-icon-btn ${isActive('/admin')}`} title="Admin">
+                            <Settings size={22} />
+                        </Link>
+                    )}
+
+                    {/* Logout button */}
+                    <button className="navbar-icon-btn" onClick={handleLogout} title="Esci">
+                        <LogOut size={22} />
+                    </button>
+
+                    {/* Avatar profilo */}
+                    <Link to="/profile" className={`navbar-avatar ${isActive('/profile')}`} title="Profilo">
+                        <User size={18} />
+                    </Link>
+                </nav>
+            </header>
+
+            {/* ── MOBILE: Header ── */}
+            <header className="mobile-header">
+                <a href="/" className="navbar-logo">
+                    <picture>
+                        <source srcSet={logoDark} media="(prefers-color-scheme: dark)" />
+                        <img src={logoLight} alt="PhytoSend" className="navbar-logo-img" />
+                    </picture>
+                </a>
+                <form className="navbar-search" onSubmit={handleSearch}>
+                    <Search size={15} className="navbar-search-icon" />
+                    <input
+                        type="text"
+                        className="navbar-search-input"
+                        placeholder="Cerca piante..."
+                        value={query}
+                        onChange={e => setQuery(e.target.value)}
+                    />
+                </form>
+            </header>
+
+            {/* ── MOBILE: Bottom Tab Bar ── */}
+            <nav className="bottom-nav">
+                <Link to="/" className={`bottom-nav-item ${isActive('/')}`}>
+                    <Home size={22} />
+                </Link>
                 {userRole === 'ADMIN' && (
-                    <Link to="/admin" className={`nav-item ${isActive('/admin')}`}>
-                        <Settings className="nav-icon" style={{ color: 'var(--color-earth)' }} />
-                        <span style={{ color: 'var(--color-earth)' }}>Pannello Admin</span>
+                    <Link to="/admin" className={`bottom-nav-item ${isActive('/admin')}`}>
+                        <Settings size={22} />
                     </Link>
                 )}
-
-                <Link to="/profile" className={`nav-item ${isActive('/profile')}`}>
-                    <User className="nav-icon" />
-                    <span>Profilo</span>
+                <Link to="/profile" className={`bottom-nav-item ${isActive('/profile')}`}>
+                    <User size={22} />
                 </Link>
+                <button className="bottom-nav-item" onClick={handleLogout}>
+                    <LogOut size={22} />
+                </button>
             </nav>
-
-            {/* Spacer */}
-            <div style={{ flex: 1 }}></div>
-
-            {/* Divisore */}
-            <div className="sidebar-divider"></div>
-
-            {/* Logout */}
-            <button
-                className="nav-item"
-                style={{ width: '100%', textAlign: 'left' }}
-                onClick={() => {
-                    localStorage.removeItem('phytosend_role');
-                    localStorage.removeItem('phytosend_token');
-                    localStorage.removeItem('phytosend_userId');
-                    window.location.reload();
-                }}
-
-            >
-                <LogOut className="nav-icon" style={{ color: 'var(--color-error)' }} />
-                <span style={{ color: 'var(--color-error)' }}>Esci</span>
-            </button>
-        </aside>
+        </>
     );
 }

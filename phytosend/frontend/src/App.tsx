@@ -25,7 +25,7 @@ function App() {
     }
 
     return (
-        <div className="app-container">
+        <div className="app-layout">
             <Sidebar userRole={userRole} />
 
             <main className="main-content">
@@ -36,8 +36,12 @@ function App() {
                     <Route path="/admin" element={<AdminPanel />} />
                 </Routes>
             </main>
+
+            {/* Badge copyright fisso */}
+            <footer className="copyright-badge">© 2026 PhytoSend</footer>
         </div>
     );
+
 }
 
 export default App;

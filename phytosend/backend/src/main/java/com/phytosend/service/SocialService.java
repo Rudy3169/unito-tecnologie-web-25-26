@@ -1,16 +1,22 @@
 package com.phytosend.service;
 
+import com.phytosend.dto.CommentDto;
 import com.phytosend.entity.Comment;
 import com.phytosend.entity.Post;
 import com.phytosend.entity.User;
 import com.phytosend.repository.CommentRepository;
 import com.phytosend.repository.PostRepository;
 import com.phytosend.repository.UserRepository;
+import com.phytosend.service.DtoConverter;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class SocialService {
@@ -22,7 +28,10 @@ public class SocialService {
     private CommentRepository commentRepository;
 
     @Autowired
-    private UserRepository userRepository; // Serve per recuperare l'autore
+    private UserRepository userRepository;
+
+    @Autowired
+    private DtoConverter dtoConverter;
 
     /**
      * Raccoglie i metadati per creare e salvare un nuovo Post di un Utente sulla
@@ -80,6 +89,20 @@ public class SocialService {
     }
 
     /**
+     * Recupera i commenti di un post in formato DTO.
+     * 
+     * @param postId ID del post
+     * @return Lista di CommentDto
+     */
+    public List<CommentDto> getCommentiDelPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post non trovato: " + postId));
+        return post.getComments().stream()
+                .map(dtoConverter::toCommentDto)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
      * Preforma l'eliminazione profonda di un post, assicurandosi nel while logico
      * che
      * solo l'utente che lo ha creato possa invocarne la distruzione per sicurezza
@@ -100,4 +123,29 @@ public class SocialService {
 
         postRepository.delete(post);
     }
+
+    /**
+     * Gestisce l'aggiunta di un like a un post.
+     * 
+     * @param postId   ID del post
+     * @param utenteId ID dell'utente
+     * @return true se il like è stato aggiunto, false se è stato rimosso
+     */
+    public boolean toggleLike(Long postId, Long utenteId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post non trovato"));
+        User user = userRepository.findById(utenteId)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        if (post.getLikedBy().contains(user)) {
+            post.getLikedBy().remove(user);
+            postRepository.save(post);
+            return false;
+        } else {
+            post.getLikedBy().add(user);
+            postRepository.save(post);
+            return true;
+        }
+    }
+
 }

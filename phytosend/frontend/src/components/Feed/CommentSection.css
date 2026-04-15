@@ -147,6 +147,7 @@
     border-radius: 24px;
     border: 1px solid var(--color-border);
     background: var(--color-bg-main);
+    color: var(--color-text-main);
     font-size: 0.9rem;
     transition: border-color 0.2s;
 }

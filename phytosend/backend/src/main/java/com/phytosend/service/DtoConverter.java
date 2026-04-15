@@ -100,6 +100,8 @@ public class DtoConverter {
         dto.setCreationDate(post.getCreationDate());
         dto.setAuthor(toUserDto(post.getAuthor()));
         dto.setPlant(toPlantDto(post.getPlant()));
+        dto.setLikesCount(post.getLikedBy() != null ? post.getLikedBy().size() : 0);
+        dto.setLikedByMe(false);
         return dto;
     }
 

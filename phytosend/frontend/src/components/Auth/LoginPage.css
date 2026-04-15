@@ -26,7 +26,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(45, 90, 39, 0.4) 0%, rgba(26, 32, 28, 0.6) 100%);
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.4) 0%, rgba(26, 32, 28, 0.6) 100%);
 }
 
 .login-quote {
@@ -101,11 +101,13 @@
     background-color: var(--color-bg-main);
     border: 1px solid var(--color-border);
     transition: all 0.2s ease;
+    border-radius: var(--border-radius-soft);
 }
 
 .input-group input:focus {
-    background-color: white;
-    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+    background-color: var(--color-bg-card);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+    border-color: var(--color-primary);
 }
 
 .login-btn {
@@ -117,12 +119,13 @@
     font-size: 1.05rem;
     border-radius: var(--border-radius-soft);
     /* Più arrotondato */
-    box-shadow: 0 4px 14px rgba(45, 90, 39, 0.25);
+    box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.25);
     border: none;
+    cursor: pointer;
 }
 
 .login-btn:hover {
-    box-shadow: 0 6px 20px rgba(45, 90, 39, 0.4);
+    box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.4);
 }
 
 /* Adattamento mobile */
@@ -157,6 +160,9 @@
     align-items: center;
     justify-content: center;
     padding: 4px;
+    cursor: pointer;
+    background: none;
+    border: none;
     /* Area di clic più comoda */
 }
 
@@ -180,4 +186,45 @@
 
 .register-link a:hover {
     text-decoration: underline;
+}
+
+/* ========== LOGIN DARK MODE ========== */
+@media (prefers-color-scheme: dark) {
+
+    /* Pannello form: gradiente caldo invece di nero piatto */
+    .login-form-side {
+        background: linear-gradient(160deg, #1c3028 0%, #0c1412 100%);
+    }
+
+    /* Overlay sull'immagine: più leggero */
+    .login-image-side::after {
+        background: linear-gradient(135deg,
+                rgba(30, 94, 75, 0.25) 0%,
+                rgba(12, 20, 18, 0.55) 100%);
+    }
+
+    /* Titolo con gradient text — effetto premium */
+    .login-box h1 {
+        background: linear-gradient(135deg,
+                var(--color-text-main) 30%,
+                var(--color-primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Input semitrasparenti */
+    .input-group input {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: var(--color-border);
+    }
+
+    .input-group input:focus {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Quote più visibile sull'immagine */
+    .login-quote h2 {
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
 }

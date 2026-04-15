@@ -17,12 +17,41 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const localUrl = URL.createObjectURL(file);
-            setImageUrl(localUrl);
-            setPreviewUrl(localUrl);
-        }
+        if (!file) return;
+
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        img.onload = () => {
+            const MAX_SIZE = 800;
+            let { width, height } = img;
+
+            if (width > MAX_SIZE || height > MAX_SIZE) {
+                if (width > height) {
+                    height = Math.round(height * MAX_SIZE / width);
+                    width = MAX_SIZE;
+                } else {
+                    width = Math.round(width * MAX_SIZE / height);
+                    height = MAX_SIZE;
+                }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+
+            const base64 = canvas.toDataURL('image/jpeg', 0.7);
+            setImageUrl(base64);
+            setPreviewUrl(base64);
+
+            URL.revokeObjectURL(objectUrl);
+        };
+
+        img.src = objectUrl;
     };
+
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -46,12 +75,19 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
 
         if (response.ok) {
             onPostCreated();
+            onClose();
             setTitle('');
             setCaption('');
             setImageUrl('');
+            setPreviewUrl('');
         }
         else {
-            setErrorMsg('Errore nella pubblicazione. Riprova!');
+            let msg = `Errore del server (${response.status})`;
+            if (response.status === 413) msg = 'Errore 413: immagine troppo grande. Usa una foto più piccola.';
+            else if (response.status === 403) msg = 'Errore 403: sessione scaduta, effettua di nuovo il login.';
+            else if (response.status === 400) msg = 'Errore 400: dati non validi. Controlla titolo e descrizione.';
+            else if (response.status === 500) msg = 'Errore 500: problema interno del server.';
+            setErrorMsg(msg);
         }
     };
 
