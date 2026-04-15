@@ -1,4 +1,6 @@
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import { CommentSection } from './CommentSection';
+import { useState } from 'react';
 import './PostCard.css';
 
 export interface AuthorDto {
@@ -27,6 +29,7 @@ interface PostCardLayoutProps extends PostProps {
 export function PostCard({
     id, title, description, urlphoto, author, likesCount, isLikedByMe, onLike
 }: PostCardLayoutProps) {
+    const [showComments, setShowComments] = useState(false);
 
     return (
         <article className="post-card">
@@ -47,7 +50,9 @@ export function PostCard({
                         color={isLikedByMe ? "var(--color-error)" : "currentColor"}
                     />
                 </button>
-                <button className="action-btn"><MessageCircle size={24} /></button>
+                <button className="action-btn" onClick={() => setShowComments(true)}>
+                    <MessageCircle size={24} />
+                </button>
                 <button className="action-btn"><Share2 size={24} /></button>
             </div>
 
@@ -58,6 +63,10 @@ export function PostCard({
                     {description}
                 </p>
             </div>
-        </article>
+            <CommentSection
+                postId={id}
+                isOpen={showComments}
+                onClose={() => setShowComments(false)}
+            />        </article>
     );
 }

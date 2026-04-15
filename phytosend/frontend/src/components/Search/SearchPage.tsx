@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Users } from 'lucide-react';
+import './SearchPage.css';
 
 interface UserResult {
     id: number;
@@ -26,24 +28,25 @@ export function SearchPage() {
     }, []);
 
     return (
-        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
-            <h2>🌍 Esplora la Community</h2>
-            <p>Tutti gli utenti iscritti a PhytoSend:</p>
-
+        <div className="search-page">
+            <div className="search-page-header">
+                <h2><Users size={28} /> Esplora la Community</h2>
+                <p>Tutti gli utenti iscritti a PhytoSend</p>
+            </div>
             {users.length === 0 ? (
-                <p>Nessun utente trovato.</p>
+                <p style={{ color: 'var(--color-text-muted)' }}>Nessun utente trovato.</p>
             ) : (
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                     {users.map(user => (
-                        <li key={user.id} style={{
-                            border: '1px solid #ccc',
-                            borderRadius: '8px',
-                            padding: '1rem',
-                            marginBottom: '0.5rem'
-                        }}>
-                            <strong>{user.name} {user.surname}</strong>
-                            <br />
-                            <small>{user.email} — {user.role}</small>
+                        <li key={user.id} className="user-card">
+                            <div className="user-card-avatar">
+                                {user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="user-card-info">
+                                <div className="user-card-name">{user.name} {user.surname}</div>
+                                <div className="user-card-email">{user.email}</div>
+                            </div>
+                            <span className="user-card-role">{user.role}</span>
                         </li>
                     ))}
                 </ul>

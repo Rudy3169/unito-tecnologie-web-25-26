@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Search, PlusSquare, User, LogOut, Settings } from 'lucide-react';
+import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
+import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
 import './Sidebar.css';
-
-import logoImage from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
 
 interface SidebarProps {
     userRole: 'USER' | 'ADMIN' | null;
@@ -14,9 +14,14 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     return (
         <aside className="sidebar">
-            <Link to="/" className="sidebar-logo-container">
-                <img src={logoImage} alt="PhytoSend Logo" className="sidebar-logo" />
-            </Link>
+            <div className="sidebar-logo-container">
+                <Link to="/">
+                    <picture>
+                        <source srcSet={logoDark} media="(prefers-color-scheme: dark)" />
+                        <img src={logoLight} alt="PhytoSend" className="sidebar-logo" />
+                    </picture>
+                </Link>
+            </div>
 
             <nav className="sidebar-nav">
                 <Link to="/" className={`nav-item ${isActive('/')}`}>
@@ -42,8 +47,13 @@ export function Sidebar({ userRole }: SidebarProps) {
                 </Link>
             </nav>
 
+            {/* Spacer */}
             <div style={{ flex: 1 }}></div>
 
+            {/* Divisore */}
+            <div className="sidebar-divider"></div>
+
+            {/* Logout */}
             <button
                 className="nav-item"
                 style={{ width: '100%', textAlign: 'left' }}

@@ -78,3 +78,34 @@ input:focus,
 textarea:focus {
     border-color: var(--color-primary);
 }
+
+/* ========== DARK MODE ========== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Sfondi */
+        --color-bg-main: #0e1510;
+        --color-bg-card: #192219;
+
+        /* Verde — più luminoso per essere leggibile su scuro */
+        --color-primary: #6abd64;
+        --color-primary-light: #88d485;
+        --color-primary-accent: #3a5540;
+
+        /* Terra */
+        --color-earth: #b08a65;
+
+        /* Testi */
+        --color-text-main: #e6efe6;
+        --color-text-muted: #7a9b7c;
+
+        /* Bordo */
+        --color-border: #283d2a;
+
+        /* Errore */
+        --color-error: #e07060;
+
+        /* Ombre più marcate */
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+}

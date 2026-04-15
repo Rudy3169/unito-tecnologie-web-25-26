@@ -98,7 +98,7 @@
 
 .input-group input {
     padding: 12px 16px;
-    background-color: #f8fbf8;
+    background-color: var(--color-bg-main);
     border: 1px solid var(--color-border);
     transition: all 0.2s ease;
 }
