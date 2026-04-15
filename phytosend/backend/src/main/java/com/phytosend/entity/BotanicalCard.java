@@ -23,5 +23,6 @@ public class BotanicalCard {
     private String fertilization;
     private String soil;
 
+    @Column(length = 2048)
     private String urlDefaultPhoto; // La foto "ufficiale" del catalogo
 }

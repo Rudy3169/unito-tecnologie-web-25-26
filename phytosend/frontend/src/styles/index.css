@@ -95,6 +95,7 @@ textarea:focus {
 /* ========== DARK MODE ========== */
 @media (prefers-color-scheme: dark) {
     :root {
+        color-scheme: dark;
         --color-bg-main: #0c1412;
         --color-bg-card: #132019;
 

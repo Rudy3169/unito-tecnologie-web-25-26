@@ -13,13 +13,17 @@ export function Sidebar({ userRole }: SidebarProps) {
     const location = useLocation();
     const navigate = useNavigate();
     const [query, setQuery] = useState('');
+    const [searchType, setSearchType] = useState('plants');
 
     const isActive = (path: string) => location.pathname === path ? 'active' : '';
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (query.trim()) navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+        if (query.trim() || searchType === 'users' || searchType === 'plants') {
+            navigate(`/search?q=${encodeURIComponent(query.trim())}&type=${searchType}`);
+        }
     };
+
 
     const handleLogout = () => {
         localStorage.removeItem('phytosend_role');
@@ -42,14 +46,25 @@ export function Sidebar({ userRole }: SidebarProps) {
 
                 {/* Search form */}
                 <form className="navbar-search" onSubmit={handleSearch}>
-                    <Search size={16} className="navbar-search-icon" />
-                    <input
-                        type="text"
-                        className="navbar-search-input"
-                        placeholder="Cerca piante, utenti..."
-                        value={query}
-                        onChange={e => setQuery(e.target.value)}
-                    />
+                    <div className="search-wrapper">
+                        <select
+                            className="navbar-search-select"
+                            value={searchType}
+                            onChange={e => setSearchType(e.target.value)}
+                        >
+                            <option value="plants">Piante</option>
+                            <option value="users">Utenti</option>
+                        </select>
+                        <div className="search-divider"></div>
+                        <Search size={16} className="navbar-search-icon" />
+                        <input
+                            type="text"
+                            className="navbar-search-input"
+                            placeholder={searchType === 'plants' ? "Cerca nel catalogo..." : "Cerca utenti..."}
+                            value={query}
+                            onChange={e => setQuery(e.target.value)}
+                        />
+                    </div>
                 </form>
 
                 {/* Icone destra */}
