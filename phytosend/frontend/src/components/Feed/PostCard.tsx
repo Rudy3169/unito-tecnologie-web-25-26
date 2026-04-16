@@ -57,7 +57,7 @@ export function PostCard({
             </div>
 
             <div className="post-content">
-                <span className="likes">{likesCount} like per madre natura</span>
+                <span className="likes">{likesCount} like per Madre Natura</span>
                 <p className="post-caption">
                     <span>{author?.name ?? 'Anonimo'}</span>
                     {description}

@@ -6,6 +6,7 @@ import { LoginPage } from './components/Auth/LoginPage';
 import { Profile } from './components/Profile/Profile';
 import { SearchPage } from './components/Search/SearchPage';
 import { AdminPanel } from './components/Admin/AdminPanel';
+import { MyGarden } from './components/MyGarden/MyGarden';
 import './styles/App.css';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/profile" element={<Profile userRole={userRole} />} />
                     <Route path="/admin" element={<AdminPanel />} />
+                    <Route path="/my-garden" element={<MyGarden />} />
                 </Routes>
             </main>
 

@@ -69,7 +69,7 @@ export function AdminPanel() {
                 <p>Gestione avanzata della piattaforma PhytoSend</p>
             </div>
             <div className="admin-card">
-                <h3><Package size={20} /> Importa Piante da Perenual API</h3>
+                <h3><Package size={20} /> Perenual API</h3>
                 <p>Clicca per importare nuove schede botaniche nel database locale dall'API esterna Perenual.</p>
                 <button
                     className="admin-btn"
@@ -92,7 +92,7 @@ export function AdminPanel() {
                 )}
             </div>
             <div className="admin-card">
-                <h3><Database size={20} /> Ripristina Database</h3>
+                <h3><Database size={20} /> Database</h3>
                 <p>Ripulisce il catalogo e inserisce nuovamente le piante originali dal file dei dati.</p>
                 <button
                     className="admin-btn"
@@ -102,7 +102,7 @@ export function AdminPanel() {
                 >
                     {isReloading
                         ? <><Loader size={16} /> Ripristino in corso...</>
-                        : <> Ripristina da data.sql</>
+                        : <> Ripristina</>
                     }
                 </button>
                 {reloadMsg && (

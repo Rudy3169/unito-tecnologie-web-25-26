@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { Home, Search, User, LogOut, Settings } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Home, Search, User, LogOut, Settings, Leaf, Menu, Bookmark, Sun, Moon, Fence } from 'lucide-react';
 import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
 import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
 import './Sidebar.css';
@@ -14,6 +14,20 @@ export function Sidebar({ userRole }: SidebarProps) {
     const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [searchType, setSearchType] = useState('plants');
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const isActive = (path: string) => location.pathname === path ? 'active' : '';
 
@@ -47,20 +61,28 @@ export function Sidebar({ userRole }: SidebarProps) {
                 {/* Search form */}
                 <form className="navbar-search" onSubmit={handleSearch}>
                     <div className="search-wrapper">
-                        <select
-                            className="navbar-search-select"
-                            value={searchType}
-                            onChange={e => setSearchType(e.target.value)}
+                        {/* Bottone Switcher Piante/Utenti */}
+                        <button
+                            type="button"
+                            className={`search-switcher-btn ${searchType}`}
+                            onClick={() => setSearchType(searchType === 'plants' ? 'users' : 'plants')}
+                            title={searchType === 'plants' ? "Clicca per cercare Utenti" : "Clicca per cercare Piante"}
                         >
-                            <option value="plants">Piante</option>
-                            <option value="users">Utenti</option>
-                        </select>
+                            <span className="switcher-content" key={searchType}>
+                                {searchType === 'plants' ? (
+                                    <User size={18} className="switcher-icon" />
+                                ) : (
+                                    <Leaf size={18} className="switcher-icon" />
+                                )}
+                            </span>
+                        </button>
+
                         <div className="search-divider"></div>
                         <Search size={16} className="navbar-search-icon" />
                         <input
                             type="text"
                             className="navbar-search-input"
-                            placeholder={searchType === 'plants' ? "Cerca nel catalogo..." : "Cerca utenti..."}
+                            placeholder={searchType === 'plants' ? "Cerca piante..." : "Cerca utenti..."}
                             value={query}
                             onChange={e => setQuery(e.target.value)}
                         />
@@ -74,6 +96,11 @@ export function Sidebar({ userRole }: SidebarProps) {
                         <Home size={22} />
                     </a>
 
+                    {/* Il mio Giardino */}
+                    <Link to="/my-garden" className={`navbar-icon-btn ${isActive('/garden')}`} title="Il mio Giardino">
+                        <Fence size={22} />
+                    </Link>
+
                     {/* Admin icon */}
                     {userRole === 'ADMIN' && (
                         <Link to="/admin" className={`navbar-icon-btn ${isActive('/admin')}`} title="Admin">
@@ -81,15 +108,42 @@ export function Sidebar({ userRole }: SidebarProps) {
                         </Link>
                     )}
 
-                    {/* Logout button */}
-                    <button className="navbar-icon-btn" onClick={handleLogout} title="Esci">
-                        <LogOut size={22} />
-                    </button>
-
                     {/* Avatar profilo */}
                     <Link to="/profile" className={`navbar-avatar ${isActive('/profile')}`} title="Profilo">
                         <User size={18} />
                     </Link>
+
+                    {/* Menù Hamburger */}
+                    <div className="navbar-menu-container" ref={menuRef}>
+                        <button
+                            className={`navbar-icon-btn ${isMenuOpen ? 'active' : ''}`}
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            title="Menu"
+                        >
+                            <Menu size={22} />
+                        </button>
+
+                        {isMenuOpen && (
+                            <div className="navbar-dropdown-menu">
+                                <Link to="/saved" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>
+                                    <Bookmark size={18} />
+                                    <span>Post Salvati</span>
+                                </Link>
+
+                                <button className="dropdown-item" onClick={() => setIsDarkMode(!isDarkMode)}>
+                                    {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                                    <span>Cambia Aspetto</span>
+                                </button>
+
+                                <div className="dropdown-divider"></div>
+
+                                <button className="dropdown-item text-danger" onClick={handleLogout}>
+                                    <LogOut size={18} />
+                                    <span>Esci</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </nav>
             </header>
 
@@ -115,19 +169,27 @@ export function Sidebar({ userRole }: SidebarProps) {
 
             {/* ── MOBILE: Bottom Tab Bar ── */}
             <nav className="bottom-nav">
+                {/* Home icon (Mobile) */}
                 <Link to="/" className={`bottom-nav-item ${isActive('/')}`}>
                     <Home size={22} />
                 </Link>
+                {/* Admin icon (Mobile) */}
                 {userRole === 'ADMIN' && (
                     <Link to="/admin" className={`bottom-nav-item ${isActive('/admin')}`}>
                         <Settings size={22} />
                     </Link>
                 )}
+                {/* Il mio Giardino (Mobile) */}
+                <Link to="/garden" className={`bottom-nav-item ${isActive('/garden')}`}>
+                    <Fence size={22} />
+                </Link>
+                {/* Avatar profilo (Mobile) */}
                 <Link to="/profile" className={`bottom-nav-item ${isActive('/profile')}`}>
                     <User size={22} />
                 </Link>
-                <button className="bottom-nav-item" onClick={handleLogout}>
-                    <LogOut size={22} />
+                {/* Menù Hamburger (Mobile) */}
+                <button className="bottom-nav-item" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                    <Menu size={22} />
                 </button>
             </nav>
         </>

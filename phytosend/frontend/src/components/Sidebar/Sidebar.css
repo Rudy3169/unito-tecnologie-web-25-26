@@ -59,38 +59,36 @@
     background: var(--color-bg-card);
 }
 
-.navbar-search-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background-color: transparent;
+/* Custom Select Container */
+.custom-search-select {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Bottone Switcher "Piante / Utenti" */
+.search-switcher-btn {
+    background: transparent;
     border: none;
     color: var(--color-text-main);
-    outline: none;
-    padding: 9px 28px 9px 16px;
-    font-size: 0.88rem;
+    padding: 9px 12px 9px 20px;
     cursor: pointer;
-    font-weight: 500;
-    
-    /* Chevron personalizzata in SVG (colore per la Light Mode) */
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%231a2120' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
 }
 
-/* Colore della freccia svg in dark mode */
-@media (prefers-color-scheme: dark) {
-    .navbar-search-select {
-        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23e2eeea' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.95);
     }
-}
 
-/* Migliora il design del menù tendina nativo quando si apre */
-.navbar-search-select option {
-    background-color: var(--color-bg-card);
-    color: var(--color-text-main);
-    font-weight: 500;
-    padding: 8px;
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .search-divider {
@@ -99,6 +97,36 @@
     background-color: var(--color-border);
     margin: 0 4px;
 }
+
+.switcher-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.switcher-icon {
+    transition: color 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: var(--color-text-muted);
+}
+
+.search-switcher-btn:hover .switcher-icon {
+    color: var(--color-primary);
+    transform: scale(1.18);
+}
+
 
 .navbar-search-icon {
     color: var(--color-text-muted);
@@ -264,4 +292,83 @@
         border-radius: 50%;
         background: var(--color-primary);
     }
+}
+
+/* ═══════════════════════════════
+   HAMBURGER MENU DROPDOWN
+═══════════════════════════════ */
+.navbar-menu-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* La lavagna della tendina */
+.navbar-dropdown-menu {
+    position: absolute;
+    top: 130%;
+    /* Lievemente staccato dal bottone */
+    right: 0;
+    /* Allineato tutto a destra così non esce dallo schermo */
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    padding: 8px 0;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    z-index: 300;
+    animation: dropSlide 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Animazione morbida ad effetto discesa */
+@keyframes dropSlide {
+    0% {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Elementi interni al Menù (i vari tasti) */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    background-color: var(--color-border);
+}
+
+/* Categoria Divisore (la "linea") */
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 6px 0;
+}
+
+/* Tocco speciale di design: Rosso per il logout ("Esci")! */
+.dropdown-item.text-danger {
+    color: #e74c3c;
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: rgba(231, 76, 60, 0.1);
 }
