@@ -109,9 +109,9 @@ export function Sidebar({ userRole }: SidebarProps) {
                     </Link>
 
                     {/* Il mio Giardino */}
-                    <Link to="/garden" className={`navbar-icon-btn ${isActive('/garden')}`} title="Il mio Giardino">
+                    <Link to="/my-garden" className={`navbar-icon-btn ${isActive('/my-garden')}`} title="MyGarden">
                         <Fence size={22} />
-                        <span className="icon-label">Giardino</span>
+                        <span className="icon-label">MyGarden</span>
                     </Link>
 
                     {/* Admin */}
@@ -182,9 +182,9 @@ export function Sidebar({ userRole }: SidebarProps) {
                 )}
 
                 {/* Il mio Giardino */}
-                <Link to="/garden" className={`bottom-nav-item ${isActive('/garden')}`}>
+                <Link to="/my-garden" className={`bottom-nav-item ${isActive('/my-garden')}`}>
                     <Fence size={22} />
-                    <span className="icon-label">Giardino</span>
+                    <span className="icon-label">MyGarden</span>
                 </Link>
 
                 {/* Profilo */}
