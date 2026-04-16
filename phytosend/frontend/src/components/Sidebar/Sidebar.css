@@ -59,11 +59,22 @@
     background: var(--color-bg-card);
 }
 
-/* Custom Select Container */
 .custom-search-select {
     position: relative;
     display: flex;
     align-items: center;
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Bottone Switcher "Piante / Utenti" */
@@ -79,18 +90,6 @@
     outline: none;
 }
 
-@keyframes popIn {
-    0% {
-        opacity: 0;
-        transform: translateY(-4px) scale(0.95);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
 .search-divider {
     width: 1px;
     height: 20px;
@@ -103,18 +102,6 @@
     align-items: center;
     gap: 8px;
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes popIn {
-    0% {
-        opacity: 0;
-        transform: translateY(-4px) scale(0.95);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
 }
 
 .switcher-icon {
@@ -137,25 +124,22 @@
 .navbar-search-input {
     width: 100%;
     padding: 9px 16px 9px 8px;
-    /* Togliamo il padding esagerato precedente a sinistra */
     border: none;
     background: transparent;
     font-size: 0.88rem;
     color: var(--color-text-main);
     outline: none;
-    /* Rimuoviamo il focus nativo, lo gestisce search-wrapper */
 }
 
 .navbar-search-input::placeholder {
     color: var(--color-text-muted);
 }
 
-/* ── Nav icons ── */
 .navbar-nav {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: 16px;
     margin-left: auto;
     flex-shrink: 0;
     padding-left: var(--spacing-lg);
@@ -163,16 +147,20 @@
 
 .navbar-icon-btn {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: auto;
+    min-width: 64px;
+    height: 56px;
+    border-radius: 12px;
     color: var(--color-text-muted);
     transition: background 0.15s, color 0.15s;
     border: none;
     background: none;
     cursor: pointer;
+    text-decoration: none;
+    gap: 4px;
 }
 
 .navbar-icon-btn:hover {
@@ -185,31 +173,36 @@
     background: rgba(var(--color-primary-rgb), 0.1);
 }
 
-/* ── Avatar profilo ── */
-.navbar-avatar {
+.icon-label {
+    font-size: 0.70rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.navbar-avatar-mini {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
     color: white;
-    margin-left: var(--spacing-sm);
     transition: box-shadow 0.2s;
-    flex-shrink: 0;
 }
 
-.navbar-avatar:hover,
-.navbar-avatar.active {
+.navbar-icon-btn:hover .navbar-avatar-mini,
+.navbar-icon-btn.active .navbar-avatar-mini,
+.bottom-nav-item:hover .navbar-avatar-mini,
+.bottom-nav-item.active .navbar-avatar-mini {
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.25);
 }
 
 /* ══════════════════════════════════
    MOBILE — BOTTOM TAB BAR
-   (nascosta su desktop, visibile su mobile)
 ══════════════════════════════════ */
-.mobile-header {
+.mobile-header,
+.bottom-nav {
     display: none;
 }
 
@@ -244,7 +237,35 @@
         height: 26px;
     }
 
-    /* Bottom tab bar */
+    .mobile-dropdown-menu {
+        position: absolute;
+        bottom: 110%;
+        right: 0;
+        left: auto;
+        background-color: var(--color-bg-card);
+        border: 1px solid var(--color-border);
+        border-radius: 14px;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+        padding: 8px 0;
+        min-width: 200px;
+        display: flex;
+        flex-direction: column;
+        z-index: 300;
+        animation: slideUp 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes slideUp {
+        0% {
+            opacity: 0;
+            transform: translateY(12px) scale(0.95);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
     .bottom-nav {
         display: flex;
         position: fixed;
@@ -277,20 +298,21 @@
         position: relative;
     }
 
-    .bottom-nav-item.active {
-        color: var(--color-primary);
-        background: rgba(var(--color-primary-rgb), 0.1);
-    }
-
-    /* Pallino indicatore attivo */
-    .bottom-nav-item.active::after {
-        content: '';
-        position: absolute;
-        bottom: 6px;
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        background: var(--color-primary);
+    .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 56px;
+        gap: 4px;
+        border-radius: 14px;
+        color: var(--color-text-muted);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.15s, background 0.15s;
+        position: relative;
     }
 }
 
@@ -303,13 +325,10 @@
     align-items: center;
 }
 
-/* La lavagna della tendina */
 .navbar-dropdown-menu {
     position: absolute;
     top: 130%;
-    /* Lievemente staccato dal bottone */
     right: 0;
-    /* Allineato tutto a destra così non esce dallo schermo */
     background-color: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: 14px;
@@ -322,7 +341,6 @@
     animation: dropSlide 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Animazione morbida ad effetto discesa */
 @keyframes dropSlide {
     0% {
         opacity: 0;
@@ -335,7 +353,6 @@
     }
 }
 
-/* Elementi interni al Menù (i vari tasti) */
 .dropdown-item {
     display: flex;
     align-items: center;
@@ -357,14 +374,12 @@
     background-color: var(--color-border);
 }
 
-/* Categoria Divisore (la "linea") */
 .dropdown-divider {
     height: 1px;
     background-color: var(--color-border);
     margin: 6px 0;
 }
 
-/* Tocco speciale di design: Rosso per il logout ("Esci")! */
 .dropdown-item.text-danger {
     color: #e74c3c;
 }

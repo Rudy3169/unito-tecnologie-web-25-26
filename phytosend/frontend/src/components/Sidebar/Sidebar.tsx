@@ -17,11 +17,14 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
+
     const menuRef = useRef<HTMLDivElement>(null);
+    const mobileMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node) &&
+                mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
                 setIsMenuOpen(false);
             }
         };
@@ -38,7 +41,6 @@ export function Sidebar({ userRole }: SidebarProps) {
         }
     };
 
-
     const handleLogout = () => {
         localStorage.removeItem('phytosend_role');
         localStorage.removeItem('phytosend_token');
@@ -46,37 +48,47 @@ export function Sidebar({ userRole }: SidebarProps) {
         window.location.reload();
     };
 
+    const renderDropdownMenu = (classNameStr: string) => (
+        <div className={classNameStr}>
+            <Link to="/saved" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>
+                <Bookmark size={18} />
+                <span>Post Salvati</span>
+            </Link>
+            <button className="dropdown-item" onClick={() => setIsDarkMode(!isDarkMode)}>
+                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                <span>Cambia Aspetto</span>
+            </button>
+            <div className="dropdown-divider"></div>
+            <button className="dropdown-item text-danger" onClick={handleLogout}>
+                <LogOut size={18} />
+                <span>Esci</span>
+            </button>
+        </div>
+    );
+
     return (
         <>
             {/* ── DESKTOP: Top Navbar ── */}
             <header className="navbar">
-                {/* Logo */}
-                <a href="/" className="navbar-logo">
+                <Link to="/" className="navbar-logo">
                     <picture>
                         <source srcSet={logoDark} media="(prefers-color-scheme: dark)" />
                         <img src={logoLight} alt="PhytoSend" className="navbar-logo-img" />
                     </picture>
-                </a>
+                </Link>
 
-                {/* Search form */}
                 <form className="navbar-search" onSubmit={handleSearch}>
                     <div className="search-wrapper">
-                        {/* Bottone Switcher Piante/Utenti */}
                         <button
                             type="button"
                             className={`search-switcher-btn ${searchType}`}
                             onClick={() => setSearchType(searchType === 'plants' ? 'users' : 'plants')}
-                            title={searchType === 'plants' ? "Clicca per cercare Utenti" : "Clicca per cercare Piante"}
+                            title={searchType === 'plants' ? "Cerca Utenti" : "Cerca Piante"}
                         >
                             <span className="switcher-content" key={searchType}>
-                                {searchType === 'plants' ? (
-                                    <User size={18} className="switcher-icon" />
-                                ) : (
-                                    <Leaf size={18} className="switcher-icon" />
-                                )}
+                                {searchType === 'plants' ? <User size={18} className="switcher-icon" /> : <Leaf size={18} className="switcher-icon" />}
                             </span>
                         </button>
-
                         <div className="search-divider"></div>
                         <Search size={16} className="navbar-search-icon" />
                         <input
@@ -89,31 +101,36 @@ export function Sidebar({ userRole }: SidebarProps) {
                     </div>
                 </form>
 
-                {/* Icone destra */}
                 <nav className="navbar-nav">
-                    {/* Home icon */}
-                    <a href="/" className={`navbar-icon-btn ${isActive('/')}`} title="Home">
+                    {/* Home */}
+                    <Link to="/" className={`navbar-icon-btn ${isActive('/')}`} title="Home">
                         <Home size={22} />
-                    </a>
-
-                    {/* Il mio Giardino */}
-                    <Link to="/my-garden" className={`navbar-icon-btn ${isActive('/garden')}`} title="Il mio Giardino">
-                        <Fence size={22} />
+                        <span className="icon-label">Home</span>
                     </Link>
 
-                    {/* Admin icon */}
+                    {/* Il mio Giardino */}
+                    <Link to="/garden" className={`navbar-icon-btn ${isActive('/garden')}`} title="Il mio Giardino">
+                        <Fence size={22} />
+                        <span className="icon-label">Giardino</span>
+                    </Link>
+
+                    {/* Admin */}
                     {userRole === 'ADMIN' && (
                         <Link to="/admin" className={`navbar-icon-btn ${isActive('/admin')}`} title="Admin">
                             <Settings size={22} />
+                            <span className="icon-label">Admin</span>
                         </Link>
                     )}
 
-                    {/* Avatar profilo */}
-                    <Link to="/profile" className={`navbar-avatar ${isActive('/profile')}`} title="Profilo">
-                        <User size={18} />
+                    {/* Profilo */}
+                    <Link to="/profile" className={`navbar-icon-btn ${isActive('/profile')}`} title="Profilo">
+                        <div className="navbar-avatar-mini">
+                            <User size={16} />
+                        </div>
+                        <span className="icon-label">Profilo</span>
                     </Link>
 
-                    {/* Menù Hamburger */}
+                    {/* Bottone Menu Desktop */}
                     <div className="navbar-menu-container" ref={menuRef}>
                         <button
                             className={`navbar-icon-btn ${isMenuOpen ? 'active' : ''}`}
@@ -121,40 +138,21 @@ export function Sidebar({ userRole }: SidebarProps) {
                             title="Menu"
                         >
                             <Menu size={22} />
+                            <span className="icon-label">Altro</span>
                         </button>
-
-                        {isMenuOpen && (
-                            <div className="navbar-dropdown-menu">
-                                <Link to="/saved" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>
-                                    <Bookmark size={18} />
-                                    <span>Post Salvati</span>
-                                </Link>
-
-                                <button className="dropdown-item" onClick={() => setIsDarkMode(!isDarkMode)}>
-                                    {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-                                    <span>Cambia Aspetto</span>
-                                </button>
-
-                                <div className="dropdown-divider"></div>
-
-                                <button className="dropdown-item text-danger" onClick={handleLogout}>
-                                    <LogOut size={18} />
-                                    <span>Esci</span>
-                                </button>
-                            </div>
-                        )}
+                        {isMenuOpen && renderDropdownMenu("navbar-dropdown-menu")}
                     </div>
                 </nav>
             </header>
 
             {/* ── MOBILE: Header ── */}
             <header className="mobile-header">
-                <a href="/" className="navbar-logo">
+                <Link to="/" className="navbar-logo">
                     <picture>
                         <source srcSet={logoDark} media="(prefers-color-scheme: dark)" />
                         <img src={logoLight} alt="PhytoSend" className="navbar-logo-img" />
                     </picture>
-                </a>
+                </Link>
                 <form className="navbar-search" onSubmit={handleSearch}>
                     <Search size={15} className="navbar-search-icon" />
                     <input
@@ -169,28 +167,42 @@ export function Sidebar({ userRole }: SidebarProps) {
 
             {/* ── MOBILE: Bottom Tab Bar ── */}
             <nav className="bottom-nav">
-                {/* Home icon (Mobile) */}
+                {/* Home */}
                 <Link to="/" className={`bottom-nav-item ${isActive('/')}`}>
                     <Home size={22} />
+                    <span className="icon-label">Home</span>
                 </Link>
-                {/* Admin icon (Mobile) */}
+
+                {/* Admin */}
                 {userRole === 'ADMIN' && (
                     <Link to="/admin" className={`bottom-nav-item ${isActive('/admin')}`}>
                         <Settings size={22} />
+                        <span className="icon-label">Admin</span>
                     </Link>
                 )}
-                {/* Il mio Giardino (Mobile) */}
+
+                {/* Il mio Giardino */}
                 <Link to="/garden" className={`bottom-nav-item ${isActive('/garden')}`}>
                     <Fence size={22} />
+                    <span className="icon-label">Giardino</span>
                 </Link>
-                {/* Avatar profilo (Mobile) */}
+
+                {/* Profilo */}
                 <Link to="/profile" className={`bottom-nav-item ${isActive('/profile')}`}>
-                    <User size={22} />
+                    <div className="navbar-avatar-mini">
+                        <User size={16} />
+                    </div>
+                    <span className="icon-label">Profilo</span>
                 </Link>
-                {/* Menù Hamburger (Mobile) */}
-                <button className="bottom-nav-item" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                    <Menu size={22} />
-                </button>
+
+                {/* Bottone Menu Mobile */}
+                <div style={{ position: 'relative' }} ref={mobileMenuRef}>
+                    <button className="bottom-nav-item" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                        <Menu size={22} />
+                        <span className="icon-label">Altro</span>
+                    </button>
+                    {isMenuOpen && renderDropdownMenu("mobile-dropdown-menu")}
+                </div>
             </nav>
         </>
     );
