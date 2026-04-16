@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Settings, Package, CheckCircle, XCircle, Loader } from 'lucide-react';
+import { Settings, Package, CheckCircle, XCircle, Loader, Database } from 'lucide-react';
 import './AdminPanel.css';
 
 export function AdminPanel() {
     const [importMsg, setImportMsg] = useState('');
     const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [isLoading, setIsLoading] = useState(false);
+
     const handleImportPlants = async () => {
         const token = localStorage.getItem('phytosend_token');
         setIsLoading(true);
@@ -31,10 +32,40 @@ export function AdminPanel() {
             setIsLoading(false);
         }
     };
+
+    const [reloadMsg, setReloadMsg] = useState('');
+    const [reloadStatus, setReloadStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [isReloading, setIsReloading] = useState(false);
+
+    const handleReloadCatalog = async () => {
+        const token = localStorage.getItem('phytosend_token');
+        setIsReloading(true);
+        setReloadMsg('');
+        setReloadStatus('idle');
+        try {
+            const response = await fetch('/api/admin/reload-catalog', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const msg = await response.text();
+                setReloadMsg(msg);
+                setReloadStatus('success');
+            } else {
+                setReloadMsg("Errore durante il ripristino: " + response.status);
+                setReloadStatus('error');
+            }
+        } catch {
+            setReloadMsg("Impossibile contattare il server.");
+            setReloadStatus('error');
+        } finally {
+            setIsReloading(false);
+        }
+    };
     return (
         <div className="admin-panel">
             <div className="admin-panel-header">
-                <h2><Settings size={28} /> Pannello Amministratore</h2>
+                <h2><Settings size={28} /> Pannello Admin</h2>
                 <p>Gestione avanzata della piattaforma PhytoSend</p>
             </div>
             <div className="admin-card">
@@ -57,6 +88,30 @@ export function AdminPanel() {
                             : <XCircle size={16} />
                         }
                         {importMsg}
+                    </div>
+                )}
+            </div>
+            <div className="admin-card">
+                <h3><Database size={20} /> Ripristina Database</h3>
+                <p>Ripulisce il catalogo e inserisce nuovamente le piante originali dal file dei dati.</p>
+                <button
+                    className="admin-btn"
+                    onClick={handleReloadCatalog}
+                    disabled={isReloading}
+                    style={{ backgroundColor: '#2b5a2e' }}
+                >
+                    {isReloading
+                        ? <><Loader size={16} /> Ripristino in corso...</>
+                        : <> Ripristina da data.sql</>
+                    }
+                </button>
+                {reloadMsg && (
+                    <div className={`admin-feedback ${reloadStatus}`}>
+                        {reloadStatus === 'success'
+                            ? <CheckCircle size={16} />
+                            : <XCircle size={16} />
+                        }
+                        {reloadMsg}
                     </div>
                 )}
             </div>
