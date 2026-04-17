@@ -1,8 +1,9 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:15-alpine
+  # DATABASE
+  db:
+    build:
+      context: ./postgre
+      dockerfile: DockerFile
     container_name: phytosend-db
     restart: always
     environment:
@@ -12,5 +13,46 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      # Salverà i dati nella cartella 'postgre'
-      - ./postgre:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - phytosend-network
+
+  # BACKEND
+  backend:
+    build:
+      context: ..
+      dockerfile: DockerFile
+    container_name: phytosend-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/phytosend_db
+      - SPRING_DATASOURCE_USERNAME=phytouser
+      - SPRING_DATASOURCE_PASSWORD=phytopassword
+    depends_on:
+      - db
+    networks:
+      - phytosend-network
+
+  # FRONTEND
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: DockerFile
+    container_name: phytosend-frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - phytosend-network
+
+volumes:
+  db_data:
+
+
+networks:
+  phytosend-network:
+    driver: bridge

@@ -1,0 +1,34 @@
+# === BUILD ===
+# Usiamo un'immagine che contiene Java 25 e Maven.
+FROM maven:3.9-eclipse-temurin-25-alpine AS builder
+
+# Creiamo una cartella di lavoro nel container
+WORKDIR /app
+
+# Copiamo prima il pom.xml e scarichiamo le dipendenze (utile per la cache di Docker)
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+RUN chmod +x ./mvnw
+RUN ./mvnw dependency:go-offline -B
+
+# Ora copiamo il codice sorgente
+COPY src ./src
+
+# Compiliamo il progetto saltando i test per velocizzare l'avvio
+RUN ./mvnw package -DskipTests
+
+# === RUNTIME ===
+# Ora prendiamo un'immagine leggerissima che ha SOLO Java (senza Maven)
+FROM eclipse-temurin:17-jre-alpine
+
+WORKDIR /app
+
+# Copiamo SOLO il file .jar generato nella Fase 1
+COPY --from=builder /app/target/*.jar app.jar
+
+# Esponiamo la porta 8080 
+EXPOSE 8080
+
+# Diciamo a Docker il comando per avviare l'applicazione
+CMD ["java", "-jar", "app.jar"]

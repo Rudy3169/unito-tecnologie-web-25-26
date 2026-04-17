@@ -1,0 +1,26 @@
+# === BUILD ===
+# Usiamo Node.js per installare i pacchetti e compilare il codice React/Vite
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copiamo i file package.json (e package-lock.json) per installare le dipendenze
+COPY package*.json ./
+RUN npm ci
+
+# Copiamo tutto il resto del codice e facciamo la build
+COPY . .
+RUN npm run build
+
+# === SERVER WEB (Nginx) ===
+# Vite genera file statici (HTML, JS, CSS). Ci serve un server web per mostrarli. Nginx è perfetto.
+FROM nginx:alpine
+
+# Copiamo i file compilati dalla Fase 1 (cartella dist) nella cartella pubblica di Nginx
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Esponiamo la porta 80
+EXPOSE 80
+
+# Avviamo nginx
+CMD ["nginx", "-g", "daemon off;"]

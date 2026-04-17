@@ -3,7 +3,7 @@ import { Fence, Plus } from 'lucide-react';
 import './MyGarden.css';
 
 export function MyGarden() {
-    const [myPlants, setMyPlants] = useState([]);
+    const [myPlants] = useState([]);
     return (
         <div className="my-garden-page">
             <header className="garden-header">
