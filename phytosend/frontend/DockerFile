@@ -19,6 +19,9 @@ FROM nginx:alpine
 # Copiamo i file compilati dalla Fase 1 (cartella dist) nella cartella pubblica di Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Copiamo il file di configurazione personalizzato
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Esponiamo la porta 80
 EXPOSE 80
 

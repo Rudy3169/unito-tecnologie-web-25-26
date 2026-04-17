@@ -19,12 +19,12 @@ COPY src ./src
 RUN ./mvnw package -DskipTests
 
 # === RUNTIME ===
-# Ora prendiamo un'immagine leggerissima che ha SOLO Java (senza Maven)
-FROM eclipse-temurin:17-jre-alpine
+# Ora prendiamo un'immagine che ha Java 25
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
-# Copiamo SOLO il file .jar generato nella Fase 1
+# Copiamo il file .jar generato
 COPY --from=builder /app/target/*.jar app.jar
 
 # Esponiamo la porta 8080 
