@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,7 +21,7 @@ import org.springframework.lang.NonNull;
 @Service
 @Slf4j
 public class PerenualService {
-    
+
     // Configurazione delegata
     private final String apiKey;
     private final BotanicalCardRepository cardRepository;
@@ -29,80 +30,109 @@ public class PerenualService {
     private static final String BASE_URL = "https://perenual.com/api/species-list";
 
     /**
-     * Costruttore configurato autonomamente da Spring per preparare il servizio Perenual.
+     * Costruttore configurato autonomamente da Spring per preparare il servizio
+     * Perenual.
      *
-     * @param apiKey chiave API iniettata dai file properties
+     * @param apiKey         chiave API iniettata dai file properties
      * @param cardRepository repository per l'archiviazione
-     * @param restTemplate client HTTP sincrono per API esterne
+     * @param restTemplate   client HTTP sincrono per API esterne
      */
     @Autowired
     public PerenualService(@Value("${perenual.api.key}") String apiKey,
-                           BotanicalCardRepository cardRepository,
-                           RestTemplate restTemplate) {
+            BotanicalCardRepository cardRepository,
+            RestTemplate restTemplate) {
         this.apiKey = Objects.requireNonNull(apiKey, "API Key must not be null");
         this.cardRepository = cardRepository;
         this.restTemplate = restTemplate;
     }
 
     /**
-     * Lancia l'importazione automatica delle specie vegetali dall'API Perenual.
-     * Esecuzione asincrona (in background) per non bloccare il chiamante a causa dei limiti di rate dell'API e del DB.
-     *
-     * @param maxPages il massimo numero di pagine dell'API da ispezionare
-     * @return stringa asincrona riportante i conteggi dell'esito
+     * Task schedulato che parte in automatico ogni notte alle 2:00.
+     * Si calcola la pagina di partenza contando le piante a DB e fa un massimo di
+     * 80 chiamate
+     * per stare sotto il limite giornaliero di 100 richieste.
+     */
+    @Scheduled(cron = "0 0 19 * * ?", zone = "Europe/Rome")
+    public void scheduledDailyImport() {
+        log.info("Inizio importazione giornaliera automatica da Perenual...");
+
+        // Calcoliamo la pagina da cui ripartire.
+        // Se il DB ha 300 piante, 300 / 30 = 10. Ripartiamo dalla pagina 11.
+        long totalImported = cardRepository.count();
+        int startPage = (int) (totalImported / 30) + 1;
+
+        // Facciamo 80 pagine al giorno (2.400 piante) per stare sotto il limite di 100
+        // chiamate
+        int endPage = startPage + 80;
+
+        importPlants(startPage, endPage);
+    }
+
+    /**
+     * Esegue l'importazione partendo da una pagina specifica fino a un limite.
      */
     @Async
-    public CompletableFuture<String> importPlants(int maxPages) {
+    public CompletableFuture<String> importPlants(int startPage, int endPage) {
         int importedCount = 0;
-        int currentPage = 1;
+        int currentPage = startPage;
 
-        // Loop through pages
-        while (currentPage <= maxPages) {
-            String url = BASE_URL + "?key=" + Objects.requireNonNull(apiKey) + "&page=" + currentPage;
+        log.info("Importazione iniziata dalla pagina {} fino alla {}", startPage, endPage);
+
+        while (currentPage <= endPage) {
+            String url = BASE_URL + "?key=" + this.apiKey + "&page=" + currentPage;
             try {
-                ResponseEntity<PerenualListResponse> responseEntity = restTemplate.getForEntity(url, PerenualListResponse.class);
+                ResponseEntity<PerenualListResponse> responseEntity = restTemplate.getForEntity(url,
+                        PerenualListResponse.class);
                 PerenualListResponse response = responseEntity.getBody();
 
+                // Se l'API non ha più dati, interrompiamo il ciclo
                 if (response == null || response.getData() == null || response.getData().isEmpty()) {
-                    break; 
+                    log.info("Nessun altro dato trovato. Fine del database di Perenual.");
+                    break;
                 }
 
                 for (PerenualPlantDto dto : response.getData()) {
-                    // Check if scientific name exists
-                    String scientificName = (dto.getScientificName() != null && !dto.getScientificName().isEmpty()) 
-                        ? dto.getScientificName().get(0) 
-                        : null;
+                    // Evita problemi con nomi scientifici vuoti
+                    String scientificName = (dto.getScientificName() != null && !dto.getScientificName().isEmpty())
+                            ? dto.getScientificName().get(0)
+                            : null;
 
-                    if (scientificName != null && !cardRepository.existsByScientificNameContainingIgnoreCase(scientificName)) {
-                        BotanicalCard card = mapDtoToEntity(dto, Objects.requireNonNull(scientificName));
+                    // Salviamo solo se non esiste già nel nostro database
+                    if (scientificName != null && !cardRepository.existsByScientificName(scientificName)) {
+                        BotanicalCard card = mapDtoToEntity(dto, scientificName);
                         cardRepository.save(card);
                         importedCount++;
                     }
                 }
 
                 if (currentPage >= response.getLastPage()) {
-                    break;
+                    break; // Abbiamo raggiunto l'ultima pagina assoluta di Perenual
                 }
+
                 currentPage++;
-                
-                // Be polite to the API
-                Thread.sleep(1000); 
+
+                // Pausa di 2 secondi per non sovraccaricare le API di Perenual (Rate Limiting)
+                Thread.sleep(2000);
 
             } catch (Exception e) {
-                // Log and continue or break? 
-                log.error("Error importing page {}: {}", currentPage, e.getMessage());
-                return CompletableFuture.completedFuture("Error imported " + importedCount + " plants. Stopped at page " + currentPage + ". Error: " + e.getMessage());
+                log.error("Errore durante l'importazione della pagina {}: {}", currentPage, e.getMessage());
+                return CompletableFuture.completedFuture(
+                        "Errore. Importate " + importedCount + " piante. Fermato a pagina " + currentPage);
             }
         }
-        
-        return CompletableFuture.completedFuture("Imported " + importedCount + " plants successfully from " + (currentPage - 1) + " pages.");
+
+        log.info("Importazione completata con successo: {} nuove piante aggiunte.", importedCount);
+        return CompletableFuture.completedFuture(
+                "Importate " + importedCount + " piante con successo. Ultima pagina letta: " + (currentPage - 1));
     }
 
     /**
-     * Traduce il set di dati di terze parti (PerenualPlantDto) nel formato BotanicalCard standard locale.
-     * Include il mapping per l'acqua, l'esposizione al sole e la classificazione per immagini.
+     * Traduce il set di dati di terze parti (PerenualPlantDto) nel formato
+     * BotanicalCard standard locale.
+     * Include il mapping per l'acqua, l'esposizione al sole e la classificazione
+     * per immagini.
      *
-     * @param dto il DTO proveniente dal payload della risposta
+     * @param dto            il DTO proveniente dal payload della risposta
      * @param scientificName stringa estratta del nome scientifico per sicurezza
      * @return l'entità BotanicalCard mappata e pronta all'inserimento SQL
      */
@@ -111,17 +141,18 @@ public class PerenualService {
         BotanicalCard card = new BotanicalCard();
         card.setCommonName(dto.getCommonName() != null ? dto.getCommonName() : scientificName); // Fallback
         card.setScientificName(scientificName);
-        
+
         // Family is not in default list response, usually. Leaving null or "Unknown"
-        // Cycle is returned, we can put it in 'exposure' or 'other' if needed, but entity doesn't have 'cycle'.
+        // Cycle is returned, we can put it in 'exposure' or 'other' if needed, but
+        // entity doesn't have 'cycle'.
         // We'll skip mapping family for now unless we do details fetch.
 
         // Default to mapped values
         card.setExposure(String.join(", ", dto.getSunlight() != null ? dto.getSunlight() : new ArrayList<>()));
-        
+
         String watering = dto.getWatering();
         card.setIrrigation(watering);
-        
+
         // Logical mapping for water frequency
         if ("Frequent".equalsIgnoreCase(watering)) {
             card.setWaterFrequencyDays(2);
@@ -142,12 +173,12 @@ public class PerenualService {
                 card.setUrlDefaultPhoto(dto.getDefaultImage().getOriginalUrl());
             }
         }
-        
+
         // Placeholder for details not in list response
         card.setFertilization("No info");
         card.setSoil("No info");
         // Family is not available in list response, so we leave it null.
-        
+
         return card;
     }
 }

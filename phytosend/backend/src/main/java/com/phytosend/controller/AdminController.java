@@ -9,6 +9,7 @@ import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Value;
+import com.phytosend.repository.BotanicalCardRepository;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -23,19 +24,35 @@ public class AdminController {
     @Autowired
     private PerenualService perenualService;
 
+    @Autowired
+    private BotanicalCardRepository botanicalCardRepository;
+
     /**
      * Importa una lista di piante dal database esterno (Perenual API) per popolare
-     * il database locale.
-     * L'operazione viene demandata ad un thread asincrono.
+     * il database locale. Riprende in automatico dall'ultima pagina scaricata.
      *
      * @param pages il numero di pagine da importare dall'API (default a 5)
      * @return un messaggio di avvenuta accettazione della richiesta
      */
     @PostMapping("/import-plants")
     public ResponseEntity<String> importPlants(@RequestParam(defaultValue = "5") int pages) {
-        perenualService.importPlants(pages); // Importazione asincrona
+
+        // Calcoliamo quante piante abbiamo già
+        long totalImported = botanicalCardRepository.count();
+
+        // Calcoliamo da quale pagina ripartire (sapendo che Perenual dà 30 piante per
+        // pagina)
+        int startPage = (int) (totalImported / 30) + 1;
+
+        // Calcoliamo la pagina di fine
+        int endPage = startPage + pages - 1;
+
+        // Lanciamo il servizio con i due parametri corretti
+        perenualService.importPlants(startPage, endPage); // Importazione asincrona
+
         return ResponseEntity.accepted()
-                .body("Importazione avviata in background. L'operazione potrebbe richiedere del tempo.");
+                .body("Importazione manuale avviata in background dalla pagina " + startPage + " alla " + endPage
+                        + ". L'operazione richiede tempo.");
     }
 
     @Autowired
@@ -91,9 +108,6 @@ public class AdminController {
         return ResponseEntity.accepted().body(
                 "Ripristino catalogo avviato! Tutte le piante verranno aggiornate senza cancellare i post sociali.");
     }
-
-    @Autowired
-    private com.phytosend.repository.BotanicalCardRepository botanicalCardRepository;
 
     @Autowired
     private com.phytosend.service.WikipediaService wikipediaService;
