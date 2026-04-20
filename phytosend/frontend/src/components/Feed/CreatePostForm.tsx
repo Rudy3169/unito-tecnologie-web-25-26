@@ -57,6 +57,11 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         e.preventDefault();
         setErrorMsg('');
 
+        if (!imageUrl) {
+            setErrorMsg("L'immagine è obbligatoria per creare un post!");
+            return;
+        }
+
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
 
@@ -105,13 +110,13 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                 <form onSubmit={handleSubmit} className="create-post-body">
                     <input
                         type="text"
-                        placeholder="Titolo del post"
+                        placeholder="Nome della pianta"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
                     />
                     <textarea
-                        placeholder="Racconta qualcosa sulla tua pianta..."
+                        placeholder="Scrivi qualcosa sulla tua pianta..."
                         value={caption}
                         onChange={(e) => setCaption(e.target.value)}
                         required

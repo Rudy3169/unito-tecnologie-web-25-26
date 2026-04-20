@@ -102,6 +102,9 @@ public class DtoConverter {
         dto.setPlant(toPlantDto(post.getPlant()));
         dto.setLikesCount(post.getLikedBy() != null ? post.getLikedBy().size() : 0);
         dto.setLikedByMe(false);
+        // Calcola quanti commenti ci sono. Se la lista è nulla, restituisce 0.
+        int conteggio = (post.getComments() != null) ? post.getComments().size() : 0;
+        dto.setCommentsCount(conteggio);
         return dto;
     }
 
@@ -118,8 +121,13 @@ public class DtoConverter {
         com.phytosend.dto.CommentDto dto = new com.phytosend.dto.CommentDto();
         dto.setId(comment.getId());
         dto.setText(comment.getText());
-        dto.setCreationDate(comment.getCreationDate());
+        if (comment.getCreationDate() != null) {
+            dto.setCreationDate(comment.getCreationDate().toString());
+        }
         dto.setAuthor(toUserDto(comment.getAuthor()));
+        Long parentId = (comment.getParent() != null) ? comment.getParent().getId() : null;
+        dto.setParentId(parentId);
+
         return dto;
     }
 }

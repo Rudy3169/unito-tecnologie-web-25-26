@@ -70,19 +70,22 @@ public class SocialController {
 
     /**
      * Aggiunge un commento al thread di uno specifico post esistente.
-     *
-     * @param postId   ID del post padre
-     * @param utenteId ID dell'autore del commento
-     * @param body     map JSON attesa contenente la chiave 'testo' del commento
-     *                 (es. { "testo": "Bel ficus!" })
-     * @return la risposta commento creata
      */
     @PostMapping("/posts/{postId}/commenti")
     public CommentDto commentaPost(@PathVariable @NonNull Long postId,
             @RequestParam @NonNull Long utenteId,
-            @RequestBody Map<String, String> body) {
-        String testo = body.get("testo");
-        Comment comment = socialService.addComment(postId, utenteId, testo);
+            @RequestBody Map<String, Object> body) { // Cambiato in Object per accettare numeri
+
+        String testo = (String) body.get("testo");
+
+        // Estraiamo il parentId in modo sicuro se è stato inviato dal frontend
+        Long parentId = null;
+        if (body.get("parentId") != null) {
+            parentId = Long.valueOf(body.get("parentId").toString());
+        }
+
+        // Passiamo anche parentId al servizio
+        Comment comment = socialService.addComment(postId, utenteId, testo, parentId);
         return dtoConverter.toCommentDto(comment);
     }
 

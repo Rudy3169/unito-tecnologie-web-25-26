@@ -8,12 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.core.annotation.Order;
 
 /**
  * Seeder utile a popolare il database all'avvio nel caso in cui la raccolta
  * degli utenti fosse completamente vuota. Inserisce 3 utenze didattiche.
  */
 @Component
+@Order(1)
 @Slf4j
 public class DatabaseSeeder implements CommandLineRunner {
 

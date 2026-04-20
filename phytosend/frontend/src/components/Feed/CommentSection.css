@@ -34,6 +34,9 @@
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(26, 32, 28, 0.25);
     animation: slideUp 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 @keyframes slideUp {
@@ -58,6 +61,7 @@
     top: 0;
     background: var(--color-bg-card);
     z-index: 1;
+    flex-shrink: 0;
 }
 
 .comment-modal-header h3 {
@@ -86,6 +90,8 @@
 
 .comment-list {
     padding: var(--spacing-md) var(--spacing-xl);
+    flex: 1;
+    overflow-y: auto;
 }
 
 .comment-empty {
@@ -181,4 +187,120 @@
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+.comment-mini-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: 4px;
+}
+
+.comment-mini-actions button {
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+}
+
+.comment-mini-actions button:hover {
+    color: var(--color-text-main);
+}
+
+.comment-input-area {
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-card);
+    flex-shrink: 0;
+    padding-bottom: var(--spacing-sm);
+}
+
+.reply-badge {
+    padding: 8px 16px;
+    background: var(--color-bg-main);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.reply-badge button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+}
+
+/* ---- STILE RISPOSTE (NESTING) ---- */
+
+.comment-thread {
+    margin-bottom: var(--spacing-md);
+}
+
+/* Rientro delle risposte rispetto al commento principale */
+.comment-replies {
+    margin-left: 42px;
+    margin-top: 4px;
+}
+
+/* Pulsante Visualizza/Nascondi risposte */
+.toggle-replies-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    transition: color 0.2s;
+}
+
+.toggle-replies-btn:hover {
+    color: var(--color-text-main);
+}
+
+/* La classica lineetta di Instagram prima del testo "Visualizza risposte" */
+.toggle-replies-btn::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background-color: var(--color-text-muted);
+}
+
+/* Modifiche per i commenti figli (risposte) */
+.comment-item.nested {
+    border-bottom: none;
+    /* Togliamo il bordo per renderli più uniti */
+    padding: 6px 0;
+}
+
+/* Avatar più piccolo per le risposte */
+.comment-item-avatar.small {
+    width: 24px;
+    height: 24px;
+    font-size: 0.65rem;
+}
+
+/* Layout per mettere il nome e la data sulla stessa linea */
+.comment-header-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    /* Spazio tra il nome e la data */
+}
+
+/* Stile del testo del tempo (es. 5 min fa) */
+.comment-time {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-weight: 400;
 }

@@ -72,7 +72,7 @@ public class SocialService {
      * @param textComment corpo stringa
      * @return il Comment serializzabile salvato su db
      */
-    public Comment addComment(@NonNull Long postId, @NonNull Long userId, String textComment) {
+    public Comment addComment(@NonNull Long postId, @NonNull Long userId, String textComment, Long parentId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post non trovato"));
 
@@ -84,6 +84,11 @@ public class SocialService {
         newComment.setAuthor(author);
         newComment.setText(textComment);
         newComment.setCreationDate(LocalDateTime.now());
+
+        if (parentId != null) {
+            Comment parentComment = commentRepository.findById(parentId).orElse(null);
+            newComment.setParent(parentComment);
+        }
 
         return commentRepository.save(newComment);
     }

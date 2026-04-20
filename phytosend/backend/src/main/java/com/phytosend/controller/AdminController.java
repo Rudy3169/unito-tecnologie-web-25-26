@@ -65,51 +65,60 @@ public class AdminController {
 
     /**
      * Ripristina il catalogo delle piante dal file data.sql.
-     * 
-     * @return un messaggio di avvenuta ricarica
+     * * @return un messaggio di avvenuta ricarica
      */
     @PostMapping("/reload-catalog")
     public ResponseEntity<String> reloadCatalog() {
-        new Thread(() -> {
-            try {
-                String sql = new String(dataSqlScript.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-                Pattern pattern = Pattern.compile(
-                        "\\('([^']*)', '([^']*)', '([^']*)', '([^']*)', '([^']*)', (\\d+), '([^']*)', '([^']*)', '([^']*)'\\)");
-                Matcher matcher = pattern.matcher(sql);
+        try {
+            // 1. Legge il file in modo sicuro (funziona sia su IDE che Docker)
+            String sql = new String(dataSqlScript.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
-                int aggiornate = 0;
-                while (matcher.find()) {
-                    String scientific = matcher.group(2);
+            // 2. Pattern Regex
+            Pattern pattern = Pattern.compile(
+                    "\\('([^']*)', '([^']*)', '([^']*)', '([^']*)', '([^']*)', (\\d+), '([^']*)', '([^']*)', '([^']*)'\\)");
+            Matcher matcher = pattern.matcher(sql);
 
-                    com.phytosend.entity.BotanicalCard card = botanicalCardRepository
-                            .findFirstByScientificName(scientific);
+            int aggiornate = 0;
+            while (matcher.find()) {
+                String scientific = matcher.group(2);
 
-                    if (card == null) {
-                        card = new com.phytosend.entity.BotanicalCard();
-                        card.setScientificName(scientific);
-                    }
+                com.phytosend.entity.BotanicalCard card = botanicalCardRepository
+                        .findFirstByScientificName(scientific);
 
-                    card.setCommonName(matcher.group(1));
-                    card.setFamily(matcher.group(3));
-                    card.setExposure(matcher.group(4));
-                    card.setIrrigation(matcher.group(5));
-                    card.setWaterFrequencyDays(Integer.parseInt(matcher.group(6)));
-                    card.setFertilization(matcher.group(7));
-                    card.setSoil(matcher.group(8));
-                    card.setUrlDefaultPhoto(matcher.group(9));
-
-                    card.setCreatedAt(java.time.LocalDate.now());
-
-                    botanicalCardRepository.save(card);
-                    aggiornate++;
+                if (card == null) {
+                    card = new com.phytosend.entity.BotanicalCard();
+                    card.setScientificName(scientific);
                 }
-                System.out.println("Ripristino catalogo completato in modo sicuro! Schede aggiornate: " + aggiornate);
-            } catch (Exception e) {
-                System.err.println("Errore durante l'aggiornamento del file data.sql: " + e.getMessage());
+
+                card.setCommonName(matcher.group(1));
+                card.setFamily(matcher.group(3));
+                card.setExposure(matcher.group(4));
+                card.setIrrigation(matcher.group(5));
+                card.setWaterFrequencyDays(Integer.parseInt(matcher.group(6)));
+                card.setFertilization(matcher.group(7));
+                card.setSoil(matcher.group(8));
+                card.setUrlDefaultPhoto(matcher.group(9));
+
+                // FIX CRITICO: Assegniamo l'anno 2000 per NON consumare la quota di oggi!
+                card.setCreatedAt(java.time.LocalDate.of(2000, 1, 1));
+
+                botanicalCardRepository.save(card);
+                aggiornate++;
             }
-        }).start();
-        return ResponseEntity.accepted().body(
-                "Ripristino catalogo avviato! Tutte le piante verranno aggiornate senza cancellare i post sociali.");
+
+            // Se il Regex non ha trovato nulla, lancia un vero errore 500 al frontend
+            if (aggiornate == 0) {
+                return ResponseEntity.internalServerError()
+                        .body("Errore: Il formato del file data.sql non corrisponde al Regex. Nessuna pianta trovata.");
+            }
+
+            System.out.println("Ripristino catalogo completato! Schede aggiornate: " + aggiornate);
+            return ResponseEntity.ok("Ripristino catalogo completato con successo! Schede aggiornate: " + aggiornate);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Errore durante il ripristino: " + e.getMessage());
+        }
     }
 
     @Autowired

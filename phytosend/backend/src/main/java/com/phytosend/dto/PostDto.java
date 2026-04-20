@@ -16,4 +16,13 @@ public class PostDto {
     private int likesCount;
     @JsonProperty("isLikedByMe")
     private boolean isLikedByMe;
+    private Integer commentsCount;
+
+    public Integer getCommentsCount() {
+        return commentsCount;
+    }
+
+    public void setCommentsCount(Integer commentsCount) {
+        this.commentsCount = commentsCount;
+    }
 }

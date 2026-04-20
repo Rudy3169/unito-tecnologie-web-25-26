@@ -2,7 +2,6 @@ import { PostCard, type PostProps } from './PostCard';
 
 interface PostListProps {
     posts: PostProps[];
-    // Nuova prop ponte!
     onToggleLike: (id: number) => void;
 }
 
@@ -24,6 +23,7 @@ export function PostList({ posts, onToggleLike }: PostListProps) {
                     author={post.author}
                     likesCount={post.likesCount}
                     isLikedByMe={post.isLikedByMe}
+                    commentsCount={post.commentsCount}
                     onLike={onToggleLike}
                 />
             ))}

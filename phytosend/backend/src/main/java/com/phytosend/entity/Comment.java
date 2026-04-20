@@ -18,14 +18,20 @@ public class Comment {
     private LocalDateTime creationDate;
 
     // RELAZIONI
-    // Ogni commento ha un autore (utente)
+    // Ogni autore (utente) può avere molti commenti
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User author;
 
-    // Ogni commento appartiene a un post
+    // Ogni post può avere molti commenti
     @ManyToOne
     @JoinColumn(name = "post_id")
-    @JsonIgnore // Evita il loop infinito JSON
+    @JsonIgnore
     private Post post;
+
+    // Ogni commento può avere più risposte
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    @JsonIgnore
+    private Comment parent;
 }

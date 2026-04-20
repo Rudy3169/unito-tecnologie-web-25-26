@@ -7,6 +7,43 @@ import java.time.LocalDateTime;
 public class CommentDto {
     private Long id;
     private String text;
-    private LocalDateTime creationDate;
+    private String creationDate;
     private UserDto author;
+    private Long parentId;
+
+    /**
+     * Getter per la data di creazione
+     * 
+     * @return data di creazione
+     */
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    /**
+     * Setter per la data di creazione
+     * 
+     * @param creationDate data di creazione
+     */
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    /**
+     * Getter per l'ID del commento padre
+     * 
+     * @return ID del commento padre
+     */
+    public Long getParentId() {
+        return parentId;
+    }
+
+    /**
+     * Setter per l'ID del commento padre
+     * 
+     * @param parentId ID del commento padre
+     */
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
 }
