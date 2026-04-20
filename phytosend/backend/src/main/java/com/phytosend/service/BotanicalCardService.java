@@ -23,11 +23,12 @@ public class BotanicalCardService {
      * @return una lista di tutte le entità BotanicalCard
      */
     public List<BotanicalCard> findAll() {
-        return cardRepository.findAll();
+        return cardRepository.findAllByOrderByCommonNameAsc();
     }
 
     /**
-     * Esegue la ricerca di una scheda botanica tramite il suo identificativo univoco.
+     * Esegue la ricerca di una scheda botanica tramite il suo identificativo
+     * univoco.
      *
      * @param id l'ID primario della scheda
      * @return la scheda trovata o un'eccezione se inesistente
@@ -41,18 +42,20 @@ public class BotanicalCardService {
     }
 
     /**
-     * Cerca schede botaniche filtrando per porzioni del nome comune, ignorando le maiuscole.
+     * Cerca schede botaniche filtrando per porzioni del nome comune, ignorando le
+     * maiuscole.
      *
      * @param query il termine di ricerca inserito dall'utente
      * @return la lista delle piante che soddisfano i criteri
      */
     public List<BotanicalCard> searchByNome(String query) {
-        return cardRepository.findByCommonNameContainingIgnoreCase(query);
+        return cardRepository.findByCommonNameContainingIgnoreCaseOrderByCommonNameAsc(query);
     }
 
     /**
      * Salva o aggiorna una scheda botanica nel data store.
-     * Inserisce la logica di controllo per prevenire l'inserimento di duplicati basati sul nome scientifico.
+     * Inserisce la logica di controllo per prevenire l'inserimento di duplicati
+     * basati sul nome scientifico.
      *
      * @param card l'oggetto BotanicalCard da salvare
      * @return la scheda persistita

@@ -127,11 +127,10 @@ public class PerenualService {
     }
 
     /**
-     * Traduce il set di dati di terze parti (PerenualPlantDto) nel formato
-     * BotanicalCard standard locale.
+     * Traduce il set di dati di Perenual nel formato locale.
      * Include il mapping per l'acqua, l'esposizione al sole e la classificazione
      * per immagini.
-     *
+     * 
      * @param dto            il DTO proveniente dal payload della risposta
      * @param scientificName stringa estratta del nome scientifico per sicurezza
      * @return l'entità BotanicalCard mappata e pronta all'inserimento SQL
@@ -139,21 +138,25 @@ public class PerenualService {
     @NonNull
     private BotanicalCard mapDtoToEntity(PerenualPlantDto dto, String scientificName) {
         BotanicalCard card = new BotanicalCard();
-        card.setCommonName(dto.getCommonName() != null ? dto.getCommonName() : scientificName); // Fallback
         card.setScientificName(scientificName);
 
-        // Family is not in default list response, usually. Leaving null or "Unknown"
-        // Cycle is returned, we can put it in 'exposure' or 'other' if needed, but
-        // entity doesn't have 'cycle'.
-        // We'll skip mapping family for now unless we do details fetch.
+        // 1. Traduzione del Nome Comune tramite API esterna (se manca, usa
+        // "Sconosciuto")
+        String englishName = dto.getCommonName();
+        card.setCommonName(traduciNome(englishName));
 
-        // Default to mapped values
-        card.setExposure(String.join(", ", dto.getSunlight() != null ? dto.getSunlight() : new ArrayList<>()));
+        // 2. Famiglia: La list API di Perenual non la fornisce, quindi mettiamo
+        // "Sconosciuto"
+        card.setFamily("Sconosciuto");
 
+        // 3. Esposizione: Traduzione tramite dizionario interno
+        card.setExposure(traduciEsposizione(dto.getSunlight()));
+
+        // 4. Irrigazione: Traduzione tramite dizionario interno
         String watering = dto.getWatering();
-        card.setIrrigation(watering);
+        card.setIrrigation(traduciIrrigazione(watering));
 
-        // Logical mapping for water frequency
+        // Mappatura logica dei giorni di annaffiatura (rimane uguale a prima)
         if ("Frequent".equalsIgnoreCase(watering)) {
             card.setWaterFrequencyDays(2);
         } else if ("Average".equalsIgnoreCase(watering)) {
@@ -164,9 +167,12 @@ public class PerenualService {
             card.setWaterFrequencyDays(7); // Default
         }
 
-        // Image
+        // 5. Terriccio e Fertilizzante: Settati esplicitamente a "Sconosciuto"
+        card.setFertilization("Sconosciuto");
+        card.setSoil("Sconosciuto");
+
+        // 6. Immagini
         if (dto.getDefaultImage() != null) {
-            // Prefer regular url, fallback to original
             if (dto.getDefaultImage().getRegularUrl() != null) {
                 card.setUrlDefaultPhoto(dto.getDefaultImage().getRegularUrl());
             } else {
@@ -174,11 +180,61 @@ public class PerenualService {
             }
         }
 
-        // Placeholder for details not in list response
-        card.setFertilization("No info");
-        card.setSoil("No info");
-        // Family is not available in list response, so we leave it null.
-
         return card;
+    }
+
+    /* --- METODI TRADUTTORI --- */
+
+    private String traduciIrrigazione(String eng) {
+        if (eng == null)
+            return "Sconosciuta";
+        String lowerEng = eng.toLowerCase();
+        if (lowerEng.equals("frequent"))
+            return "Abbondante";
+        if (lowerEng.equals("average"))
+            return "Moderata";
+        if (lowerEng.equals("minimum"))
+            return "Scarsa";
+        return "Sconosciuta";
+    }
+
+    private String traduciEsposizione(java.util.List<String> sunlight) {
+        if (sunlight == null || sunlight.isEmpty())
+            return "Sconosciuta";
+        String joined = String.join(" ", sunlight).toLowerCase();
+        if (joined.contains("full sun"))
+            return "Pieno sole";
+        if (joined.contains("part shade") || joined.contains("part sun"))
+            return "Penombra";
+        if (joined.contains("full shade") || joined.contains("shade"))
+            return "Ombra";
+        return "Luce diffusa"; // fallback se non capisce il termine
+    }
+
+    private String traduciNome(String englishName) {
+        if (englishName == null || englishName.trim().isEmpty())
+            return "Sconosciuto";
+
+        // Chiamata API gratuita MyMemory per tradurre dall'Inglese (en) all'Italiano
+        // (it)
+        try {
+            String url = "https://api.mymemory.translated.net/get?q=" + englishName.replace(" ", "%20")
+                    + "&langpair=en|it";
+            java.util.Map response = restTemplate.getForObject(url, java.util.Map.class);
+
+            if (response != null && response.get("responseData") != null) {
+                java.util.Map responseData = (java.util.Map) response.get("responseData");
+                String translated = (String) responseData.get("translatedText");
+
+                // Evita di salvare strani messaggi di errore dell'API
+                if (translated != null && !translated.contains("MYMEMORY WARNING")) {
+                    // Mette la prima lettera maiuscola per eleganza
+                    return translated.substring(0, 1).toUpperCase() + translated.substring(1);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Errore di traduzione per il nome: {}", englishName);
+        }
+        return englishName; // Fallback: se la traduzione fallisce, salva il nome in inglese
     }
 }

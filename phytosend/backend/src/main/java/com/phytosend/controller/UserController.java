@@ -6,9 +6,9 @@ import com.phytosend.service.DtoConverter;
 import com.phytosend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.lang.NonNull;
 
 import jakarta.validation.Valid;
-import org.springframework.lang.NonNull;
 
 @RestController
 @RequestMapping("/api/utenti")

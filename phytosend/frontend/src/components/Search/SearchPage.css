@@ -99,3 +99,53 @@
 .navbar-search-select:focus {
     color: var(--color-primary);
 }
+
+/* Badge per le nuove importazioni */
+.badge-new {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #ff9800, #f44336);
+    /* Arancione/Rosso vivace */
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    /* Impedisce al badge di restringersi se il titolo è lungo */
+    box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+    animation: pulse-new 2s infinite;
+}
+
+@keyframes pulse-new {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Assicurati che la griglia delle piante sia ben spaziata */
+.plants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+}
+
+.plant-card {
+    transition: transform 0.2s;
+}
+
+.plant-card:hover {
+    transform: translateY(-4px);
+}

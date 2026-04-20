@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Users, Leaf } from 'lucide-react';
+// Aggiungi Sparkles agli import
+import { Users, Leaf, Sparkles } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import './SearchPage.css';
 
@@ -17,16 +18,26 @@ interface PlantResult {
     scientificName: string;
     family: string;
     urlDefaultPhoto?: string;
+    createdAt?: string; // <-- AGGIUNTO: per ricevere la data dal DB
 }
 
 export function SearchPage() {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') || '';
-    const type = searchParams.get('type') || 'plants'; // "plants" o "users"
+    const type = searchParams.get('type') || 'plants';
 
     const [users, setUsers] = useState<UserResult[]>([]);
     const [plants, setPlants] = useState<PlantResult[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // FUNZIONE DI UTILITÀ: Controlla se la pianta è stata importata nelle ultime 12 ore
+    const isNew = (dateString?: string) => {
+        if (!dateString) return false;
+        const importDate = new Date(dateString);
+        const now = new Date();
+        const diffInHours = Math.abs(now.getTime() - importDate.getTime()) / 36e5;
+        return diffInHours <= 12;
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('phytosend_token');
@@ -73,7 +84,7 @@ export function SearchPage() {
             {loading ? (
                 <p>Caricamento in corso...</p>
             ) : type === 'users' ? (
-                /* ─── RENDER RISULTATI UTENTI ─── */
+                /* ... Render Utenti (rimane uguale) ... */
                 users.length === 0 ? (
                     <p className="no-results">Nessun utente trovato.</p>
                 ) : (
@@ -90,13 +101,13 @@ export function SearchPage() {
                     </ul>
                 )
             ) : (
-                /* ─── RENDER RISULTATI PIANTE (CATALOGO) ─── */
+                /* ─── RENDER RISULTATI PIANTE AGGIORNATO ─── */
                 plants.length === 0 ? (
                     <p className="no-results">Nessuna pianta trovata nel catalogo.</p>
                 ) : (
                     <div className="plants-grid">
                         {plants.map(plant => (
-                            <div key={plant.id} className="plant-card">
+                            <div key={plant.id} className="plant-card" style={{ position: 'relative' }}>
                                 <div className="plant-card-img"
                                     style={{
                                         backgroundImage: `url(${plant.urlDefaultPhoto || '/placeholder-plant.png'})`,
@@ -104,7 +115,20 @@ export function SearchPage() {
                                     }}>
                                 </div>
                                 <div className="plant-card-body" style={{ padding: '12px 0' }}>
-                                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{plant.commonName || plant.scientificName}</h3>
+                                    {/* Layout Flex per mettere il badge a destra del titolo */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1.1rem', flex: 1 }}>
+                                            {plant.commonName || plant.scientificName}
+                                        </h3>
+
+                                        {/* BADGE NEW: Spunta solo se la pianta è recente */}
+                                        {isNew(plant.createdAt) && (
+                                            <span className="badge-new">
+                                                <Sparkles size={12} /> NEW
+                                            </span>
+                                        )}
+                                    </div>
+
                                     <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
                                         {plant.scientificName}
                                     </p>

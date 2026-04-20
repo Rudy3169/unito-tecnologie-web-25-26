@@ -1,68 +1,153 @@
-.admin-panel {
-    max-width: 680px;
+.admin-dashboard {
+    max-width: 1000px;
     margin: 0 auto;
+    padding: var(--spacing-md);
 }
 
-.admin-panel-header {
+.admin-header {
     margin-bottom: var(--spacing-xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.admin-panel-header h2 {
-    font-size: 1.8rem;
+.admin-header h2 {
+    font-size: 2rem;
     font-weight: 700;
     color: var(--color-text-main);
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: 12px;
 }
 
-.admin-panel-header p {
-    color: var(--color-text-muted);
-    margin-top: 4px;
+.api-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-dot.online {
+    background-color: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+}
+
+.status-dot.offline {
+    background-color: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+}
+
+.status-dot.checking {
+    background-color: #eab308;
+    animation: pulse 1.5s infinite;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
 }
 
 .admin-card {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-soft);
-    padding: var(--spacing-xl);
-    margin-bottom: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.admin-card h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text-main);
+.admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-primary);
 }
 
 .admin-card p {
     color: var(--color-text-muted);
-    margin-bottom: var(--spacing-lg);
     font-size: 0.95rem;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.stat-box {
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.1), transparent);
+    border: 1px dashed var(--color-primary);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stat-box h4 {
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.stat-box span {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .admin-btn {
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    background: var(--color-primary);
     color: white;
-    padding: 12px 24px;
-    border-radius: var(--border-radius-hard);
+    padding: 12px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 0.95rem;
-    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
-    transition: box-shadow 0.2s, transform 0.2s;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
 }
 
 .admin-btn:hover:not(:disabled) {
-    box-shadow: 0 6px 18px rgba(var(--color-primary-rgb), 0.35);
-    transform: translateY(-1px);
+    background: var(--color-primary-dark);
+}
+
+.admin-btn.danger {
+    background: #dc2626;
+}
+
+.admin-btn.danger:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
+.admin-btn.secondary {
+    background: #2563eb;
+}
+
+.admin-btn.secondary:hover:not(:disabled) {
+    background: #1d4ed8;
 }
 
 .admin-btn:disabled {
@@ -70,25 +155,103 @@
     cursor: not-allowed;
 }
 
-.admin-feedback {
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* --- STILI PER I POPUP MODALI --- */
+.admin-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius-hard);
-    font-weight: 500;
-    font-size: 0.9rem;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
 }
 
-.admin-feedback.success {
-    background: rgba(45, 90, 39, 0.1);
-    color: var(--color-primary);
-    border: 1px solid var(--color-primary-accent);
+.admin-modal {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: slideUp 0.2s ease-out;
 }
 
-.admin-feedback.error {
-    background: rgba(204, 85, 67, 0.08);
-    color: var(--color-error);
-    border: 1px solid rgba(204, 85, 67, 0.3);
+.admin-modal-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.admin-modal h4 {
+    font-size: 1.25rem;
+    color: var(--color-text-main);
+    margin: 0 0 12px 0;
+}
+
+.admin-modal p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin: 0 0 24px 0;
+    white-space: pre-wrap;
+    /* Permette di andare a capo con \n */
+    line-height: 1.5;
+}
+
+.admin-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.admin-btn.cancel {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-main);
+}
+
+.admin-btn.cancel:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }

@@ -24,8 +24,9 @@ public class CatalogController {
     @GetMapping("/ricerca")
     public ResponseEntity<List<BotanicalCard>> searchCatalog(@RequestParam(required = false) String q) {
         if (q != null && !q.trim().isEmpty()) {
-            return ResponseEntity.ok(botanicalCardRepository.findByCommonNameStartingWithIgnoreCase(q));
+            return ResponseEntity
+                    .ok(botanicalCardRepository.findByCommonNameStartingWithIgnoreCaseOrderByCommonNameAsc(q));
         }
-        return ResponseEntity.ok(botanicalCardRepository.findAll());
+        return ResponseEntity.ok(botanicalCardRepository.findAllByOrderByCommonNameAsc());
     }
 }

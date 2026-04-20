@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import com.phytosend.repository.BotanicalCardRepository;
@@ -97,6 +98,8 @@ public class AdminController {
                     card.setSoil(matcher.group(8));
                     card.setUrlDefaultPhoto(matcher.group(9));
 
+                    card.setCreatedAt(java.time.LocalDate.now());
+
                     botanicalCardRepository.save(card);
                     aggiornate++;
                 }
@@ -110,27 +113,26 @@ public class AdminController {
     }
 
     @Autowired
-    private com.phytosend.service.WikipediaService wikipediaService;
+    private RestTemplate restTemplate;
 
-    @PostMapping("/fetch-wikipedia-photos")
-    public ResponseEntity<String> fetchWikipediaPhotos() {
-        new Thread(() -> {
-            var cards = botanicalCardRepository.findAll();
-            for (var card : cards) {
-                String wikiPhoto = wikipediaService.ottieniFotoWikipedia(card.getScientificName());
-                if (wikiPhoto != null) {
-                    card.setUrlDefaultPhoto(wikiPhoto);
-                    botanicalCardRepository.save(card);
-                }
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException ignored) {
-                }
-            }
-            System.out.println("Ricerca di massa foto Wikipedia conclusa!");
-        }).start();
+    @Value("${perenual.api.key}")
+    private String perenualApiKey;
 
-        return ResponseEntity.accepted()
-                .body("Ricerca intensiva foto da Wikipedia avviata per tutte le piante in background!");
+    /**
+     * Restituisce il numero di piante presenti nel database locale.
+     * 
+     * @return un JSON con il conteggio delle piante
+     */
+    @GetMapping("/stats")
+    public ResponseEntity<?> getDatabaseStats() {
+        long count = botanicalCardRepository.count();
+        long importedToday = botanicalCardRepository.countByCreatedAt(java.time.LocalDate.now());
+
+        boolean isOnline = true;
+
+        // Restituisce il JSON
+        String jsonResponse = String.format("{\"totalPlants\": %d, \"perenualOnline\": %b, \"importedToday\": %d}",
+                count, isOnline, importedToday);
+        return ResponseEntity.ok(jsonResponse);
     }
 }
