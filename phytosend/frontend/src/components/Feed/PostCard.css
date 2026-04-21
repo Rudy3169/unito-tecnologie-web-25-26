@@ -16,10 +16,42 @@
     padding: var(--spacing-md);
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    justify-content: space-between;
     border-bottom: 1px solid var(--color-border);
 }
 
+.header-user-section {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+/* STILE E ANIMAZIONE DEL CESTINO */
+.delete-post-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.delete-post-btn:hover {
+    color: var(--color-error);
+    background-color: rgba(var(--color-error-rgb), 0.1);
+    transform: scale(1.15) rotate(5deg);
+}
+
+.delete-post-btn:active {
+    transform: scale(0.9);
+}
+
+
+/* Avatar e Info Post */
 .user-avatar {
     width: 40px;
     height: 40px;
@@ -84,23 +116,6 @@
     }
 }
 
-/* Pulsante mostra commenti */
-.view-comments-btn {
-    background: none;
-    border: none;
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 0;
-    margin-top: 6px;
-    transition: color 0.2s;
-}
-
-.view-comments-btn:hover {
-    color: var(--color-text-main);
-}
-
 .action-btn {
     display: inline-flex;
     align-items: center;
@@ -143,4 +158,71 @@
     line-height: 1;
     padding-top: 2px;
     color: inherit;
+}
+
+/* ---- POP-UP CONFERMA ELIMINAZIONE ---- */
+.delete-modal {
+    background: var(--color-bg-card);
+    border-radius: var(--border-radius-hard);
+    width: 90%;
+    max-width: 380px;
+    padding: var(--spacing-xl);
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(26, 32, 28, 0.25);
+    animation: slideUp 0.2s ease;
+}
+
+.delete-modal h3 {
+    margin-top: 0;
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1.2rem;
+}
+
+.delete-modal p {
+    color: var(--color-text-muted);
+    margin: var(--spacing-md) 0 var(--spacing-xl);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.delete-modal-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+.delete-modal-actions button {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 24px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+/* Bottone Annulla */
+.cancel-btn {
+    background: var(--color-bg-main);
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+}
+
+.cancel-btn:hover {
+    background: var(--color-border);
+}
+
+/* Bottone Elimina (Rosso) */
+.confirm-delete-btn {
+    background: var(--color-error);
+    color: white;
+}
+
+.confirm-delete-btn:hover {
+    filter: brightness(0.9);
+    transform: scale(1.02);
 }

@@ -130,4 +130,22 @@ public class SocialController {
         return ResponseEntity.ok(Map.of("isLikedByMe", isNowLiked));
     }
 
+    /**
+     * Elimina un commento o una risposta, rispettando le regole di moderazione
+     * 
+     * @param postId    ID del post
+     * @param commentId ID del commento
+     * @param utenteId  ID dell'utente
+     * @return stato vuoto al completamento
+     */
+    @DeleteMapping("/posts/{postId}/commenti/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable("postId") Long postId,
+            @PathVariable("commentId") Long commentId,
+            @RequestParam("utenteId") Long utenteId) {
+
+        socialService.deleteComment(postId, commentId, utenteId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

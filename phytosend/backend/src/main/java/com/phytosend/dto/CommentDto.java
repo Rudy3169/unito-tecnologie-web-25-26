@@ -10,6 +10,25 @@ public class CommentDto {
     private String creationDate;
     private UserDto author;
     private Long parentId;
+    private Long authorId;
+
+    /**
+     * Getter per l'ID dell'autore
+     * 
+     * @return ID dell'autore
+     */
+    public Long getAuthorId() {
+        return authorId;
+    }
+
+    /**
+     * Setter per l'ID dell'autore
+     * 
+     * @param authorId ID dell'autore
+     */
+    public void setAuthorId(Long authorId) {
+        this.authorId = authorId;
+    }
 
     /**
      * Getter per la data di creazione

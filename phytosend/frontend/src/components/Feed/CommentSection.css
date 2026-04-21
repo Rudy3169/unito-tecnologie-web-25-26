@@ -1,3 +1,23 @@
+/* Stile per il cestino posizionato in alto a destra */
+.header-delete-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: color 0.2s, transform 0.15s;
+}
+
+.header-delete-btn:hover {
+    color: var(--color-error);
+    transform: scale(1.15);
+}
+
 /* Overlay scuro che copre tutto lo schermo */
 .comment-overlay {
     position: fixed;
@@ -293,10 +313,11 @@
 /* Layout per mettere il nome e la data sulla stessa linea */
 .comment-header-row {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
-    /* Spazio tra il nome e la data */
+    width: 100%;
 }
+
 
 /* Stile del testo del tempo (es. 5 min fa) */
 .comment-time {

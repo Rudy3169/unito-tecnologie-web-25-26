@@ -3,11 +3,13 @@ import { PostCard, type PostProps } from './PostCard';
 interface PostListProps {
     posts: PostProps[];
     onToggleLike: (id: number) => void;
+    onDeletePost: (id: number) => void;
+    onCommentUpdate: () => void;
 }
 
-export function PostList({ posts, onToggleLike }: PostListProps) {
+export function PostList({ posts, onToggleLike, onDeletePost, onCommentUpdate }: PostListProps) {
     if (posts.length === 0) {
-        return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Nessun post da mostrare. Pianta un seme!</p>;
+        return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Nessun post da mostrare. Inizia tu piantando un seme!</p>;
     }
 
     return (
@@ -25,6 +27,8 @@ export function PostList({ posts, onToggleLike }: PostListProps) {
                     isLikedByMe={post.isLikedByMe}
                     commentsCount={post.commentsCount}
                     onLike={onToggleLike}
+                    onDelete={onDeletePost}
+                    onCommentUpdate={onCommentUpdate}
                 />
             ))}
         </div>

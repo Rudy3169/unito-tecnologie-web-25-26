@@ -153,4 +153,70 @@ public class SocialService {
         }
     }
 
+    /**
+     * Elimina un commento o una risposta, rispettando le regole di moderazione
+     * 
+     * @param postId    ID del post
+     * @param commentId ID del commento
+     * @param userId    ID dell'utente
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteComment(Long postId, Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Commento non trovato"));
+
+        // 1. Prevenzione NullPointer per le risposte
+        Post post = comment.getPost();
+        if (post == null && comment.getParent() != null) {
+            post = comment.getParent().getPost();
+        }
+
+        if (post == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Errore: Post non trovato per questo commento");
+        }
+
+        Long postAuthorId = post.getAuthor().getId();
+        Long commentAuthorId = comment.getAuthor().getId();
+
+        boolean isPostAuthor = userId.equals(postAuthorId);
+        boolean isCommentAuthor = userId.equals(commentAuthorId);
+
+        // 2. Controllo permessi base (chi non c'entra niente viene bloccato subito)
+        if (!isPostAuthor && !isCommentAuthor) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN, "Non sei autorizzato a eliminare questo commento");
+        }
+
+        // 3. RECUPERIAMO LE RISPOSTE
+        // Usiamo il repository per trovare tutte le risposte che hanno questo commento
+        // come parent
+        List<Comment> risposte = commentRepository.findByParentId(commentId);
+
+        // 4. Regola d'oro permessi (Autore commento bloccato se ci sono risposte)
+        if (isCommentAuthor && !isPostAuthor && !risposte.isEmpty()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN, "Non puoi eliminare un commento con risposte.");
+        }
+
+        // 5. ELIMINAZIONE FISICA
+        try {
+            if (!risposte.isEmpty()) {
+                // Eliminiamo prima tutte le risposte
+                commentRepository.deleteAll(risposte);
+                // Forziamo il database a eseguire l'eliminazione SUBITO
+                commentRepository.flush();
+            }
+
+            // Ora che il padre è "orfano", possiamo eliminarlo senza errori di vincolo
+            commentRepository.delete(comment);
+            commentRepository.flush();
+
+        } catch (Exception e) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Errore database: " + e.getMessage());
+        }
+    }
 }

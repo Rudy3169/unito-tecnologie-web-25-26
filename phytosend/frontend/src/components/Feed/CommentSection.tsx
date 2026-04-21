@@ -1,11 +1,12 @@
 import { useState, type FormEvent, useEffect } from 'react';
-import { MessageCircle, X, Send, AlertCircle, Heart } from 'lucide-react';
+import { MessageCircle, X, Send, AlertCircle, Heart, Trash2 } from 'lucide-react';
 import './CommentSection.css';
 
 interface Comment {
     id: number;
     text: string;
     authorName: string;
+    authorId: number;
     likesCount?: number;
     isLikedByMe?: boolean;
     parentId?: number | null;
@@ -14,11 +15,13 @@ interface Comment {
 
 interface CommentSectionProps {
     postId: number;
+    postAuthorId: number;
     isOpen: boolean;
     onClose: () => void;
+    onCommentsUpdated?: () => void;
 }
 
-export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps) {
+export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommentsUpdated }: CommentSectionProps) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
@@ -28,6 +31,10 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
 
     // Stato per tracciare quali risposte sono "espanse/visibili"
     const [expandedReplies, setExpandedReplies] = useState<Record<number, boolean>>({});
+
+    // Stato per tracciare quale commento stiamo eliminando
+    const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
+
 
     const getRelativeTime = (dateString?: string) => {
         if (!dateString) return 'Ora';
@@ -69,14 +76,17 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
 
         const token = localStorage.getItem('phytosend_token');
         fetch(`/api/social/posts/${postId}/commenti`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store' // Forza il ricaricamento da server
         })
             .then(res => res.ok ? res.json() : [])
             .then(data => {
+
                 setComments(data.map((c: any) => ({
                     id: c.id,
                     text: c.testo ?? c.text ?? '',
                     authorName: c.author?.name ?? 'Utente',
+                    authorId: c.author?.id ?? c.authorId ?? 0,
                     likesCount: 0,
                     isLikedByMe: false,
                     parentId: c.parentId || null,
@@ -101,8 +111,9 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
     };
 
     const handleReply = (authorName: string, parentId: number) => {
-        setReplyingTo({ authorName, parentId });
         setNewComment(`@${authorName} `);
+        setReplyingTo({ authorName, parentId });
+        if (onCommentsUpdated) onCommentsUpdated();
     };
 
     const toggleReplies = (parentId: number) => {
@@ -112,6 +123,7 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
         }));
     };
 
+    // Gestisce l'invio del commento
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setErrorMsg('');
@@ -147,9 +159,11 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
                     id: created.id || Date.now(),
                     text: newComment,
                     authorName: 'Tu',
+                    authorId: Number(userId),
                     likesCount: 0,
                     isLikedByMe: false,
-                    parentId: replyingTo?.parentId || null
+                    parentId: replyingTo?.parentId || null,
+                    creationDate: new Date().toISOString()
                 }]);
 
                 // Se abbiamo appena risposto, espandiamo in automatico le risposte di quel genitore
@@ -167,7 +181,37 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
         }
     };
 
+    // Gestisce l'eliminazione del commento
+    const confirmDeleteComment = async () => {
+        if (commentToDelete === null) return;
+
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        try {
+            const response = await fetch(`/api/social/posts/${postId}/commenti/${commentToDelete}?utenteId=${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                // Rimuoviamo il commento (e a cascata le sue risposte visivamente)
+                setComments(comments.filter(c => c.id !== commentToDelete && c.parentId !== commentToDelete));
+                if (onCommentsUpdated) onCommentsUpdated();
+            } else {
+                alert("Errore o permessi insufficienti per eliminare il commento.");
+            }
+        } catch (err) {
+            console.error("Errore cancellazione commento:", err);
+        } finally {
+            setCommentToDelete(null);
+        }
+    };
+
     if (!isOpen) return null;
+
+    // Otteniamo l'ID dell'utente corrente
+    const currentUserId = Number(localStorage.getItem('phytosend_userId'));
 
     // Filtriamo i commenti GENITORI (che non hanno un parentId)
     const parentComments = comments
@@ -184,30 +228,45 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
 
                 <div className="comment-list">
                     {parentComments.length === 0 ? (
-                        <p className="comment-empty">Nessun commento ancora. Sii il primo!</p>
+                        <p className="comment-empty">Ancora nessun commento</p>
                     ) : (
                         parentComments.map(parent => {
-                            // Filtriamo le risposte e le ordiniamo per data di creazione
                             const replies = comments
                                 .filter(c => c.parentId === parent.id)
                                 .sort((a, b) => new Date(b.creationDate!).getTime() - new Date(a.creationDate!).getTime());
 
                             const isExpanded = expandedReplies[parent.id];
 
+                            const isPostAuthor = currentUserId === postAuthorId;
+                            const isParentAuthor = currentUserId === parent.authorId;
+                            const parentHasReplies = replies.length > 0;
+                            const canDeleteParent = isPostAuthor || (isParentAuthor && !parentHasReplies);
+
+                            console.log(`Commento di ${parent.authorName} | MioID: ${currentUserId} | AutorePost: ${postAuthorId} | AutoreCommento: ${parent.authorId}`);
+
                             return (
-                                <div key={parent.id} className="comment-thread">
+                                <div key={`parent-${parent.id}`} className="comment-thread">
                                     {/* 1. IL COMMENTO GENITORE */}
                                     <div className="comment-item-content">
                                         <div className="comment-header-row">
                                             <strong>{parent.authorName}</strong>
                                             <span className="comment-time">{getRelativeTime(parent.creationDate)}</span>
+
+                                            {/* Il cestino ora è sulla riga del nome */}
+                                            {canDeleteParent && (
+                                                <button className="header-delete-btn" onClick={() => setCommentToDelete(parent.id)} title="Elimina">
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            )}
                                         </div>
                                         <p>{parent.text}</p>
                                         <div className="comment-mini-actions">
+                                            {/* MI PIACE */}
                                             <button onClick={() => handleLikeComment(parent.id)}>
                                                 <Heart size={12} fill={parent.isLikedByMe ? "var(--color-error)" : "none"} color={parent.isLikedByMe ? "var(--color-error)" : "currentColor"} />
                                                 {parent.likesCount || ''}
                                             </button>
+                                            {/* RISPONDI */}
                                             <button onClick={() => handleReply(parent.authorName, parent.id)}>Rispondi</button>
                                         </div>
                                     </div>
@@ -222,26 +281,36 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
                                                     </button>
                                                 ) : (
                                                     <div className="nested-replies-list">
-                                                        {replies.map(reply => (
-                                                            <div key={reply.id} className="comment-item nested">
-                                                                <div className="comment-item-avatar small">{reply.authorName.charAt(0)}</div>
-                                                                <div className="comment-item-content">
+                                                        {replies.map(reply => {
+                                                            const isReplyAuthor = currentUserId === reply.authorId;
+                                                            const canDeleteReply = isPostAuthor || isReplyAuthor;
+
+                                                            return (
+                                                                <div key={`reply-${reply.id}`} className="comment-item-content">
                                                                     <div className="comment-header-row">
                                                                         <strong>{reply.authorName}</strong>
                                                                         <span className="comment-time">{getRelativeTime(reply.creationDate)}</span>
                                                                     </div>
                                                                     <p>{reply.text}</p>
                                                                     <div className="comment-mini-actions">
+                                                                        {/* MI PIACE */}
                                                                         <button onClick={() => handleLikeComment(reply.id)}>
                                                                             <Heart size={12} fill={reply.isLikedByMe ? "var(--color-error)" : "none"} color={reply.isLikedByMe ? "var(--color-error)" : "currentColor"} />
                                                                             {reply.likesCount || ''}
                                                                         </button>
-                                                                        {/* Quando si risponde a una risposta, il parentId rimane quello del genitore principale */}
+                                                                        {/* RISPONDI */}
                                                                         <button onClick={() => handleReply(reply.authorName, parent.id)}>Rispondi</button>
+
+                                                                        {/* ELIMINA */}
+                                                                        {canDeleteReply && (
+                                                                            <button className="delete-mini-btn" onClick={() => setCommentToDelete(reply.id)}>
+                                                                                Elimina
+                                                                            </button>
+                                                                        )}
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        ))}
+                                                            );
+                                                        })}
 
                                                         {/* Mostra "Nascondi" o in generale, ma lo richiedi specificamente se sono > 3 */}
                                                         {replies.length > 3 ? (
@@ -286,6 +355,21 @@ export function CommentSection({ postId, isOpen, onClose }: CommentSectionProps)
                 </div>
                 {errorMsg && <p className="comment-error"><AlertCircle size={14} /> {errorMsg}</p>}
             </div>
+            {/* --- POPUP ELIMINAZIONE COMMENTO --- */}
+            {
+                commentToDelete !== null && (
+                    <div className="comment-overlay" style={{ zIndex: 1100 }} onClick={() => setCommentToDelete(null)}>
+                        <div className="delete-modal" onClick={e => e.stopPropagation()}>
+                            <h3>Elimina commento</h3>
+                            <p>Sei sicuro di voler eliminare questo commento?</p>
+                            <div className="delete-modal-actions">
+                                <button className="cancel-btn" onClick={() => setCommentToDelete(null)}>Annulla</button>
+                                <button className="confirm-delete-btn" onClick={confirmDeleteComment}>Elimina</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div >
     );
 }

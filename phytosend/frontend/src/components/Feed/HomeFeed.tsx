@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react';
-import { PenLine } from 'lucide-react';
+import { PenLine, AlertTriangle } from 'lucide-react';
 import { PostList } from './PostList';
 import { CreatePostForm } from './CreatePostForm';
 import type { PostProps } from './PostCard';
+import './HomeFeed.css';
 
 export function HomeFeed() {
+
+    // Funzione per caricare i post
     const [posts, setPosts] = useState<PostProps[]>([]);
+
+    // Funzione per aggiungere un post
     const [showCreateForm, setShowCreateForm] = useState(false);
 
+    // Funzione per eliminare un post
+    const [postToDelete, setPostToDelete] = useState<number | null>(null);
+
+    // Funzione per caricare i post
     const caricaPosts = () => {
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
@@ -34,6 +43,7 @@ export function HomeFeed() {
         caricaPosts();
     };
 
+    // Funzione per mettere like a un post
     const handleToggleLike = (postId: number) => {
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
@@ -59,6 +69,62 @@ export function HomeFeed() {
         });
     };
 
+    // Funzione per eliminare un post
+    const handleDeletePost = async (postId: number) => {
+        // Chiede conferma prima di fare danni irreparabili
+        if (!window.confirm("Sei sicuro di voler eliminare questo post? Non potrai tornare indietro.")) return;
+
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        try {
+            const response = await fetch(`/api/social/posts/${postId}?utenteId=${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                // Rimuove istantaneamente il post dalla lista visualizzata senza dover ricaricare la pagina
+                setPosts(posts.filter(post => post.id !== postId));
+            } else {
+                alert("Errore: Impossibile eliminare il post.");
+            }
+        } catch (err) {
+            console.error("Errore cancellazione:", err);
+        }
+    };
+
+    // Funzione per eliminare un post
+    const handleDeleteClick = (postId: number) => {
+        setPostToDelete(postId);
+    };
+
+    // Funzione per confermare l'eliminazione di un post
+    const confirmDelete = async () => {
+        if (postToDelete === null) return;
+
+        const postId = postToDelete;
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        try {
+            const response = await fetch(`/api/social/posts/${postId}?utenteId=${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                setPosts(posts.filter(post => post.id !== postId));
+            } else {
+                alert("Errore: Impossibile eliminare il post.");
+            }
+        } catch (err) {
+            console.error("Errore cancellazione:", err);
+        } finally {
+            // Qualsiasi cosa succeda (successo o errore), chiudiamo il pop-up
+            setPostToDelete(null);
+        }
+    };
 
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
@@ -75,8 +141,32 @@ export function HomeFeed() {
                 onPostCreated={handleAddPost}
             />
 
-            {/* Lista post — NON VA RIMOSSA */}
-            <PostList posts={posts} onToggleLike={handleToggleLike} />
+            {/* Lista post */}
+            <PostList
+                posts={posts}
+                onToggleLike={handleToggleLike}
+                onDeletePost={handleDeleteClick}
+                onCommentUpdate={caricaPosts}
+            />
+
+            {/* POP-UP DI CONFERMA ELIMINAZIONE */}
+            {postToDelete !== null && (
+                <div className="comment-overlay" onClick={() => setPostToDelete(null)}>
+                    <div className="delete-modal" onClick={e => e.stopPropagation()}>
+                        <h3><AlertTriangle color="var(--color-error)" size={24} /> Elimina Post</h3>
+                        <p>Sei sicuro di voler eliminare definitivamente questo post?</p>
+
+                        <div className="delete-modal-actions">
+                            <button className="cancel-btn" onClick={() => setPostToDelete(null)}>
+                                Annulla
+                            </button>
+                            <button className="confirm-delete-btn" onClick={confirmDelete}>
+                                Elimina
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

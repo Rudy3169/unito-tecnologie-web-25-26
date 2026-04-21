@@ -127,6 +127,7 @@ public class DtoConverter {
         dto.setAuthor(toUserDto(comment.getAuthor()));
         Long parentId = (comment.getParent() != null) ? comment.getParent().getId() : null;
         dto.setParentId(parentId);
+        dto.setAuthorId(comment.getAuthor().getId());
 
         return dto;
     }
