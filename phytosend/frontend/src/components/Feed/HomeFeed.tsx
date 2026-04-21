@@ -70,31 +70,6 @@ export function HomeFeed() {
     };
 
     // Funzione per eliminare un post
-    const handleDeletePost = async (postId: number) => {
-        // Chiede conferma prima di fare danni irreparabili
-        if (!window.confirm("Sei sicuro di voler eliminare questo post? Non potrai tornare indietro.")) return;
-
-        const token = localStorage.getItem('phytosend_token');
-        const userId = localStorage.getItem('phytosend_userId');
-
-        try {
-            const response = await fetch(`/api/social/posts/${postId}?utenteId=${userId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (response.ok) {
-                // Rimuove istantaneamente il post dalla lista visualizzata senza dover ricaricare la pagina
-                setPosts(posts.filter(post => post.id !== postId));
-            } else {
-                alert("Errore: Impossibile eliminare il post.");
-            }
-        } catch (err) {
-            console.error("Errore cancellazione:", err);
-        }
-    };
-
-    // Funzione per eliminare un post
     const handleDeleteClick = (postId: number) => {
         setPostToDelete(postId);
     };
