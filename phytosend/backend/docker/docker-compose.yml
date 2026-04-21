@@ -3,6 +3,7 @@ name: phytosend
 services:
   # DATABASE
   db:
+    image: postgres:17.6
     build:
       context: ./postgre
       dockerfile: DockerFile
