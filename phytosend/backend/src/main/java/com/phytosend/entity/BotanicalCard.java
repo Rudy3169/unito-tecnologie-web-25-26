@@ -24,7 +24,7 @@ public class BotanicalCard {
     // Info di cura (statiche per la specie)
     private String exposure;
     private String irrigation;
-    private int waterFrequencyDays;
+    private String waterFrequencyDays;
     private String fertilization;
     private String soil;
 

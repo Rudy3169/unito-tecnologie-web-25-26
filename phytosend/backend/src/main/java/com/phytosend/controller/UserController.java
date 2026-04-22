@@ -2,6 +2,7 @@ package com.phytosend.controller;
 
 import com.phytosend.dto.UserDto;
 import com.phytosend.entity.User;
+import com.phytosend.repository.PostRepository;
 import com.phytosend.service.DtoConverter;
 import com.phytosend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class UserController {
     @Autowired
     private DtoConverter dtoConverter;
 
+    @Autowired
+    private PostRepository postRepository;
+
     /**
      * Recupera l'elenco di tutti gli utenti attualmente iscritti alla piattaforma
      * impaginati.
@@ -33,6 +37,28 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return userService.findAll(page, size).map(dtoConverter::toUserDto);
+    }
+
+    /**
+     * Recupera il profilo di un singolo utente con i contatori di post e piante.
+     *
+     * @param id ID dell'utente
+     * @return profilo utente completo con statistiche
+     */
+    @GetMapping("/{id}")
+    public UserDto getUser(@PathVariable @NonNull Long id) {
+        User user = userService.findById(id);
+        UserDto dto = dtoConverter.toUserDto(user);
+
+        // Calcola i contatori
+        int postsCount = postRepository.findByAuthorIdOrderByCreationDateDesc(id).size();
+        int plantsCount = (user.getGarden() != null && user.getGarden().getPlants() != null)
+                ? user.getGarden().getPlants().size()
+                : 0;
+
+        dto.setPostsCount(postsCount);
+        dto.setPlantsCount(plantsCount);
+        return dto;
     }
 
     /**

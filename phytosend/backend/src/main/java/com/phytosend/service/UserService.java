@@ -144,8 +144,18 @@ public class UserService implements UserDetailsService {
         User exsisting = findById(id);
 
         // Aggiorna solo i campi modificabili dall'utente
-        exsisting.setCity(updatedData.getCity());
-        exsisting.setPhoneNumber(updatedData.getPhoneNumber());
+        if (updatedData.getName() != null)
+            exsisting.setName(updatedData.getName());
+        if (updatedData.getSurname() != null)
+            exsisting.setSurname(updatedData.getSurname());
+        if (updatedData.getCity() != null)
+            exsisting.setCity(updatedData.getCity());
+        if (updatedData.getPhoneNumber() != null)
+            exsisting.setPhoneNumber(updatedData.getPhoneNumber());
+        if (updatedData.getBio() != null)
+            exsisting.setBio(updatedData.getBio());
+        if (updatedData.getBirthDate() != null)
+            exsisting.setBirthDate(updatedData.getBirthDate());
 
         return userRepository.save(exsisting);
     }

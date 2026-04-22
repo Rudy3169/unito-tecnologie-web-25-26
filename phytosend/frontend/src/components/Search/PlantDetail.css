@@ -1,0 +1,221 @@
+/* ═══════════════════════════════════════════
+   PAGINA DETTAGLIO PIANTA
+   ═══════════════════════════════════════════ */
+
+.plant-detail-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding-bottom: var(--spacing-xl);
+}
+
+.plant-detail-loading {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+/* ═══ BOTTONE INDIETRO ═══ */
+.plant-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 24px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: var(--spacing-md);
+}
+
+.plant-back-btn:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary-accent);
+    transform: translateX(-3px);
+}
+
+/* ═══ HERO IMAGE ═══ */
+.plant-hero {
+    position: relative;
+    width: 100%;
+    border-radius: var(--border-radius-soft);
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-md);
+}
+
+.plant-hero-img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    display: block;
+}
+
+.plant-hero-placeholder {
+    width: 100%;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary-accent), var(--color-primary));
+    color: white;
+    opacity: 0.6;
+}
+
+.plant-hero-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+    pointer-events: none;
+}
+
+/* ═══ INFO CARD ═══ */
+.plant-info-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-soft);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.plant-name-section h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    margin: 0 0 4px;
+    line-height: 1.2;
+}
+
+.plant-scientific {
+    font-style: italic;
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    margin: 0 0 var(--spacing-md);
+}
+
+.plant-family-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 24px;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* ═══ SEZIONE CURA ═══ */
+.plant-care-section {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-soft);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.plant-section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin: 0 0 var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.plant-care-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.care-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-hard);
+    background: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.care-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.care-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.care-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.care-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.care-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    line-height: 1.4;
+}
+
+/* ═══ NESSUNA INFO ═══ */
+.plant-no-care {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-soft);
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 600px) {
+    .plant-hero-img {
+        height: 240px;
+    }
+
+    .plant-name-section h1 {
+        font-size: 1.4rem;
+    }
+
+    .plant-care-grid {
+        grid-template-columns: 1fr;
+    }
+}

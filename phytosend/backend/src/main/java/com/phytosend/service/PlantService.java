@@ -24,8 +24,10 @@ public class PlantService {
     private CareEventRepository careEventRepository; // Per creare le notifiche
 
     /**
-     * Inserisce fisicamente una pianta associandole la relativa scheda botanica nel giardino dell'utente.
-     * Si occupa inoltre di programmare in automatico il primissimo evento di innaffiatura (CareEvent) 
+     * Inserisce fisicamente una pianta associandole la relativa scheda botanica nel
+     * giardino dell'utente.
+     * Si occupa inoltre di programmare in automatico il primissimo evento di
+     * innaffiatura (CareEvent)
      * in base alla frequenza dichiarata dalla specie.
      *
      * @param user il proprietario chiamante
@@ -45,7 +47,28 @@ public class PlantService {
         CareEvent firstEvent = new CareEvent();
         firstEvent.setPlant(newPlant);
         firstEvent.setType("ACQUA");
-        firstEvent.setProgrammedDate(LocalDate.now().plusDays(card.getWaterFrequencyDays()));
+        // Prendi la stringa dalla pianta usando getCard() (invece di
+        // getBotanicalCard())
+        String frequenzaStr = newPlant.getCard().getWaterFrequencyDays();
+
+        // Estrai il numero. Se è "Sconosciuto", usiamo 7 giorni di default per non
+        // far morire la pianta
+        long giorniDaAggiungere = 7;
+        if (frequenzaStr != null && frequenzaStr.matches(".*\\d+.*")) {
+            // Questa magia rimuove tutte le lettere e tiene solo i numeri (es. da "Ogni 14
+            // giorni" diventa "14")
+            giorniDaAggiungere = Long.parseLong(frequenzaStr.replaceAll("\\D+", ""));
+        }
+
+        // Calcoliamo la prossima annaffiatura partendo da OGGI
+        LocalDate prossimaAnnaffiatura = LocalDate.now().plusDays(giorniDaAggiungere);
+
+        firstEvent.setCompleted(false);
+
+        firstEvent.setProgrammedDate(prossimaAnnaffiatura);
+
+        careEventRepository.save(firstEvent);
+
         firstEvent.setCompleted(false);
 
         careEventRepository.save(firstEvent);
@@ -54,7 +77,8 @@ public class PlantService {
     }
 
     /**
-     * Lista in sola lettura tutte le piante relative ad un utente per il popolamento UI.
+     * Lista in sola lettura tutte le piante relative ad un utente per il
+     * popolamento UI.
      *
      * @param utenteId identificativo
      * @return lista listata da Spring Data di entità Plant
@@ -64,7 +88,8 @@ public class PlantService {
     }
 
     /**
-     * Esegue l'azione distruttiva per sganciare ed eliminare una pianta specifica dal DB.
+     * Esegue l'azione distruttiva per sganciare ed eliminare una pianta specifica
+     * dal DB.
      * Attenzione: la JPA configurerà i clear a cascata sulle careEvent collegate.
      *
      * @param plantId ID della pianta radice da distruggere

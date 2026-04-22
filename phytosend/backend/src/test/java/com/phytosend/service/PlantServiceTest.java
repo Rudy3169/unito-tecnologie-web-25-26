@@ -47,7 +47,7 @@ class PlantServiceTest {
         card = new BotanicalCard();
         card.setId(10L);
         card.setCommonName("Pothos");
-        card.setWaterFrequencyDays(7);
+        card.setWaterFrequencyDays("Ogni 7 giorni");
 
         plant = new Plant();
         plant.setId(100L);
@@ -107,7 +107,7 @@ class PlantServiceTest {
     @Test
     void addPlantToGarden_CreatesWateringEventWithCorrectDateAndType() {
         // Arrange
-        card.setWaterFrequencyDays(14); // ogni 14 giorni
+        card.setWaterFrequencyDays("Ogni 14 giorni");
         when(plantRepository.save(any(Plant.class))).thenAnswer(i -> i.getArgument(0));
 
         ArgumentCaptor<CareEvent> careEventCaptor = ArgumentCaptor.forClass(CareEvent.class);

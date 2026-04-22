@@ -94,7 +94,7 @@ public class AdminController {
                 card.setFamily(matcher.group(3));
                 card.setExposure(matcher.group(4));
                 card.setIrrigation(matcher.group(5));
-                card.setWaterFrequencyDays(Integer.parseInt(matcher.group(6)));
+                card.setWaterFrequencyDays("Ogni " + matcher.group(6) + " giorni");
                 card.setFertilization(matcher.group(7));
                 card.setSoil(matcher.group(8));
                 card.setUrlDefaultPhoto(matcher.group(9));

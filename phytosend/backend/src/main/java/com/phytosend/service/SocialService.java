@@ -1,6 +1,7 @@
 package com.phytosend.service;
 
 import com.phytosend.dto.CommentDto;
+import com.phytosend.dto.PostDto;
 import com.phytosend.entity.Comment;
 import com.phytosend.entity.Post;
 import com.phytosend.entity.User;
@@ -61,6 +62,26 @@ public class SocialService {
     public org.springframework.data.domain.Page<Post> getFeed(int page, int size) {
         return postRepository
                 .findAllByOrderByCreationDateDesc(org.springframework.data.domain.PageRequest.of(page, size));
+    }
+
+    /**
+     * Recupera tutti i post pubblicati da un utente specifico.
+     *
+     * @param userId        ID dell'utente di cui si vogliono i post
+     * @param currentUserId ID dell'utente che sta facendo la richiesta (per calcolare likedByMe)
+     * @return lista di PostDto ordinati per data discendente
+     */
+    public List<PostDto> getPostsByUser(Long userId, Long currentUserId) {
+        List<Post> posts = postRepository.findByAuthorIdOrderByCreationDateDesc(userId);
+        return posts.stream().map(post -> {
+            PostDto dto = dtoConverter.toPostDto(post);
+            if (currentUserId != null && post.getLikedBy() != null) {
+                boolean liked = post.getLikedBy().stream()
+                        .anyMatch(u -> u.getId().equals(currentUserId));
+                dto.setLikedByMe(liked);
+            }
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     /**

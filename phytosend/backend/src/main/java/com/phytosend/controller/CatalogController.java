@@ -2,6 +2,7 @@ package com.phytosend.controller;
 
 import com.phytosend.entity.BotanicalCard;
 import com.phytosend.repository.BotanicalCardRepository;
+import com.phytosend.service.BotanicalCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,9 @@ public class CatalogController {
 
     @Autowired
     private BotanicalCardRepository botanicalCardRepository;
+
+    @Autowired
+    private BotanicalCardService botanicalCardService;
 
     /**
      * Metodo per cercare schede botaniche il cui nome INIZIA per la query inserita
@@ -28,5 +32,17 @@ public class CatalogController {
                     .ok(botanicalCardRepository.findByCommonNameStartingWithIgnoreCaseOrderByCommonNameAsc(q));
         }
         return ResponseEntity.ok(botanicalCardRepository.findAllByOrderByCommonNameAsc());
+    }
+
+    /**
+     * Recupera una singola scheda botanica completa.
+     *
+     * @param id ID della scheda botanica
+     * @return la scheda botanica con tutte le informazioni
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<BotanicalCard> getCard(@PathVariable Long id) {
+        BotanicalCard card = botanicalCardService.findById(id);
+        return ResponseEntity.ok(card);
     }
 }

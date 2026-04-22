@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 // Aggiungi Sparkles agli import
 import { Users, Leaf, Sparkles } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import './SearchPage.css';
 
 interface UserResult {
@@ -23,6 +23,7 @@ interface PlantResult {
 
 export function SearchPage() {
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const query = searchParams.get('q') || '';
     const type = searchParams.get('type') || 'plants';
 
@@ -90,7 +91,7 @@ export function SearchPage() {
                 ) : (
                     <ul className="user-list">
                         {users.map(user => (
-                            <li key={user.id} className="user-card">
+                            <li key={user.id} className="user-card" onClick={() => navigate(`/profile/${user.id}`)} style={{ cursor: 'pointer' }}>
                                 <div className="user-card-avatar">{user.name.charAt(0).toUpperCase()}</div>
                                 <div className="user-card-info">
                                     <div className="user-card-name">{user.name} {user.surname}</div>
@@ -107,7 +108,13 @@ export function SearchPage() {
                 ) : (
                     <div className="plants-grid">
                         {plants.map(plant => (
-                            <div key={plant.id} className="plant-card" style={{ position: 'relative' }}>
+                            <div
+                                key={plant.id}
+                                className="plant-card"
+                                /* Pointer e la funzione onClick */
+                                style={{ position: 'relative', cursor: 'pointer' }}
+                                onClick={() => navigate(`/plant/${plant.id}`)}
+                            >
                                 <div className="plant-card-img"
                                     style={{
                                         backgroundImage: `url(${plant.urlDefaultPhoto || '/placeholder-plant.png'})`,

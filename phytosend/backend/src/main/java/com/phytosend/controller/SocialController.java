@@ -54,6 +54,20 @@ public class SocialController {
     }
 
     /**
+     * Recupera tutti i post pubblicati da un utente specifico.
+     *
+     * @param userId   ID dell'utente di cui si vogliono i post
+     * @param utenteId ID dell'utente corrente (per calcolare likedByMe)
+     * @return lista di PostDto ordinati per data discendente
+     */
+    @GetMapping("/posts/user/{userId}")
+    public List<com.phytosend.dto.PostDto> getPostsByUser(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Long utenteId) {
+        return socialService.getPostsByUser(userId, utenteId);
+    }
+
+    /**
      * Crea un nuovo post all'interno della piattaforma social e lo attribuisce
      * all'autore.
      *

@@ -7,6 +7,7 @@ import { Profile } from './components/Profile/Profile';
 import { SearchPage } from './components/Search/SearchPage';
 import { AdminPanel } from './components/Admin/AdminPanel';
 import { MyGarden } from './components/MyGarden/MyGarden';
+import { PlantDetail } from './components/Search/PlantDetail';
 import './styles/App.css';
 
 function App() {
@@ -33,7 +34,9 @@ function App() {
                 <Routes>
                     <Route path="/" element={<HomeFeed />} />
                     <Route path="/search" element={<SearchPage />} />
-                    <Route path="/profile" element={<Profile userRole={userRole} />} />
+                    <Route path="/plant/:plantId" element={<PlantDetail />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/profile/:userId" element={<Profile />} />
                     <Route path="/admin" element={<AdminPanel />} />
                     <Route path="/my-garden" element={<MyGarden />} />
                 </Routes>

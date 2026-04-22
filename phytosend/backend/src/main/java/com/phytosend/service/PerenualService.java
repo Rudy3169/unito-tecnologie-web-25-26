@@ -54,16 +54,12 @@ public class PerenualService {
      */
     @Scheduled(cron = "0 0 19 * * ?", zone = "Europe/Rome")
     public void scheduledDailyImport() {
-        log.info("Inizio importazione giornaliera automatica da Perenual...");
-
-        // Calcoliamo la pagina da cui ripartire.
-        // Se il DB ha 300 piante, 300 / 30 = 10. Ripartiamo dalla pagina 11.
+        log.info("Inizio importazione giornaliera automatica (Livello Pro) da Perenual...");
         long totalImported = cardRepository.count();
         int startPage = (int) (totalImported / 30) + 1;
 
-        // Facciamo 80 pagine al giorno (2.400 piante) per stare sotto il limite di 100
-        // chiamate
-        int endPage = startPage + 80;
+        // LIMITIAMO A 3 PAGINE (Max 93 chiamate API in totale) per non farci bloccare!
+        int endPage = startPage + 2;
 
         importPlants(startPage, endPage);
     }
@@ -92,16 +88,33 @@ public class PerenualService {
                 }
 
                 for (PerenualPlantDto dto : response.getData()) {
-                    // Evita problemi con nomi scientifici vuoti
-                    String scientificName = (dto.getScientificName() != null && !dto.getScientificName().isEmpty())
+                    // FILTRO BASE: salta se non ha immagine valida
+                    if (dto.getDefaultImage() == null ||
+                            (dto.getDefaultImage().getRegularUrl() == null
+                                    && dto.getDefaultImage().getOriginalUrl() == null)) {
+                        continue;
+                    }
+
+                    String rawScientificName = (dto.getScientificName() != null && !dto.getScientificName().isEmpty())
                             ? dto.getScientificName().get(0)
                             : null;
+                    String scientificName = pulisciTesto(rawScientificName);
 
-                    // Salviamo solo se non esiste già nel nostro database
-                    if (scientificName != null && !cardRepository.existsByScientificName(scientificName)) {
-                        BotanicalCard card = mapDtoToEntity(dto, scientificName);
-                        cardRepository.save(card);
-                        importedCount++;
+                    if (scientificName == null || scientificName.length() < 3)
+                        continue;
+
+                    // SEGNALE VIA LIBERA: Non è un duplicato! Scateniamo la seconda chiamata API!
+                    if (!cardRepository.existsByScientificName(scientificName)) {
+
+                        java.util.Map<String, Object> plantDetails = fetchPlantDetails(dto.getId());
+
+                        if (plantDetails != null) {
+                            BotanicalCard card = mapDetailToEntity(plantDetails, dto, scientificName);
+                            if (card != null) {
+                                cardRepository.save(card);
+                                importedCount++;
+                            }
+                        }
                     }
                 }
 
@@ -136,47 +149,70 @@ public class PerenualService {
      * @return l'entità BotanicalCard mappata e pronta all'inserimento SQL
      */
     @NonNull
-    private BotanicalCard mapDtoToEntity(PerenualPlantDto dto, String scientificName) {
+    private BotanicalCard mapDetailToEntity(java.util.Map<String, Object> details, PerenualPlantDto listDto,
+            String scientificName) {
         BotanicalCard card = new BotanicalCard();
         card.setScientificName(scientificName);
 
-        // 1. Traduzione del Nome Comune tramite API esterna (se manca, usa
-        // "Sconosciuto")
-        String englishName = dto.getCommonName();
+        // Nome
+        String englishName = (String) details.get("common_name");
         card.setCommonName(traduciNome(englishName));
 
-        // 2. Famiglia: La list API di Perenual non la fornisce, quindi mettiamo
-        // "Sconosciuto"
-        card.setFamily("Sconosciuto");
+        // 1. FAMIGLIA (Ora ce l'abbiamo!)
+        String family = (String) details.get("family");
+        card.setFamily(family != null && !family.isEmpty() ? pulisciTesto(family) : "Sconosciuta");
 
-        // 3. Esposizione: Traduzione tramite dizionario interno
-        card.setExposure(traduciEsposizione(dto.getSunlight()));
+        int sconosciutiCount = 0;
 
-        // 4. Irrigazione: Traduzione tramite dizionario interno
-        String watering = dto.getWatering();
-        card.setIrrigation(traduciIrrigazione(watering));
+        // 2. ESPOSIZIONE
+        java.util.List<String> sunlightList = (java.util.List<String>) details.get("sunlight");
+        String exposure = traduciEsposizione(sunlightList);
+        if (exposure.contains("Sconosciut"))
+            sconosciutiCount++;
+        card.setExposure(exposure);
 
-        // Mappatura logica dei giorni di annaffiatura (rimane uguale a prima)
+        // 3. IRRIGAZIONE E FREQUENZA
+        String watering = (String) details.get("watering");
+        String irrigation = traduciIrrigazione(watering);
+        if (irrigation.contains("Sconosciut"))
+            sconosciutiCount++;
+        card.setIrrigation(irrigation);
+
         if ("Frequent".equalsIgnoreCase(watering)) {
-            card.setWaterFrequencyDays(2);
+            card.setWaterFrequencyDays("Ogni 2 giorni");
         } else if ("Average".equalsIgnoreCase(watering)) {
-            card.setWaterFrequencyDays(7);
+            card.setWaterFrequencyDays("Ogni 7 giorni");
         } else if ("Minimum".equalsIgnoreCase(watering)) {
-            card.setWaterFrequencyDays(14);
+            card.setWaterFrequencyDays("Ogni 14 giorni");
         } else {
-            card.setWaterFrequencyDays(7); // Default
+            card.setWaterFrequencyDays("Sconosciuto");
+            sconosciutiCount++;
         }
 
-        // 5. Terriccio e Fertilizzante: Settati esplicitamente a "Sconosciuto"
-        card.setFertilization("Sconosciuto");
-        card.setSoil("Sconosciuto");
+        // 4. TERRENO (Ora ce l'abbiamo!)
+        java.util.List<String> soilList = (java.util.List<String>) details.get("soil");
+        String soil = traduciTerreno(soilList);
+        if (soil.contains("Sconosciuto"))
+            sconosciutiCount++;
+        card.setSoil(soil);
 
-        // 6. Immagini
-        if (dto.getDefaultImage() != null) {
-            if (dto.getDefaultImage().getRegularUrl() != null) {
-                card.setUrlDefaultPhoto(dto.getDefaultImage().getRegularUrl());
+        // 5. FERTILIZZAZIONE (Rimane sconosciuta perché serve una terza API, ma va bene
+        // così)
+        card.setFertilization("Sconosciuto");
+        sconosciutiCount++;
+
+        // SEGNALE DI SCARTO: Ora che abbiamo il terreno, se mancano 3 campi su 5, la
+        // buttiamo.
+        if (sconosciutiCount >= 3) {
+            return null;
+        }
+
+        // Immagini originali dal DTO della lista
+        if (listDto.getDefaultImage() != null) {
+            if (listDto.getDefaultImage().getRegularUrl() != null) {
+                card.setUrlDefaultPhoto(listDto.getDefaultImage().getRegularUrl());
             } else {
-                card.setUrlDefaultPhoto(dto.getDefaultImage().getOriginalUrl());
+                card.setUrlDefaultPhoto(listDto.getDefaultImage().getOriginalUrl());
             }
         }
 
@@ -212,29 +248,97 @@ public class PerenualService {
     }
 
     private String traduciNome(String englishName) {
-        if (englishName == null || englishName.trim().isEmpty())
-            return "Sconosciuto";
+        // Pulizia iniziale del termine inglese
+        String cleanEnglishName = pulisciTesto(englishName);
 
-        // Chiamata API gratuita MyMemory per tradurre dall'Inglese (en) all'Italiano
-        // (it)
+        if (cleanEnglishName == null || cleanEnglishName.isEmpty() || cleanEnglishName.equalsIgnoreCase("unknown")) {
+            return "Sconosciuto";
+        }
+
         try {
-            String url = "https://api.mymemory.translated.net/get?q=" + englishName.replace(" ", "%20")
-                    + "&langpair=en|it";
+            // Codifica l'URL in modo SICURO per prevenire gli errori dell'API (meglio del
+            // replace)
+            String encodedName = java.net.URLEncoder.encode(cleanEnglishName,
+                    java.nio.charset.StandardCharsets.UTF_8.name());
+            String url = "https://api.mymemory.translated.net/get?q=" + encodedName + "&langpair=en|it";
+
             java.util.Map response = restTemplate.getForObject(url, java.util.Map.class);
 
             if (response != null && response.get("responseData") != null) {
                 java.util.Map responseData = (java.util.Map) response.get("responseData");
                 String translated = (String) responseData.get("translatedText");
 
-                // Evita di salvare strani messaggi di errore dell'API
+                // Puliamo anche la traduzione in uscita da eventuali sporcizie dell'API e
+                // controlliamo errori
                 if (translated != null && !translated.contains("MYMEMORY WARNING")) {
-                    // Mette la prima lettera maiuscola per eleganza
-                    return translated.substring(0, 1).toUpperCase() + translated.substring(1);
+                    translated = pulisciTesto(translated);
+                    if (translated != null && !translated.isEmpty()) {
+                        return translated.substring(0, 1).toUpperCase() + translated.substring(1);
+                    }
                 }
             }
         } catch (Exception e) {
-            log.warn("Errore di traduzione per il nome: {}", englishName);
+            log.warn("Errore di traduzione per il nome: {}", cleanEnglishName);
         }
-        return englishName; // Fallback: se la traduzione fallisce, salva il nome in inglese
+
+        // Fallback: se fallisce, restituisce l'inglese ma PULITO
+        return cleanEnglishName.substring(0, 1).toUpperCase() + cleanEnglishName.substring(1);
+    }
+
+    /**
+     * Pulisce la stringa da tag XML/HTML, decodifica gli URL (es. %20 -> spazio)
+     * e rimuove gli spazi in eccesso.
+     */
+    private String pulisciTesto(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            // Decodifica eventuale URL encoding rimasto (es. %20 -> spazio)
+            input = java.net.URLDecoder.decode(input, java.nio.charset.StandardCharsets.UTF_8.name());
+        } catch (Exception e) {
+            log.warn("Impossibile decodificare la stringa: {}", input);
+        }
+
+        // Rimuove eventuali tag XML o HTML (es. <ph x="102"/>)
+        input = input.replaceAll("<[^>]*>", "");
+
+        // Rimuove spazi doppi e fa il trim
+        return input.replaceAll(" +", " ").trim();
+    }
+
+    /**
+     * Esegue la SECONDA CHIAMATA all'API per scaricare i dettagli completi
+     */
+    private java.util.Map<String, Object> fetchPlantDetails(Long plantId) {
+        String url = "https://perenual.com/api/species/details/" + plantId + "?key=" + this.apiKey;
+        try {
+            // Rallentiamo di 1 secondo e mezzo per non far arrabbiare il server di Perenual
+            Thread.sleep(1500);
+            return restTemplate.getForObject(url, java.util.Map.class);
+        } catch (Exception e) {
+            log.error("Impossibile recuperare i dettagli per la pianta ID {}: {}", plantId, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Traduce il terreno dall'inglese all'italiano
+     */
+    private String traduciTerreno(java.util.List<String> soil) {
+        if (soil == null || soil.isEmpty())
+            return "Sconosciuto";
+        String joined = String.join(" ", soil).toLowerCase();
+
+        if (joined.contains("sand") && joined.contains("loam"))
+            return "Sabbioso e Argilloso";
+        if (joined.contains("sand"))
+            return "Sabbioso ben drenante";
+        if (joined.contains("clay"))
+            return "Argilloso e compatto";
+        if (joined.contains("loam"))
+            return "Terriccio universale ricco";
+
+        return "Terriccio universale"; // Fallback ottimistico per gli altri casi
     }
 }
