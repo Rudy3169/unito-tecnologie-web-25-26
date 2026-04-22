@@ -35,7 +35,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
     // Stato per tracciare quale commento stiamo eliminando
     const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
 
-
+    // Funzione per caricare i commenti
     const getRelativeTime = (dateString?: string) => {
         if (!dateString) return 'Ora';
 
@@ -75,7 +75,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
         setErrorMsg('');        // Pulisce eventuali errori precedenti
 
         const token = localStorage.getItem('phytosend_token');
-        fetch(`/api/social/posts/${postId}/commenti`, {
+        const userId = localStorage.getItem('phytosend_userId');
+        fetch(`/api/social/posts/${postId}/commenti?utenteId=${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store' // Forza il ricaricamento da server
         })
@@ -87,8 +88,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                     text: c.testo ?? c.text ?? '',
                     authorName: c.author?.name ?? 'Utente',
                     authorId: c.author?.id ?? c.authorId ?? 0,
-                    likesCount: 0,
-                    isLikedByMe: false,
+                    likesCount: c.likesCount ?? 0,
+                    isLikedByMe: c.likedByMe ?? false,
                     parentId: c.parentId || null,
                     creationDate: c.creationDate || new Date().toISOString()
                 })));
@@ -96,7 +97,12 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
             .catch(err => console.error("Errore caricamento commenti:", err));
     }, [isOpen, postId]);
 
+    // Funzione per aggiungere o rimuovere un like a un commento
     const handleLikeComment = (commentId: number) => {
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        // Aggiornamento ottimistico della UI
         setComments(comments.map(c => {
             if (c.id === commentId) {
                 const isNowLiked = !c.isLikedByMe;
@@ -108,14 +114,44 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
             }
             return c;
         }));
+
+        // Chiamata al backend per rendere il dato permanente
+        fetch(`/api/social/commenti/${commentId}/like?utenteId=${userId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(err => {
+            console.error("Errore salvataggio like commento:", err);
+            // In caso di errore, ricarichiamo i commenti dal server per ripristinare lo stato corretto
+            const tokenFetch = localStorage.getItem('phytosend_token');
+            const userId = localStorage.getItem('phytosend_userId');
+            fetch(`/api/social/posts/${postId}/commenti?utenteId=${userId}`, {
+                headers: { 'Authorization': `Bearer ${tokenFetch}` },
+                cache: 'no-store'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setComments(data.map((c: any) => ({
+                        id: c.id,
+                        text: c.testo ?? c.text ?? '',
+                        authorName: c.author?.name ?? 'Utente',
+                        authorId: c.author?.id ?? c.authorId ?? 0,
+                        likesCount: c.likesCount ?? 0,
+                        isLikedByMe: c.likedByMe ?? false,
+                        parentId: c.parentId || null,
+                        creationDate: c.creationDate || new Date().toISOString()
+                    })));
+                });
+        });
     };
 
+    // Funzione per rispondere a un commento
     const handleReply = (authorName: string, parentId: number) => {
         setNewComment(`@${authorName} `);
         setReplyingTo({ authorName, parentId });
         if (onCommentsUpdated) onCommentsUpdated();
     };
 
+    // Funzione per espandere o comprimere le risposte
     const toggleReplies = (parentId: number) => {
         setExpandedReplies(prev => ({
             ...prev,
@@ -271,7 +307,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                         </div>
                                     </div>
 
-                                    {/* 2. LE RISPOSTE (Se ci sono) */}
+                                    {/* 2. LE RISPOSTE */}
                                     {
                                         replies.length > 0 && (
                                             <div className="comment-replies">

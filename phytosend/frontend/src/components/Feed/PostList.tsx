@@ -9,7 +9,7 @@ interface PostListProps {
 
 export function PostList({ posts, onToggleLike, onDeletePost, onCommentUpdate }: PostListProps) {
     if (posts.length === 0) {
-        return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Nessun post da mostrare. Inizia tu piantando un seme!</p>;
+        return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Nessun post da mostrare. <br />Inizia tu piantando un seme!</p>;
     }
 
     return (

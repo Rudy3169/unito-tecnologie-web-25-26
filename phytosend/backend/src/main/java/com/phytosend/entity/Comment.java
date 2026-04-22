@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -34,4 +36,9 @@ public class Comment {
     @JoinColumn(name = "parent_id")
     @JsonIgnore
     private Comment parent;
+
+    // Più utenti possono mettere like a più commenti
+    @ManyToMany
+    @JoinTable(name = "comment_likes", joinColumns = @JoinColumn(name = "comment_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<User> likedBy = new HashSet<>();
 }

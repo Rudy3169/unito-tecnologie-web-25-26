@@ -5,11 +5,16 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Il PROXY è fondamentale! Qualsiasi richiesta Frontend verso "/api/..."
-    // verrà rediretta automaticamente al Backend Java sulla porta 8080!
+    host: '0.0.0.0',
+    port: 5173,
+    hmr: { host: 'localhost', port: 5173 },
+    watch: {
+      usePolling: true,
+      interval: 1000,
+    },
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_TARGET || 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       }

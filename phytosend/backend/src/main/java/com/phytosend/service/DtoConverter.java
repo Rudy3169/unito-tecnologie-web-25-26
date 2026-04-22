@@ -30,6 +30,8 @@ public class DtoConverter {
         dto.setEmail(user.getEmail());
         dto.setCity(user.getCity());
         dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setBio(user.getBio());
+        dto.setBirthDate(user.getBirthDate());
         dto.setRole(user.getRole());
         return dto;
     }
@@ -115,7 +117,7 @@ public class DtoConverter {
      * @param comment il commento originario persistito
      * @return CommentDto standardizzato
      */
-    public com.phytosend.dto.CommentDto toCommentDto(com.phytosend.entity.Comment comment) {
+    public com.phytosend.dto.CommentDto toCommentDto(com.phytosend.entity.Comment comment, Long currentUserId) {
         if (comment == null)
             return null;
         com.phytosend.dto.CommentDto dto = new com.phytosend.dto.CommentDto();
@@ -128,7 +130,9 @@ public class DtoConverter {
         Long parentId = (comment.getParent() != null) ? comment.getParent().getId() : null;
         dto.setParentId(parentId);
         dto.setAuthorId(comment.getAuthor().getId());
-
+        dto.setLikesCount(comment.getLikedBy() != null ? comment.getLikedBy().size() : 0);
+        dto.setLikedByMe(currentUserId != null && comment.getLikedBy() != null &&
+                comment.getLikedBy().stream().anyMatch(u -> u.getId().equals(currentUserId)));
         return dto;
     }
 }

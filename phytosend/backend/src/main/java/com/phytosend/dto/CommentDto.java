@@ -11,6 +11,8 @@ public class CommentDto {
     private UserDto author;
     private Long parentId;
     private Long authorId;
+    private int likesCount;
+    private boolean likedByMe;
 
     /**
      * Getter per l'ID dell'autore

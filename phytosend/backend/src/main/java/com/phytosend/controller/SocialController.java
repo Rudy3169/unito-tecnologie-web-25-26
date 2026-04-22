@@ -86,7 +86,7 @@ public class SocialController {
 
         // Passiamo anche parentId al servizio
         Comment comment = socialService.addComment(postId, utenteId, testo, parentId);
-        return dtoConverter.toCommentDto(comment);
+        return dtoConverter.toCommentDto(comment, null);
     }
 
     /**
@@ -111,8 +111,10 @@ public class SocialController {
      * @return lista di commenti in formato DTO
      */
     @GetMapping("/posts/{postId}/commenti")
-    public List<CommentDto> getCommenti(@PathVariable @NonNull Long postId) {
-        return socialService.getCommentiDelPost(postId);
+    public List<CommentDto> getCommenti(
+            @PathVariable @NonNull Long postId,
+            @RequestParam(required = false) Long utenteId) {
+        return socialService.getCommentiDelPost(postId, utenteId);
     }
 
     /**
@@ -128,6 +130,20 @@ public class SocialController {
             @RequestParam Long utenteId) {
         boolean isNowLiked = socialService.toggleLike(postId, utenteId);
         return ResponseEntity.ok(Map.of("isLikedByMe", isNowLiked));
+    }
+
+    /**
+     * Aggiunge o rimuove un like a un commento.
+     * 
+     * @param commentId ID del commento
+     * @param utenteId  ID dell'utente
+     * @return true se il like è stato aggiunto, false se è stato rimosso
+     */
+    @PostMapping("/commenti/{commentId}/like")
+    public ResponseEntity<Boolean> toggleCommentLike(
+            @PathVariable Long commentId,
+            @RequestParam Long utenteId) {
+        return ResponseEntity.ok(socialService.toggleCommentLike(commentId, utenteId));
     }
 
     /**

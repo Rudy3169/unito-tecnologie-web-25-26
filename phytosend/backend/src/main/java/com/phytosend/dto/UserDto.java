@@ -11,7 +11,11 @@ public class UserDto {
     private String email;
     private String phoneNumber;
     private String city;
+    private String bio;
+    private String birthDate;
     private UserRole role;
-    
+    private int postsCount;
+    private int plantsCount;
+
     // Non includiamo la password!
 }

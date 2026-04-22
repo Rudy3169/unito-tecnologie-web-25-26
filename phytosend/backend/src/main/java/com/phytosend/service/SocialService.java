@@ -99,11 +99,11 @@ public class SocialService {
      * @param postId ID del post
      * @return Lista di CommentDto
      */
-    public List<CommentDto> getCommentiDelPost(Long postId) {
+    public List<CommentDto> getCommentiDelPost(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("Post non trovato: " + postId));
         return post.getComments().stream()
-                .map(dtoConverter::toCommentDto)
+                .map(c -> dtoConverter.toCommentDto(c, currentUserId))
                 .collect(java.util.stream.Collectors.toList());
     }
 
@@ -150,6 +150,30 @@ public class SocialService {
             post.getLikedBy().add(user);
             postRepository.save(post);
             return true;
+        }
+    }
+
+    /**
+     * Gestisce l'aggiunta di un like a un commento.
+     * 
+     * @param commentId ID del commento
+     * @param utenteId  ID dell'utente
+     * @return true se il like è stato aggiunto, false se è stato rimosso
+     */
+    public boolean toggleCommentLike(Long commentId, Long utenteId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Commento non trovato"));
+        User user = userRepository.findById(utenteId)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        if (comment.getLikedBy().contains(user)) {
+            comment.getLikedBy().remove(user);
+            commentRepository.save(comment);
+            return false; // Like rimosso
+        } else {
+            comment.getLikedBy().add(user);
+            commentRepository.save(comment);
+            return true; // Like aggiunto
         }
     }
 
