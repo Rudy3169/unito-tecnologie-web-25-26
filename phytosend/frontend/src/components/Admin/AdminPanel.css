@@ -20,38 +20,7 @@
     gap: 12px;
 }
 
-.api-status-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-}
 
-.status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-
-.status-dot.online {
-    background-color: #22c55e;
-    box-shadow: 0 0 8px #22c55e;
-}
-
-.status-dot.offline {
-    background-color: #ef4444;
-    box-shadow: 0 0 8px #ef4444;
-}
-
-.status-dot.checking {
-    background-color: #eab308;
-    animation: pulse 1.5s infinite;
-}
 
 .admin-grid {
     display: grid;
