@@ -2,7 +2,7 @@ INSERT INTO botanical_cards (common_name, scientific_name, family, exposure, irr
 
 ('Abete di Engelmann', 'Picea engelmannii', 'Pinaceae', 'Pieno sole', 'Scarsa', 10, 'Bilanciato', 'Ben drenato', 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Engelmann_spruce_on_the_PCT%2C_Washington.JPG'),
 ('Acacia nilotica', 'Vachellia nilotica', 'Fabaceae', 'Pieno sole', 'Scarsa', 10, 'Organico', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Macro_view_of_thorn_and_leaves_of_a_Babul_tree_%28Vachellia_nilotica%29_from_Rajasthan%2C_India.jpg'),
-('Acacia', 'Acacia spp.', 'Fabaceae', 'Pieno sole', 'Scarsa', 10, 'Organico', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/c/ca/Acacia_confusa-01.jpg'),
+('Acacia', 'Acacia spp.', 'Fabaceae', 'Pieno sole', 'Scarsa', 10, 'Organico', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/e/e9/Starr_040812-0030_Acacia_confusa.jpg'),
 ('Acalifa', 'Acalypha hispida', 'Euphorbiaceae', 'Pieno sole', 'Moderata', 7, 'Organico', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Acalypha_Hispida_DS.jpg'),
 ('Acanto', 'Acanthus mollis', 'Acanthaceae', 'Penombra', 'Abbondante', 4, 'Organico', 'Terriccio ricco', 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Acanthus_mollis_pm.jpg'),
 ('Acero giapponese', 'Acer palmatum', 'Sapindaceae', 'Penombra', 'Abbondante', 4, 'Bilanciato', 'Acido', 'https://upload.wikimedia.org/wikipedia/commons/d/da/Acer_Palmatum_in_Villa_Taranto%2C_Verbania.jpg'),

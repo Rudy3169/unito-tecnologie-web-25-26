@@ -3,6 +3,8 @@ package com.phytosend.repository;
 import com.phytosend.entity.BotanicalCard;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BotanicalCardRepository extends JpaRepository<BotanicalCard, Long> {
 
@@ -20,6 +22,12 @@ public interface BotanicalCardRepository extends JpaRepository<BotanicalCard, Lo
 
     // Metodo per cercare il nome scientifico delle schede botaniche
     BotanicalCard findFirstByScientificName(String scientificName);
+
+    // Trova tutte le schede ordinate e paginate
+    Page<BotanicalCard> findAllByOrderByCommonNameAsc(Pageable pageable);
+
+    // Trova schede che iniziano per una stringa, ordinate e paginate
+    Page<BotanicalCard> findByCommonNameStartingWithIgnoreCaseOrderByCommonNameAsc(String prefix, Pageable pageable);
 
     // Metodo per verificare l'esistenza di una scheda botanica tramite il nome
     // scientifico

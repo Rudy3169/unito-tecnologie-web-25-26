@@ -1,4 +1,4 @@
-name: phytosend
+name: phytosend-dev
 
 services:
   # DATABASE (uguale alla produzione, non cambia)

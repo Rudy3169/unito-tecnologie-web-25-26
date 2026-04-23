@@ -45,7 +45,7 @@ export function Sidebar({ userRole }: SidebarProps) {
         localStorage.removeItem('phytosend_role');
         localStorage.removeItem('phytosend_token');
         localStorage.removeItem('phytosend_userId');
-        window.location.reload();
+        window.location.href = '/';
     };
 
     const renderDropdownMenu = (classNameStr: string) => (

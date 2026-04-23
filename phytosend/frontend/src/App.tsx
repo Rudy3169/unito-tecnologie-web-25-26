@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { HomeFeed } from './components/Feed/HomeFeed';
 import { LoginPage } from './components/Auth/LoginPage';
@@ -11,6 +11,7 @@ import { PlantDetail } from './components/Search/PlantDetail';
 import './styles/App.css';
 
 function App() {
+    const navigate = useNavigate();
     const savedRole = localStorage.getItem('phytosend_role') as 'USER' | 'ADMIN' | null;
 
     const [userRole, setUserRole] = useState<'USER' | 'ADMIN' | null>(savedRole);
@@ -20,6 +21,7 @@ function App() {
         localStorage.setItem('phytosend_role', role);
         setIsLoggedIn(true);
         setUserRole(role);
+        navigate('/');
     };
 
     if (!isLoggedIn) {

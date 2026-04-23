@@ -41,13 +41,26 @@ export function Profile() {
 
     // Funzione per caricare i dati del profilo
     const loadProfile = () => {
-        if (!profileUserId) return;
+        if (!profileUserId) {
+            // Se il browser non ha l'ID utente salvato, puliamo tutto e andiamo al login!
+            localStorage.clear();
+            window.location.href = '/';
+            return;
+        }
 
         // 1. Carica dati utente
         fetch(`/api/utenti/${profileUserId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
-            .then(res => res.ok ? res.json() : null)
+            .then(res => {
+                // Se il token è scaduto/invalido (401/403) oppure il MIO profilo è stato cancellato (404)
+                if (res.status === 401 || res.status === 403 || (res.status === 404 && isOwnProfile)) {
+                    localStorage.clear();
+                    window.location.href = '/';
+                    return null;
+                }
+                return res.ok ? res.json() : null;
+            })
             .then(data => setUser(data))
             .catch(err => console.error("Errore caricamento profilo:", err));
 

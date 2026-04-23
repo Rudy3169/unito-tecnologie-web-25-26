@@ -28,6 +28,11 @@ export function HomeFeed() {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => {
+                if (res.status === 401 || res.status === 403) {
+                    localStorage.clear();
+                    window.location.href = '/';
+                    return;
+                }
                 if (!res.ok) throw new Error(`Errore server: ${res.status}`);
                 return res.json();
             })

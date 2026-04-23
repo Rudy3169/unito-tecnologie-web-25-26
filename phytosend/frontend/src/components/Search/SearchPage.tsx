@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-// Aggiungi Sparkles agli import
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Users, Leaf, Sparkles } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import './SearchPage.css';
@@ -30,6 +29,9 @@ export function SearchPage() {
     const [users, setUsers] = useState<UserResult[]>([]);
     const [plants, setPlants] = useState<PlantResult[]>([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const observerRef = useRef<IntersectionObserver | null>(null);
 
     // FUNZIONE DI UTILITÀ: Controlla se la pianta è stata importata nelle ultime 12 ore
     const isNew = (dateString?: string) => {
@@ -40,10 +42,34 @@ export function SearchPage() {
         return diffInHours <= 12;
     };
 
+    // Sensore che si accorge quando tocchi il fondo della pagina
+    const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+        if (loading && plants.length === 0) return; // Non fa niente se sta già caricando
+        if (observerRef.current) observerRef.current.disconnect();
+
+        observerRef.current = new IntersectionObserver(entries => {
+            // Se l'ultimo elemento appare nello schermo e ci sono ancora piante nel DB, carica la prossima pagina
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+
+        if (node) observerRef.current.observe(node);
+    }, [loading, hasMore]);
+
+    // Azzera tutto quando scrivi qualcosa di nuovo nella barra di ricerca
+    useEffect(() => {
+        if (type === 'plants') {
+            setPlants([]);
+            setPage(0);
+            setHasMore(true);
+        }
+    }, [query, type]);
+
+    // Fa partire la richiesta quando cambia la query, il tab o scendi di pagina
     useEffect(() => {
         const token = localStorage.getItem('phytosend_token');
         setLoading(true);
-
         if (type === 'users') {
             fetch('/api/utenti', { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(res => res.json())
@@ -57,18 +83,23 @@ export function SearchPage() {
                     setUsers(filtered);
                 })
                 .finally(() => setLoading(false));
-
         } else if (type === 'plants') {
-            fetch(`/api/catalogo/ricerca?q=${encodeURIComponent(query)}`, {
+            // Passiamo page e size al backend!
+            fetch(`/api/catalogo/ricerca?q=${encodeURIComponent(query)}&page=${page}&size=15`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
-                .then(data => setPlants(data ?? []))
+                .then(data => {
+                    setPlants(prevPlants => {
+                        // Se è pagina 0 metti le nuove, altrimenti incollale in fondo a quelle vecchie
+                        return page === 0 ? data.content : [...prevPlants, ...data.content];
+                    });
+                    setHasMore(!data.last); // data.last ci dice se il backend ha finito le piante
+                })
                 .catch(err => console.error(err))
                 .finally(() => setLoading(false));
         }
-
-    }, [query, type]);
+    }, [query, type, page]);
 
     return (
         <div className="search-page">
@@ -82,7 +113,7 @@ export function SearchPage() {
                 </p>
             </div>
 
-            {loading ? (
+            {loading && plants.length === 0 && users.length === 0 ? (
                 <p>Caricamento in corso...</p>
             ) : type === 'users' ? (
                 /* ... Render Utenti (rimane uguale) ... */
@@ -107,42 +138,46 @@ export function SearchPage() {
                     <p className="no-results">Nessuna pianta trovata nel catalogo.</p>
                 ) : (
                     <div className="plants-grid">
-                        {plants.map(plant => (
-                            <div
-                                key={plant.id}
-                                className="plant-card"
-                                /* Pointer e la funzione onClick */
-                                style={{ position: 'relative', cursor: 'pointer' }}
-                                onClick={() => navigate(`/plant/${plant.id}`)}
-                            >
-                                <div className="plant-card-img"
-                                    style={{
-                                        backgroundImage: `url(${plant.urlDefaultPhoto || '/placeholder-plant.png'})`,
-                                        height: '150px', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '12px'
-                                    }}>
-                                </div>
-                                <div className="plant-card-body" style={{ padding: '12px 0' }}>
-                                    {/* Layout Flex per mettere il badge a destra del titolo */}
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                                        <h3 style={{ margin: 0, fontSize: '1.1rem', flex: 1 }}>
-                                            {plant.commonName || plant.scientificName}
-                                        </h3>
-
-                                        {/* BADGE NEW: Spunta solo se la pianta è recente */}
-                                        {isNew(plant.createdAt) && (
-                                            <span className="badge-new">
-                                                <Sparkles size={12} /> NEW
-                                            </span>
-                                        )}
+                        {plants.map((plant, index) => {
+                            // Controlla se questa è l'ultima pianta della lista sullo schermo
+                            const isLastElement = index === plants.length - 1;
+                            return (
+                                <div
+                                    key={`${plant.id}-${index}`}
+                                    ref={isLastElement ? lastElementRef : null} // AGGIUNTO IL SENSORE QUI
+                                    className="plant-card"
+                                    style={{ position: 'relative', cursor: 'pointer' }}
+                                    onClick={() => navigate(`/plant/${plant.id}`)}
+                                >
+                                    <div className="plant-card-img"
+                                        style={{
+                                            backgroundImage: `url(${plant.urlDefaultPhoto || '/placeholder-plant.png'})`,
+                                            height: '150px', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '12px'
+                                        }}>
                                     </div>
+                                    <div className="plant-card-body" style={{ padding: '12px 0' }}>
+                                        {/* Layout Flex per mettere il badge a destra del titolo */}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                            <h3 style={{ margin: 0, fontSize: '1.1rem', flex: 1 }}>
+                                                {plant.commonName || plant.scientificName}
+                                            </h3>
 
-                                    <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                                        {plant.scientificName}
-                                    </p>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)' }}>Fam: {plant.family}</span>
+                                            {/* BADGE NEW: Spunta solo se la pianta è recente */}
+                                            {isNew(plant.createdAt) && (
+                                                <span className="badge-new">
+                                                    <Sparkles size={12} /> NEW
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+                                            {plant.scientificName}
+                                        </p>
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)' }}>Fam: {plant.family}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )
             )}
