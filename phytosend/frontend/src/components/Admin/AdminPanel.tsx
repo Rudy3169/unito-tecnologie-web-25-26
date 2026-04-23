@@ -54,9 +54,9 @@ export function AdminPanel() {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
+
             const responseText = await response.text();
-            
+
             if (response.ok) {
                 showPopup('Operazione Completata', responseText || successMsg, 'success');
                 fetchDashboardData();
@@ -99,7 +99,7 @@ export function AdminPanel() {
                             isOpen: true,
                             type: 'confirm',
                             title: 'Attenzione!',
-                            message: 'Sei sicuro di voler ripristinare il database dal file SQL? Le modifiche ai dati base potrebbero essere sovrascritte.',
+                            message: 'Sei sicuro di voler ripristinare il database? \nLe modifiche ai dati base potrebbero essere sovrascritte.',
                             icon: 'warning',
                             onConfirm: () => { closePopup(); handleAction('/api/admin/reload-catalog', setIsReloading, 'Ripristino avviato con successo!'); }
                         })}

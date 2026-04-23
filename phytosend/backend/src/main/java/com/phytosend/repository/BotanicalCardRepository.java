@@ -23,6 +23,9 @@ public interface BotanicalCardRepository extends JpaRepository<BotanicalCard, Lo
     // Metodo per cercare il nome scientifico delle schede botaniche
     BotanicalCard findFirstByScientificName(String scientificName);
 
+    // Metodo per cercare usando sia il nome comune che quello scientifico
+    BotanicalCard findFirstByCommonNameAndScientificName(String commonName, String scientificName);
+
     // Trova tutte le schede ordinate e paginate
     Page<BotanicalCard> findAllByOrderByCommonNameAsc(Pageable pageable);
 

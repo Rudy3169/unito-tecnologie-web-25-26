@@ -34,17 +34,18 @@ public class AdminController {
             int saltate = 0;
 
             while (matcher.find()) {
+                String common = matcher.group(1);
                 String scientific = matcher.group(2);
 
                 try {
-                    BotanicalCard card = botanicalCardRepository.findFirstByScientificName(scientific);
+                    BotanicalCard card = botanicalCardRepository.findFirstByCommonNameAndScientificName(common,
+                            scientific);
 
                     if (card == null) {
                         card = new BotanicalCard();
+                        card.setCommonName(common);
                         card.setScientificName(scientific);
                     }
-
-                    card.setCommonName(matcher.group(1));
                     card.setFamily(matcher.group(3));
                     card.setExposure(matcher.group(4));
                     card.setIrrigation(matcher.group(5));
@@ -57,8 +58,7 @@ public class AdminController {
                     botanicalCardRepository.saveAndFlush(card);
                     aggiornate++;
                 } catch (Exception e) {
-                    // Ignora i duplicati che violano i vincoli (es. Peperone duplicato nel file
-                    // data.sql) e vai avanti
+                    // Ignora i duplicati che violano i vincoli
                     saltate++;
                 }
             }
@@ -68,8 +68,7 @@ public class AdminController {
                         .body("Errore: Il formato del file data.sql non corrisponde al Regex. Nessuna pianta trovata.");
             }
 
-            return ResponseEntity.ok("Ripristino completato! \n Schede caricate: " + aggiornate
-                    + "\n (Saltati " + saltate + " duplicati nel file).");
+            return ResponseEntity.ok("Ripristino completato! \n Schede caricate: " + aggiornate);
 
         } catch (Exception e) {
             e.printStackTrace();
