@@ -37,12 +37,18 @@ public class PostDto {
     // Getter per plantId
     @JsonProperty("plantId")
     public Long getPlantId() {
-        return plant.getId();
+        if (this.plant == null) {
+            return null;
+        }
+        return this.plant.getId();
     }
 
     // Getter per plantName
     @JsonProperty("plantName")
     public String getPlantName() {
-        return plant.getPlantName();
+        if (this.plant == null) {
+            return null;
+        }
+        return this.plant.getPlantName();
     }
 }

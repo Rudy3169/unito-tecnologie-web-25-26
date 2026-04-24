@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
-import { ImagePlus, Camera, X, Check, Loader, Sprout, Fence, Plus } from 'lucide-react';
+import { ImagePlus, X, Check, Loader, Sprout, Fence, Plus } from 'lucide-react';
 import './CreatePostForm.css';
 
 interface CreatePostFormProps {
@@ -23,28 +23,23 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
     const [previewUrl, setPreviewUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // Nuovi stati per la gestione del Giardino vs Nuova Pianta
     const [postMode, setPostMode] = useState<'new' | 'garden'>('new');
     const [myPlants, setMyPlants] = useState<any[]>([]);
     const [selectedPlantId, setSelectedPlantId] = useState<number | null>(null);
     const [selectedBotanicalCardId, setSelectedBotanicalCardId] = useState<number | null>(null);
     const [addToGarden, setAddToGarden] = useState(true);
 
-
-    // Stato per Autocompletamento (Nuova pianta)
     const [suggestions, setSuggestions] = useState<PlantSuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Reset e caricamento piante utente
     useEffect(() => {
         if (isOpen) {
             const token = localStorage.getItem('phytosend_token');
             const userId = localStorage.getItem('phytosend_userId');
 
-            // Carica il giardino dell'utente
             fetch(`/api/utenti/${userId}/piante`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -52,17 +47,19 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                 .then(data => setMyPlants(data || []))
                 .catch(err => console.error("Errore caricamento giardino:", err));
         } else {
-            // Reset form
             setTitle(''); setCaption(''); setImageUrl(''); setPreviewUrl('');
             setErrorMsg(''); setSuggestions([]); setShowSuggestions(false);
             setSelectedPlantId(null); setSelectedBotanicalCardId(null); setPostMode('new');
+            setAddToGarden(true);
         }
     }, [isOpen]);
 
-    // Autocompletamento: Debounced Fetch
+    // FIX TENDINA: Se l'utente ha già selezionato una pianta, blocchiamo la ricerca!
     useEffect(() => {
-        if (postMode !== 'new' || !title.trim() || title.length < 2) {
-            setSuggestions([]); setShowSuggestions(false); setIsSearching(false);
+        if (postMode !== 'new' || !title.trim() || title.length < 2 || selectedBotanicalCardId !== null) {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            setIsSearching(false);
             return;
         }
 
@@ -86,9 +83,8 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [title, postMode]);
+    }, [title, postMode, selectedBotanicalCardId]);
 
-    // Funzione per caricare l'immagine
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -116,14 +112,12 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         img.src = objectUrl;
     };
 
-    // Funzione per selezionare una pianta dal catalogo
     const handleSelectSuggestion = (suggestion: PlantSuggestion) => {
-        setTitle(suggestion.commonName);
         setSelectedBotanicalCardId(suggestion.id);
-        setShowSuggestions(false);
+        setTitle(suggestion.commonName);
+        setShowSuggestions(false); // La tendina si chiude
     };
 
-    // Funzione per selezionare una pianta dal giardino
     const handleSelectFromGarden = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const pId = Number(e.target.value);
         setSelectedPlantId(pId);
@@ -131,7 +125,6 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         if (selected) setTitle(selected.card?.commonName || 'Pianta dal giardino');
     };
 
-    // Funzione per inviare il post
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setErrorMsg('');
@@ -145,11 +138,10 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
 
-        // Costruiamo il payload rispettando il PostCreateDto
         const payload = {
             title: title,
             description: caption,
-            urlphoto: imageUrl,
+            urlPhoto: imageUrl,
             botanicalCardId: postMode === 'new' ? selectedBotanicalCardId : null,
             plantId: postMode === 'garden' ? selectedPlantId : null,
             addToGarden: addToGarden
@@ -204,7 +196,6 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                         </div>
 
                         <div className="split-right">
-                            {/* SELETTORE MODALITA' */}
                             <div className="post-mode-tabs" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                                 <button type="button"
                                     style={{ flex: 1, padding: '8px', borderRadius: '8px', border: postMode === 'new' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)', background: postMode === 'new' ? 'rgba(30, 94, 75, 0.1)' : 'transparent', color: postMode === 'new' ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
@@ -212,20 +203,12 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                                     <Sprout size={16} style={{ marginBottom: '-3px', marginRight: '4px' }} /> Nuova Pianta
                                 </button>
                                 <button type="button"
-                                    // 1. Disabilita il click se non ci sono piante
                                     disabled={myPlants.length === 0}
-                                    // 2. Mostra un piccolo messaggio al passaggio del mouse
                                     title={myPlants.length === 0 ? "Aggiungi prima una pianta al tuo giardino!" : ""}
                                     style={{
-                                        flex: 1,
-                                        padding: '8px',
-                                        borderRadius: '8px',
-                                        border: postMode === 'garden' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                                        background: postMode === 'garden' ? 'rgba(30, 94, 75, 0.1)' : 'transparent',
-                                        color: postMode === 'garden' ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                                        // 3. Rende il tasto semi-trasparente e col cursore di divieto se vuoto
-                                        opacity: myPlants.length === 0 ? 0.5 : 1,
-                                        cursor: myPlants.length === 0 ? 'not-allowed' : 'pointer'
+                                        flex: 1, padding: '8px', borderRadius: '8px', border: postMode === 'garden' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                                        background: postMode === 'garden' ? 'rgba(30, 94, 75, 0.1)' : 'transparent', color: postMode === 'garden' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                                        opacity: myPlants.length === 0 ? 0.5 : 1, cursor: myPlants.length === 0 ? 'not-allowed' : 'pointer'
                                     }}
                                     onClick={() => { setPostMode('garden'); setSelectedBotanicalCardId(null); setTitle(''); }}>
                                     <Fence size={16} style={{ marginBottom: '-3px', marginRight: '4px' }} /> Dal Giardino
@@ -239,7 +222,12 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                                     <div className="input-with-icon">
                                         <input
                                             type="text" value={title}
-                                            onChange={(e) => { setTitle(e.target.value); setShowSuggestions(true); }}
+                                            // FIX: Se l'utente riprende a scrivere, cancelliamo la selezione e riapriamo la ricerca
+                                            onChange={(e) => {
+                                                setTitle(e.target.value);
+                                                setSelectedBotanicalCardId(null);
+                                                setShowSuggestions(true);
+                                            }}
                                             required placeholder="Es. Monstera" className="search-input" autoComplete="off"
                                         />
                                         {isSearching && <Loader size={16} className="spin search-spinner" />}
@@ -269,27 +257,19 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                                 )}
                             </div>
 
-                            {/* NUOVO BOTTONE: Visibile solo se ha selezionato una pianta dal catalogo */}
+                            {/* NUOVO BOTTONE ANIMATO (Visibile solo se pianta nuova selezionata) */}
                             {postMode === 'new' && selectedBotanicalCardId && (
                                 <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <button
                                         type="button"
+                                        className={`animated-toggle-btn ${addToGarden ? 'active' : 'inactive'}`}
                                         onClick={() => setAddToGarden(!addToGarden)}
-                                        style={{
-                                            display: 'flex', alignItems: 'center', gap: '6px',
-                                            padding: '6px 14px', borderRadius: '20px',
-                                            background: addToGarden ? 'var(--color-primary)' : 'transparent',
-                                            color: addToGarden ? 'white' : 'var(--color-text-muted)',
-                                            border: `1px solid ${addToGarden ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                                            cursor: 'pointer', transition: 'all 0.2s', fontSize: '0.85rem', fontWeight: 500
-                                        }}
                                     >
-                                        {addToGarden ? <Check size={16} /> : <Plus size={16} />}
-                                        {addToGarden ? 'Nel tuo Giardino' : 'Aggiungi al Giardino'}
+                                        <span className="toggle-icon-wrapper">
+                                            {addToGarden ? <Check size={16} /> : <Plus size={16} />}
+                                        </span>
+                                        <span>{addToGarden ? 'Aggiunta al Giardino' : 'Aggiungi al Giardino'}</span>
                                     </button>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: 1.2 }}>
-                                        {addToGarden ? 'Verrà creata la scheda di cura' : 'Solo post (non verrà salvata)'}
-                                    </span>
                                 </div>
                             )}
 

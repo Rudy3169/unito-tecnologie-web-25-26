@@ -1,3 +1,29 @@
+-- -----------------------------------------------------------------------------
+-- Utenti
+-- -----------------------------------------------------------------------------
+INSERT INTO users (name, surname, email, password, role) VALUES
+('Super', 'Admin', 'admin@phytosend.com', '$2a$12$8MbNZoW/GoSvYtBRGcVp5eGVxIm/KPzHqKBMr3wSeLvq5zqpc55oO', 0),
+('Esperto', 'Pro', 'pro@phytosend.com', '$2a$12$8MbNZoW/GoSvYtBRGcVp5eGVxIm/KPzHqKBMr3wSeLvq5zqpc55oO', 1),
+('Utente', 'Base', 'user@phytosend.com', '$2a$12$8MbNZoW/GoSvYtBRGcVp5eGVxIm/KPzHqKBMr3wSeLvq5zqpc55oO', 2);
+
+-- -----------------------------------------------------------------------------
+-- Post
+-- -----------------------------------------------------------------------------
+INSERT INTO posts (title, description, urlphoto, creation_date, author_id) VALUES
+('La mia nuova Monstera! 🌿', 'Oggi ho finalmente comprato una Monstera Deliciosa...', 'https://plantersplace.com/wp-content/uploads/2022/08/20200309_110255-scaled.jpg', CURRENT_TIMESTAMP, 3),
+('Fioritura Phalaenopsis', 'Dopo mesi di attesa, la mia orchidea è sbocciata.', 'https://fasolipiante.com/wp-content/uploads/2020/08/3-rami.jpeg', CURRENT_TIMESTAMP, 2),
+('Pothos infinito', 'Il mio Epipremnum aureum sta conquistando tutto il salotto.', 'https://www.pianteincasa.com/wp-content/uploads/2021/06/Pothos-Altezza-scaled.jpg', CURRENT_TIMESTAMP, 3),
+('Problemi con il Ficus', 'Aiuto! Il mio Ficus Elastica sta perdendo le foglie basse.', 'https://unquadratodigiardino.it/media/kunena/attachments/10321/20220522_082907.jpg', CURRENT_TIMESTAMP, 3),
+('Angolo delle succulente 🌵', 'Ho riorganizzato il mio davanzale.', 'https://i.redd.it/e9ibns9lssw91.jpg', CURRENT_TIMESTAMP, 2),
+('Calathea: amore e odio', 'È bellissima, ma quanto è capricciosa!', 'https://thursd.com/storage/media/101706/Man-with-a-huge-leafed-Calathea-plant.jpg', CURRENT_TIMESTAMP, 1),
+('Raccolta Aloe Vera', 'Oggi ho tagliato una foglia dalla mia Aloe.', 'https://aloevonderweid.com/wp-content/uploads/2016/06/SEZIONE-CARATTERISTICHE-EXTRA-PRODOTTO-WOOCOMMERCE-1-1280x853.jpg', CURRENT_TIMESTAMP, 3),
+('Il mio primo Cactus', 'Piccolo, spinoso e adorabile.', 'https://i.etsystatic.com/23308416/r/il/54c0da/4595512158/il_fullxfull.4595512158_jbf2.jpg', CURRENT_TIMESTAMP, 3),
+('Sansevieria indistruttibile', 'La lingua di suocera perdona tutto.', 'https://www.simegarden.com/cdn/shop/files/simegarden-sansevieria-trifasciata-30-cm-61584599089485.jpg?v=1735027351&width=480', CURRENT_TIMESTAMP, 2),
+('Felce in bagno 🚿', 'L''umidità della doccia la sta facendo esplodere di verde!', 'https://www.giunglaurbana.com/wp-content/uploads/2026/01/arredare-bagno-con-le-piante.jpg', CURRENT_TIMESTAMP, 1);
+
+-- -----------------------------------------------------------------------------
+-- Catalogo Botanico
+-- -----------------------------------------------------------------------------
 INSERT INTO botanical_cards (common_name, scientific_name, family, exposure, irrigation, water_frequency_days, fertilization, soil, url_default_photo) VALUES 
 
 ('Abete di Engelmann', 'Picea engelmannii', 'Pinaceae', 'Pieno sole', 'Scarsa', 10, 'Bilanciato', 'Ben drenato', 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Engelmann_spruce_on_the_PCT%2C_Washington.JPG'),

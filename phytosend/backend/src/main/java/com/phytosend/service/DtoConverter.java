@@ -83,7 +83,7 @@ public class DtoConverter {
         dto.setId(plant.getId());
         dto.setUrlPhoto(plant.getUrlPhoto());
         dto.setPurchaseDate(plant.getPurchaseDate());
-        dto.setBotanicalCard(toBotanicalCardDto(plant.getCard()));
+        dto.setCard(toBotanicalCardDto(plant.getCard()));
         return dto;
     }
 

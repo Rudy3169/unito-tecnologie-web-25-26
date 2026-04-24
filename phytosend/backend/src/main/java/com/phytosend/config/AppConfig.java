@@ -4,11 +4,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Configurazione generale dell'applicazione.
+ * In questa classe viene configurato il RestTemplate da iniettare nei servizi
+ * per effettuare chiamate HTTP esterne.
+ */
 @Configuration
 public class AppConfig {
 
     /**
-     * Fornisce un'istanza di RestTemplate da iniettare nei servizi per effettuare chiamate HTTP esterne.
+     * Fornisce un'istanza di RestTemplate da iniettare nei servizi per effettuare
+     * chiamate HTTP esterne.
      *
      * @return una nuova istanza configurata di RestTemplate
      */

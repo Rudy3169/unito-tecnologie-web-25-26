@@ -12,10 +12,5 @@ public class PlantDto {
     private String plantName; // Nome della pianta
     private String urlPhoto; // URL della foto della pianta
     private LocalDate purchaseDate; // Data di acquisto della pianta
-    private BotanicalCardDto botanicalCard; // Scheda botanica della pianta
-
-    // Getter per botanicalCard
-    public BotanicalCardDto getBotanicalCard() {
-        return botanicalCard;
-    }
+    private BotanicalCardDto card; // Scheda botanica della pianta
 }

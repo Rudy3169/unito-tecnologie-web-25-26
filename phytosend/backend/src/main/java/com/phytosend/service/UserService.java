@@ -72,7 +72,7 @@ public class UserService implements UserDetailsService {
      * @return profilo generato in output
      */
     @Transactional
-    public User registerUser(User newUser) {
+    public @NonNull User registerUser(User newUser) {
         // Verifica se l'email esiste già
         if (userRepository.existsByEmail(newUser.getEmail())) {
             throw new RuntimeException("Un altro utente con questa email è già registrato!");
@@ -127,7 +127,7 @@ public class UserService implements UserDetailsService {
     /**
      * Semplice lookup ad utente per ID.
      */
-    public User findById(@NonNull Long id) {
+    public @NonNull User findById(@NonNull Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utente con ID " + id + " non trovato"));
     }
@@ -155,26 +155,26 @@ public class UserService implements UserDetailsService {
      * @return status nuovo
      */
     @Transactional
-    public User aggiornaProfilo(@NonNull Long id, User updatedData) {
+    public @NonNull User aggiornaProfilo(@NonNull Long id, User updatedData) {
         // Trova l'utente nel database
-        User exsisting = findById(id);
+        User existing = findById(id);
 
         // Aggiorna solo i campi modificabili dall'utente
         if (updatedData.getName() != null)
-            exsisting.setName(updatedData.getName());
+            existing.setName(updatedData.getName());
         if (updatedData.getSurname() != null)
-            exsisting.setSurname(updatedData.getSurname());
+            existing.setSurname(updatedData.getSurname());
         if (updatedData.getCity() != null)
-            exsisting.setCity(updatedData.getCity());
+            existing.setCity(updatedData.getCity());
         if (updatedData.getPhoneNumber() != null)
-            exsisting.setPhoneNumber(updatedData.getPhoneNumber());
+            existing.setPhoneNumber(updatedData.getPhoneNumber());
         if (updatedData.getBio() != null)
-            exsisting.setBio(updatedData.getBio());
+            existing.setBio(updatedData.getBio());
         if (updatedData.getBirthDate() != null)
-            exsisting.setBirthDate(updatedData.getBirthDate());
+            existing.setBirthDate(updatedData.getBirthDate());
 
         // Salva l'utente aggiornato
-        return userRepository.save(exsisting);
+        return userRepository.save(existing);
     }
 
     /**
@@ -186,7 +186,7 @@ public class UserService implements UserDetailsService {
      * @return utente in upgrade state
      */
     @Transactional
-    public User changeRole(@NonNull Long id, UserRole newRole) {
+    public @NonNull User changeRole(@NonNull Long id, UserRole newRole) {
         // Trova l'utente nel database
         User user = findById(id);
         // Imposta il nuovo ruolo
@@ -199,7 +199,7 @@ public class UserService implements UserDetailsService {
      * Wrapper per l'upgrade veloce d'utente al tier PRO.
      */
     @Transactional
-    public User Upgrade(@NonNull Long id) {
+    public @NonNull User Upgrade(@NonNull Long id) {
         // Cambia il ruolo dell'utente in PRO
         return changeRole(id, UserRole.PRO);
     }

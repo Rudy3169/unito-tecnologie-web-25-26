@@ -24,16 +24,31 @@ import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 
+/**
+ * Configurazione della sicurezza del sistema.
+ * In questa classe vengono definiti i filtri di sicurezza, l'autenticazione e
+ * le autorizzazioni.
+ * Viene inoltre configurata la gestione delle sessioni e le regole CORS.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // Indirizzo del frontend
     @Value("${app.frontend.url}")
     private String frontendUrl;
 
+    // Inizializzazione dei filtri di sicurezza e del user details service
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Costruttore del SecurityConfig.
+     *
+     * @param jwtAuthFilter      il filtro di autenticazione JWT
+     * @param userDetailsService il service per il caricamento dei dettagli
+     *                           dell'utente
+     */
     public SecurityConfig(@Lazy JwtAuthenticationFilter jwtAuthFilter, @Lazy UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
@@ -61,7 +76,8 @@ public class SecurityConfig {
     }
 
     /**
-     * Gestisce l'autenticazione tramite l'AuthenticationManager esposto dalla configurazione globale.
+     * Gestisce l'autenticazione tramite l'AuthenticationManager esposto dalla
+     * configurazione globale.
      *
      * @param config la configurazione di autenticazione Spring
      * @return il manager di autenticazione configurato
@@ -73,7 +89,8 @@ public class SecurityConfig {
     }
 
     /**
-     * Fornisce il provider di autenticazione basato su DAO che incapsula la gestione del UserDetailsService e della crittografia password.
+     * Fornisce il provider di autenticazione basato su DAO che incapsula la
+     * gestione del UserDetailsService e della crittografia password.
      *
      * @return un'istanza di AuthenticationProvider
      */
@@ -85,7 +102,8 @@ public class SecurityConfig {
     }
 
     /**
-     * Fornisce l'algoritmo di hash (BCrypt) utilizzato per codificare e verificare le password degli utenti in modo sicuro.
+     * Fornisce l'algoritmo di hash (BCrypt) utilizzato per codificare e verificare
+     * le password degli utenti in modo sicuro.
      *
      * @return un'istanza di BCryptPasswordEncoder
      */
@@ -95,9 +113,11 @@ public class SecurityConfig {
     }
 
     /**
-     * Configura le regole CORS (Cross-Origin Resource Sharing) per permettere al frontend di interagire col backend in sicurezza.
+     * Configura le regole CORS (Cross-Origin Resource Sharing) per permettere al
+     * frontend di interagire col backend in sicurezza.
      *
-     * @return la sorgente di configurazione CORS che accetta specifici origini, metodi HTTP e header
+     * @return la sorgente di configurazione CORS che accetta specifici origini,
+     *         metodi HTTP e header
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

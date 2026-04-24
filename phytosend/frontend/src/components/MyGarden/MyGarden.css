@@ -75,3 +75,57 @@
 .care-btn:hover {
     background: rgba(var(--color-primary-rgb), 0.2);
 }
+
+/* Bottone per eliminare la pianta */
+.delete-plant-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(239, 68, 68, 0.85);
+    /* Rosso semi trasparente */
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s;
+    opacity: 0;
+    /* Nascosto di default */
+}
+
+/* Mostriamo il bottone delete solo quando passiamo col mouse sulla card */
+.garden-plant-card:hover .delete-plant-btn {
+    opacity: 1;
+}
+
+.delete-plant-btn:hover {
+    background: rgb(220, 38, 38);
+    transform: scale(1.1);
+}
+
+/* Nuove info (Stats rapide) */
+.plant-quick-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+    background: var(--color-bg-body);
+    padding: 10px;
+    border-radius: var(--border-radius-soft);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--color-text-main);
+}
+
+.stat-item svg {
+    color: var(--color-primary);
+}

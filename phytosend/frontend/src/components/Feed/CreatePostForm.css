@@ -69,7 +69,8 @@
 
 .create-post-modal.has-photo {
     width: 95%;
-    max-width: 850px; /* Più largo per accogliere due colonne */
+    max-width: 850px;
+    /* Più largo per accogliere due colonne */
 }
 
 .create-post-header {
@@ -158,13 +159,15 @@
 /* --- STATO 2: SPLIT LAYOUT (Foto + Form) --- */
 .create-post-split {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Due metà uguali */
+    grid-template-columns: 1fr 1fr;
+    /* Due metà uguali */
     min-height: 450px;
 }
 
 @media (max-width: 768px) {
     .create-post-split {
-        grid-template-columns: 1fr; /* Torna a colonna su cellulare */
+        grid-template-columns: 1fr;
+        /* Torna a colonna su cellulare */
     }
 }
 
@@ -181,7 +184,8 @@
 .post-preview-img-large {
     width: 100%;
     max-width: 350px;
-    aspect-ratio: 1 / 1; /* Quadrato perfetto */
+    aspect-ratio: 1 / 1;
+    /* Quadrato perfetto */
     object-fit: cover;
     border-radius: var(--border-radius-hard);
     box-shadow: var(--shadow-sm);
@@ -214,7 +218,8 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    position: relative; /* Importante per la tendina assoluta */
+    position: relative;
+    /* Importante per la tendina assoluta */
 }
 
 .form-group label {
@@ -284,7 +289,7 @@
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-soft);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     max-height: 250px;
     overflow-y: auto;
     z-index: 100;
@@ -380,13 +385,25 @@
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .spin {
@@ -394,5 +411,46 @@
 }
 
 @keyframes spin {
-    100% { transform: rotate(360deg); }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Animazione interruttore aggiungi al giardino */
+.animated-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+.animated-toggle-btn.active {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.animated-toggle-btn.inactive {
+    background: var(--color-bg-body);
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+}
+
+.animated-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.toggle-icon-wrapper {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animated-toggle-btn.active .toggle-icon-wrapper {
+    transform: rotate(360deg) scale(1.1);
 }
