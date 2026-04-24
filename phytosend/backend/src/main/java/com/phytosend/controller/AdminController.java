@@ -12,16 +12,26 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Controller per gestire le operazioni di amministrazione
+ */
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
 
+    // Repository per accedere alle schede botaniche
     @Autowired
     private BotanicalCardRepository botanicalCardRepository;
 
+    // Risorsa che punta al file data.sql
     @Value("classpath:data.sql")
     private Resource dataSqlScript;
 
+    /**
+     * Endpoint per ricaricare il catalogo delle piante
+     * 
+     * @return Messaggio di successo o errore
+     */
     @PostMapping("/reload-catalog")
     public ResponseEntity<String> reloadCatalog() {
         try {
@@ -76,6 +86,11 @@ public class AdminController {
         }
     }
 
+    /**
+     * Endpoint per ottenere le statistiche del database
+     * 
+     * @return Statistiche del database
+     */
     @GetMapping("/stats")
     public ResponseEntity<?> getDatabaseStats() {
         long count = botanicalCardRepository.count();

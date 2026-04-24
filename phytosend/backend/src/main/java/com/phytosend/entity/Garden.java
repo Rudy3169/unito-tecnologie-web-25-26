@@ -6,6 +6,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.util.List;
 
+/**
+ * Classe che rappresenta il giardino di un utente
+ */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
@@ -14,12 +17,11 @@ public class Garden {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Long id;
+    private Long id; // ID giardino
 
-    private String name; // opzionale
+    private String name; // Nome del giardino (opzionale)
 
     // RELAZIONI
-
     // Ogni giardino ha un solo proprietario (utente)
     @OneToOne
     @JoinColumn(name = "user_id")

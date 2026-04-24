@@ -3,11 +3,19 @@ package com.phytosend.dto;
 import lombok.Data;
 import java.time.LocalDate;
 
+/**
+ * DTO per la risposta della pianta
+ */
 @Data
 public class PlantDto {
-    private Long id;
-    private String urlPhoto;
-    private LocalDate purchaseDate;
-    private Long botanicalCardId;
-    private String botanicalCardName;
+    private Long id; // ID della pianta
+    private String plantName; // Nome della pianta
+    private String urlPhoto; // URL della foto della pianta
+    private LocalDate purchaseDate; // Data di acquisto della pianta
+    private BotanicalCardDto botanicalCard; // Scheda botanica della pianta
+
+    // Getter per botanicalCard
+    public BotanicalCardDto getBotanicalCard() {
+        return botanicalCard;
+    }
 }

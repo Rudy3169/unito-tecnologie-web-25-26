@@ -5,10 +5,40 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
+/**
+ * Interfaccia repository per User
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email);     // Per il login
-    boolean existsByEmail(String email);            // Per evitare doppioni in registrazione
-    Optional<User> findByName(String name);       // Per trovare utente per nome
-    Optional<User> findBySurname(String surname); // Per trovare utente per cognome
+    /**
+     * Trova un utente tramite email
+     * 
+     * @param email Email da cercare
+     * @return Optional contenente l'utente se trovato, altrimenti Optional vuoto
+     */
+    Optional<User> findByEmail(String email);
+
+    /**
+     * Verifica se un utente esiste tramite email
+     * 
+     * @param email Email da verificare
+     * @return true se l'utente esiste, false altrimenti
+     */
+    boolean existsByEmail(String email);
+
+    /**
+     * Trova un utente tramite nome
+     * 
+     * @param name Nome da cercare
+     * @return Optional contenente l'utente se trovato, altrimenti Optional vuoto
+     */
+    Optional<User> findByName(String name);
+
+    /**
+     * Trova un utente tramite cognome
+     * 
+     * @param surname Cognome da cercare
+     * @return Optional contenente l'utente se trovato, altrimenti Optional vuoto
+     */
+    Optional<User> findBySurname(String surname);
 }

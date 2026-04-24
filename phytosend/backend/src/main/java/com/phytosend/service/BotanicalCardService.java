@@ -9,10 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Gestore per le schede botaniche
+ */
 @Service
 @Transactional(readOnly = true)
 public class BotanicalCardService {
 
+    /**
+     * Repository per le schede botaniche
+     */
     @Autowired
     private BotanicalCardRepository cardRepository;
 

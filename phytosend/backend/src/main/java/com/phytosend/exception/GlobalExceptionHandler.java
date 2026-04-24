@@ -14,34 +14,67 @@ import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDateTime;
 
+/**
+ * Gestore globale delle eccezioni per l'applicazione
+ */
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
+    /**
+     * Gestisce le eccezioni di tipo ResourceNotFoundException
+     * 
+     * @param ex Eccezione da gestire
+     * @return Response entity con corpo JSON
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
         log.warn("Risorsa non trovata: {}", ex.getMessage());
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
     }
 
+    /**
+     * Gestisce le eccezioni di tipo IllegalArgumentException
+     * 
+     * @param ex Eccezione da gestire
+     * @return Response entity con corpo JSON
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Argomento non valido: {}", ex.getMessage());
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
 
+    /**
+     * Gestisce le eccezioni di tipo AccessDeniedException
+     * 
+     * @param ex Eccezione da gestire
+     * @return Response entity con corpo JSON
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
         log.warn("Accesso negato: {}", ex.getMessage());
         return buildResponse(HttpStatus.FORBIDDEN, "Accesso negato/non autorizzato", null);
     }
 
+    /**
+     * Gestisce le eccezioni di tipo BadCredentialsException
+     * 
+     * @param ex Eccezione da gestire
+     * @return Response entity con corpo JSON
+     */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
         log.warn("Tentativo di login fallito: {}", ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Email o password errati", null);
     }
 
+    /**
+     * Gestisce le eccezioni di tipo MethodArgumentNotValidException
+     * 
+     * @param ex Eccezione da gestire
+     * @return Response entity con corpo JSON
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         log.warn("Validazione fallita: {}", ex.getMessage());
@@ -54,13 +87,28 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Errore di validazione", errors);
     }
 
+    /**
+     * Gestisce le eccezioni generiche
+     * 
+     * @param ex Eccezione da gestire
+     * @return Response entity con corpo JSON
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleException(Exception ex) {
         log.error("Errore imprevisto", ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Errore interno del server: " + ex.getMessage(), null);
     }
 
-    private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message, Map<String, String> errors) {
+    /**
+     * Metodo di supporto per la creazione di una response entity con corpo JSON
+     * 
+     * @param status  Status HTTP da ritornare
+     * @param message Messaggio di errore da ritornare
+     * @param errors  Oggetto contenente eventuali errori di validazione
+     * @return Response entity con corpo JSON
+     */
+    private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message,
+            Map<String, String> errors) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", status.value());

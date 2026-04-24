@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
 
+/**
+ * Classe che rappresenta un evento di cura per una pianta
+ */
 @Data
 @Entity
 @Table(name = "care_events")
@@ -11,14 +14,14 @@ public class CareEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // ID evento di cura
 
-    private LocalDate programmedDate;
-    private String type; // "ACQUA", "CONCIME", "TRAVASO"
+    private LocalDate programmedDate; // Data programmata per l'evento
+    private String type; // Tipo evento: "ACQUA", "CONCIME", "TRAVASO"
 
-    private boolean completed;
+    private boolean completed; // Indica se l'evento è stato completato
 
-    private String notes;
+    private String notes; // Note aggiuntive
 
     // RELAZIONE: Ogni evento di cura è associato a una pianta
     @ManyToOne

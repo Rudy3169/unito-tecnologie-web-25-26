@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * Classe che rappresenta un utente
+ */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
@@ -16,34 +19,34 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Long id;
+    private Long id; // ID utente
 
     @NotBlank(message = "Il nome è obbligatorio")
-    private String name;
+    private String name; // Nome
 
     @NotBlank(message = "Il cognome è obbligatorio")
-    private String surname;
+    private String surname; // Cognome
 
-    private String birthDate;
-    private String city;
+    private String birthDate; // Data di nascita
+    private String city; // Città
 
     @Column(unique = true)
-    private String phoneNumber;
+    private String phoneNumber; // Numero di telefono
 
     @Column(unique = true)
     @Email(message = "Email non valida")
     @NotBlank(message = "L'email è obbligatoria")
-    private String email;
+    private String email; // Email
 
     @NotBlank(message = "La password è obbligatoria")
     @Size(min = 6, message = "La password deve avere almeno 6 caratteri")
-    private String password;
+    private String password; // Password
 
     @Column(length = 300)
-    private String bio;
+    private String bio; // Biografia
 
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private UserRole role; // Ruolo
 
     // RELAZIONE: ogni utente ha un solo giardino
     @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)

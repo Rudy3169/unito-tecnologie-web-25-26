@@ -5,6 +5,9 @@ import lombok.Data;
 import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * Classe che rappresenta una pianta
+ */
 @Data
 @Entity
 @Table(name = "plants")
@@ -12,11 +15,11 @@ public class Plant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // ID della pianta
 
-    private String urlPhoto;
+    private String urlPhoto; // URL della foto
 
-    private LocalDate purchaseDate;
+    private LocalDate purchaseDate; // Data di acquisto
 
     // RELAZIONI
     // Ogni pianta appartiene a un giardino

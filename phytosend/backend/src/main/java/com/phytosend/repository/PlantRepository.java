@@ -5,8 +5,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
+/**
+ * Interfaccia repository per Plant
+ */
 @Repository
 public interface PlantRepository extends JpaRepository<Plant, Long> {
-    // Metodo personalizzato per trovare le piante di un certo proprietario (attraverso il giardino)
+    /**
+     * Trova tutte le piante appartenenti a un proprietario tramite il suo giardino
+     * 
+     * @param ownerId ID del proprietario
+     * @return Lista di piante del proprietario
+     */
     List<Plant> findByGardenOwnerId(Long ownerId);
 }

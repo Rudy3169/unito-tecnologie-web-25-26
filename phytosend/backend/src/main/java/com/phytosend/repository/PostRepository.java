@@ -6,12 +6,26 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Interfaccia repository per Post
+ */
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    ;
-    // Trova i post più recenti ordinati per data con paginazione
-    org.springframework.data.domain.Page<Post> findAllByOrderByCreationDateDesc(org.springframework.data.domain.Pageable pageable);
 
-    // Trova tutti i post di un utente specifico
+    /**
+     * Trova i post più recenti ordinati per data con paginazione
+     * 
+     * @param pageable Oggetto di paginazione
+     * @return Pagina di post ordinati per data decrescente
+     */
+    org.springframework.data.domain.Page<Post> findAllByOrderByCreationDateDesc(
+            org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * Trova tutti i post di un utente specifico
+     * 
+     * @param authorId ID dell'autore
+     * @return Lista di post dell'autore
+     */
     List<Post> findByAuthorIdOrderByCreationDateDesc(Long authorId);
 }

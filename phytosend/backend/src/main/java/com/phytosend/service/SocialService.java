@@ -8,7 +8,12 @@ import com.phytosend.entity.User;
 import com.phytosend.repository.CommentRepository;
 import com.phytosend.repository.PostRepository;
 import com.phytosend.repository.UserRepository;
-import com.phytosend.service.DtoConverter;
+import com.phytosend.repository.PlantRepository;
+import com.phytosend.repository.BotanicalCardRepository;
+
+import com.phytosend.service.PlantService;
+import com.phytosend.entity.Plant;
+import com.phytosend.entity.BotanicalCard;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -19,35 +24,85 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Gestore del social layer del sistema.
+ * Include metodi per la gestione di post, commenti e interazioni.
+ */
 @Service
 public class SocialService {
 
+    // Repository per i post
     @Autowired
     private PostRepository postRepository;
 
+    // Repository per i commenti
     @Autowired
     private CommentRepository commentRepository;
 
+    // Repository per gli utenti
     @Autowired
     private UserRepository userRepository;
 
+    // Repository per le piante
+    @Autowired
+    private PlantRepository plantRepository;
+
+    // Repository per le schede botaniche
+    @Autowired
+    private BotanicalCardRepository botanicalCardRepository;
+
+    // Servizio per le piante
+    @Autowired
+    private PlantService plantService;
+
+    // Convertitore di DTO
     @Autowired
     private DtoConverter dtoConverter;
 
     /**
-     * Raccoglie i metadati per creare e salvare un nuovo Post di un Utente sulla
-     * piattaforma.
+     * Crea e salva un nuovo post di un utente sulla piattaforma.
      *
      * @param userId l'ID utente
      * @param post   l'istanza del nuovo post da salvare in bacheca
      * @return entità Post finale salvata
      */
-    public Post createPost(@NonNull Long userId, Post post) {
+    public Post createPost(@NonNull Long userId, com.phytosend.dto.PostCreateDto postDto) {
+        // Trova l'autore del post
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
-        post.setAuthor(author);
-        post.setCreationDate(LocalDateTime.now());
+        // Crea il post
+        Post post = new Post();
+        post.setTitle(postDto.getTitle()); // Imposta il titolo
+        post.setDescription(postDto.getDescription()); // Imposta la descrizione
+        post.setURLPhoto(postDto.getUrlPhoto()); // Imposta l'URL della foto
+        post.setAuthor(author); // Imposta l'autore
+        post.setCreationDate(LocalDateTime.now()); // Imposta la data di creazione
+
+        // Gestione della pianta associata
+        if (postDto.getBotanicalCardId() != null) {
+            // Se si vuole aggiungere una pianta al giardino
+            if (postDto.isAddToGarden()) {
+                // Trova la scheda botanica
+                BotanicalCard card = botanicalCardRepository.findById(postDto.getBotanicalCardId())
+                        .orElseThrow(() -> new RuntimeException("Scheda botanica non trovata"));
+                // Crea una nuova pianta associata al giardino e all'utente
+                Plant newPlant = plantService.addPlantToGarden(author, card);
+                post.setPlant(newPlant); // Associa la nuova pianta al post
+            }
+        } else {
+            // Se si vuole associare una pianta esistente al post
+            Plant existingPlant = plantRepository.findById(postDto.getPlantId())
+                    .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
+
+            // Verifica che l'utente sia il proprietario della pianta
+            if (existingPlant.getGarden() == null || !existingPlant.getGarden().getOwner().getId().equals(userId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Questa pianta non ti appartiene");
+            }
+            // Associa la pianta esistente al post
+            post.setPlant(existingPlant);
+        }
+
         return postRepository.save(post);
     }
 
@@ -68,13 +123,15 @@ public class SocialService {
      * Recupera tutti i post pubblicati da un utente specifico.
      *
      * @param userId        ID dell'utente di cui si vogliono i post
-     * @param currentUserId ID dell'utente che sta facendo la richiesta (per calcolare likedByMe)
+     * @param currentUserId ID dell'utente che sta facendo la richiesta (per
+     *                      calcolare likedByMe)
      * @return lista di PostDto ordinati per data discendente
      */
     public List<PostDto> getPostsByUser(Long userId, Long currentUserId) {
         List<Post> posts = postRepository.findByAuthorIdOrderByCreationDateDesc(userId);
         return posts.stream().map(post -> {
             PostDto dto = dtoConverter.toPostDto(post);
+            // Calcola likedByMe in base ai like del post
             if (currentUserId != null && post.getLikedBy() != null) {
                 boolean liked = post.getLikedBy().stream()
                         .anyMatch(u -> u.getId().equals(currentUserId));
@@ -94,23 +151,28 @@ public class SocialService {
      * @return il Comment serializzabile salvato su db
      */
     public Comment addComment(@NonNull Long postId, @NonNull Long userId, String textComment, Long parentId) {
+        // Trova il post
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post non trovato"));
 
+        // Trova l'autore del commento
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
+        // Crea il commento
         Comment newComment = new Comment();
         newComment.setPost(post);
         newComment.setAuthor(author);
         newComment.setText(textComment);
         newComment.setCreationDate(LocalDateTime.now());
 
+        // Gestione commento padre (per risposte)
         if (parentId != null) {
             Comment parentComment = commentRepository.findById(parentId).orElse(null);
             newComment.setParent(parentComment);
         }
 
+        // Salva il commento
         return commentRepository.save(newComment);
     }
 
@@ -121,8 +183,11 @@ public class SocialService {
      * @return Lista di CommentDto
      */
     public List<CommentDto> getCommentiDelPost(Long postId, Long currentUserId) {
+        // Trova il post
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("Post non trovato: " + postId));
+
+        // Restituisce i commenti del post convertiti in DTO
         return post.getComments().stream()
                 .map(c -> dtoConverter.toCommentDto(c, currentUserId))
                 .collect(java.util.stream.Collectors.toList());
@@ -138,6 +203,7 @@ public class SocialService {
      * @param userId user session che fa la call all'API
      */
     public void deletePost(@NonNull Long postId, @NonNull Long userId) {
+        // Trova il post
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post non trovato"));
 
@@ -158,11 +224,14 @@ public class SocialService {
      * @return true se il like è stato aggiunto, false se è stato rimosso
      */
     public boolean toggleLike(Long postId, Long utenteId) {
+        // Trova il post
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post non trovato"));
+        // Trova l'utente
         User user = userRepository.findById(utenteId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
+        // Gestione like
         if (post.getLikedBy().contains(user)) {
             post.getLikedBy().remove(user);
             postRepository.save(post);
@@ -182,11 +251,14 @@ public class SocialService {
      * @return true se il like è stato aggiunto, false se è stato rimosso
      */
     public boolean toggleCommentLike(Long commentId, Long utenteId) {
+        // Trova il commento
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Commento non trovato"));
+        // Trova l'utente
         User user = userRepository.findById(utenteId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
+        // Gestione like
         if (comment.getLikedBy().contains(user)) {
             comment.getLikedBy().remove(user);
             commentRepository.save(comment);
@@ -207,56 +279,59 @@ public class SocialService {
      */
     @org.springframework.transaction.annotation.Transactional
     public void deleteComment(Long postId, Long commentId, Long userId) {
+        // Trova il commento
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
                         org.springframework.http.HttpStatus.NOT_FOUND, "Commento non trovato"));
 
-        // 1. Prevenzione NullPointer per le risposte
+        // Prevenzione NullPointer per le risposte
         Post post = comment.getPost();
         if (post == null && comment.getParent() != null) {
             post = comment.getParent().getPost();
         }
 
+        // Prevenzione NullPointer per il post
         if (post == null) {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
                     "Errore: Post non trovato per questo commento");
         }
 
+        // Ottiene l'ID dell'autore del post e del commento
         Long postAuthorId = post.getAuthor().getId();
         Long commentAuthorId = comment.getAuthor().getId();
 
+        // Verifica se l'utente è l'autore del post o del commento
         boolean isPostAuthor = userId.equals(postAuthorId);
         boolean isCommentAuthor = userId.equals(commentAuthorId);
 
-        // 2. Controllo permessi base (chi non c'entra niente viene bloccato subito)
+        // Controllo permessi base (chi non c'entra niente viene bloccato subito)
         if (!isPostAuthor && !isCommentAuthor) {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.FORBIDDEN, "Non sei autorizzato a eliminare questo commento");
         }
 
-        // 3. RECUPERIAMO LE RISPOSTE
-        // Usiamo il repository per trovare tutte le risposte che hanno questo commento
-        // come parent
+        // Recupera le risposte
         List<Comment> risposte = commentRepository.findByParentId(commentId);
 
-        // 4. Regola d'oro permessi (Autore commento bloccato se ci sono risposte)
+        // Controllo permessi (L'autore di un commento è bloccato se ci sono risposte)
         if (isCommentAuthor && !isPostAuthor && !risposte.isEmpty()) {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.FORBIDDEN, "Non puoi eliminare un commento con risposte.");
         }
 
-        // 5. ELIMINAZIONE FISICA
+        // Eliminazione fisica del commento
         try {
+            // Elimina tutte le risposte del commento principale
             if (!risposte.isEmpty()) {
-                // Eliminiamo prima tutte le risposte
                 commentRepository.deleteAll(risposte);
-                // Forziamo il database a eseguire l'eliminazione SUBITO
+                // Elimina le risposte dal database
                 commentRepository.flush();
             }
 
-            // Ora che il padre è "orfano", possiamo eliminarlo senza errori di vincolo
+            // Elimina il commento principale
             commentRepository.delete(comment);
+            // Elimina il commento principale dal database
             commentRepository.flush();
 
         } catch (Exception e) {

@@ -18,18 +18,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/*
+ * Gestore principale dell'utente e dell'autenticazione
+ */
 @Service
 @Transactional(readOnly = true)
 public class UserService implements UserDetailsService {
 
+    // Repository per l'accesso ai dati dell'utente
     @Autowired
     private UserRepository userRepository;
 
+    // Encoder per la gestione delle password
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     /**
-     * Mappatura standard Spring Security per caricare il contenitore di permessi partendo dall'email.
+     * Mappatura standard Spring Security per caricare il contenitore di permessi
+     * partendo dall'email.
      *
      * @param email identificativo stringa primario
      * @return UserDetails interfacciato da convertire in Token
@@ -37,16 +43,17 @@ public class UserService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // Trova l'utente nel database
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato con email: " + email));
-        
+
+        // Crea un oggetto UserDetails con i dati dell'utente
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                new ArrayList<>() // Authorities (da implementare se necessario)
-        );
+                new ArrayList<>());
     }
-    
+
     /**
      * Ritorna l'entità proprietaria associata alla mail.
      */
@@ -54,12 +61,12 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email).orElse(null);
     }
 
-
-
     /**
      * Processo core della registrazione utente.
-     * Controlla duplicati per chiave email, fa il setup della cartografia e assegna un giardino vuoto iniziale.
-     * Si occupa anche di triggerare la procedura di Hashing sulla password inserita in plain text.
+     * Controlla duplicati per chiave email, fa il setup della cartografia e assegna
+     * un giardino vuoto iniziale.
+     * Si occupa anche di triggerare la procedura di Hashing sulla password inserita
+     * in plain text.
      *
      * @param newUser scheletro dell'utente dalla form UI
      * @return profilo generato in output
@@ -71,6 +78,7 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Un altro utente con questa email è già registrato!");
         }
 
+        // Imposta la città e il numero di telefono
         newUser.setCity(newUser.getCity());
         newUser.setPhoneNumber(newUser.getPhoneNumber());
 
@@ -83,23 +91,27 @@ public class UserService implements UserDetailsService {
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
         // Inizializza il giardino associato all'utente
-         Garden garden = new Garden();
-         garden.setOwner(newUser);
-         newUser.setGarden(garden);
+        Garden garden = new Garden();
+        garden.setOwner(newUser);
+        newUser.setGarden(garden);
 
+        // Salva l'utente
         return userRepository.save(newUser);
     }
 
     /**
-     * Flusso di confronto tra le password criptate usato nell'accesso semplificato per generare responsi JWT positivi.
+     * Flusso di confronto tra le password criptate usato nell'accesso semplificato
+     * per generare responsi JWT positivi.
      *
-     * @param email login email
+     * @param email    login email
      * @param password secret plain per confronto col digest hashato nel db
      * @return utente loggato con i permessi aggiornati
      */
     public User login(String email, String password) {
+        // Trova l'utente nel database
         Optional<User> userOpt = userRepository.findByEmail(email);
 
+        // Verifica se l'utente esiste
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             // Verifica password con l'hash
@@ -107,6 +119,8 @@ public class UserService implements UserDetailsService {
                 return user;
             }
         }
+
+        // Se l'utente non esiste o la password non è valida
         throw new RuntimeException("Email o Password non valide!");
     }
 
@@ -133,14 +147,16 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Funzione mirata all'editing autorizzato del solo profilo UI: sovrascrive unicamente telefono e città.
+     * Funzione mirata all'editing autorizzato del solo profilo UI: sovrascrive
+     * unicamente telefono e città.
      *
-     * @param id primary key utente
+     * @param id          primary key utente
      * @param updatedData body precompilato nel mapping REST
      * @return status nuovo
      */
     @Transactional
     public User aggiornaProfilo(@NonNull Long id, User updatedData) {
+        // Trova l'utente nel database
         User exsisting = findById(id);
 
         // Aggiorna solo i campi modificabili dall'utente
@@ -157,28 +173,34 @@ public class UserService implements UserDetailsService {
         if (updatedData.getBirthDate() != null)
             exsisting.setBirthDate(updatedData.getBirthDate());
 
+        // Salva l'utente aggiornato
         return userRepository.save(exsisting);
     }
 
     /**
-     * Metodo di amministrazione per il cambio dei ruoli applicativi, ricalcola i grants su spring context.
+     * Metodo di amministrazione per il cambio dei ruoli applicativi, ricalcola i
+     * grants su spring context.
      *
-     * @param id user
+     * @param id      user
      * @param newRole enumerazione ruolo di rimpiazzamento
      * @return utente in upgrade state
      */
     @Transactional
     public User changeRole(@NonNull Long id, UserRole newRole) {
+        // Trova l'utente nel database
         User user = findById(id);
+        // Imposta il nuovo ruolo
         user.setRole(newRole);
+        // Salva l'utente con il nuovo ruolo
         return userRepository.save(user);
     }
 
     /**
-     * Abbreviazione wrapper per l'upgrade veloce d'utente al tier PRO (es. dopo acquisto abbonamento / premio interno).
+     * Wrapper per l'upgrade veloce d'utente al tier PRO.
      */
     @Transactional
     public User Upgrade(@NonNull Long id) {
+        // Cambia il ruolo dell'utente in PRO
         return changeRole(id, UserRole.PRO);
     }
 }

@@ -11,16 +11,22 @@ import org.springframework.lang.NonNull;
 
 import jakarta.validation.Valid;
 
+/**
+ * Controller per la gestione degli utenti
+ */
 @RestController
 @RequestMapping("/api/utenti")
 public class UserController {
 
+    // Servizio per la gestione degli utenti
     @Autowired
     private UserService userService;
 
+    // Convertitore di DTO
     @Autowired
     private DtoConverter dtoConverter;
 
+    // Repository per i post
     @Autowired
     private PostRepository postRepository;
 
@@ -47,7 +53,10 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public UserDto getUser(@PathVariable @NonNull Long id) {
+        // Trova l'utente tramite il servizio
         User user = userService.findById(id);
+
+        // Converti l'utente in DTO
         UserDto dto = dtoConverter.toUserDto(user);
 
         // Calcola i contatori
@@ -56,8 +65,10 @@ public class UserController {
                 ? user.getGarden().getPlants().size()
                 : 0;
 
+        // Imposta i contatori nel DTO
         dto.setPostsCount(postsCount);
         dto.setPlantsCount(plantsCount);
+
         return dto;
     }
 
@@ -71,7 +82,10 @@ public class UserController {
      */
     @PostMapping
     public UserDto createUser(@Valid @RequestBody User user) {
+        // Crea un nuovo utente tramite il servizio
         User createdUser = userService.registerUser(user);
+
+        // Restituisci l'utente creato convertito in DTO
         return dtoConverter.toUserDto(createdUser);
     }
 
@@ -85,7 +99,10 @@ public class UserController {
      */
     @PutMapping("/{id}")
     public UserDto updateUser(@PathVariable @NonNull Long id, @RequestBody User updatedData) {
+        // Aggiorna il profilo utente tramite il servizio
         User updatedUser = userService.aggiornaProfilo(id, updatedData);
+
+        // Restituisci il profilo aggiornato convertito in DTO
         return dtoConverter.toUserDto(updatedUser);
     }
 }

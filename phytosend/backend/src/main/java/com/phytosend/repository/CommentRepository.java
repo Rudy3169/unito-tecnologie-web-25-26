@@ -6,7 +6,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Interfaccia repository per Comment
+ */
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
+
+    /**
+     * Trova tutti i commenti legati a un genitore specifico
+     * 
+     * @param parentId ID del genitore
+     * @return Lista di commenti legati al genitore
+     */
     List<Comment> findByParentId(Long parentId);
 }

@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
 
+/**
+ * Classe che rappresenta un gruppo
+ */
 @Data
 @Entity
 @Table(name = "groups")
@@ -11,12 +14,12 @@ public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // ID gruppo
 
-    private String name;       // Es. "Scambio Talee"
-    private String description;
-    private String country;
-    private String city;
+    private String name; // Nome (es. "Scambio Talee")
+    private String description; // Descrizione
+    private String country; // Paese
+    private String city; // Città
 
     // RELAZIONI
     // Ogni gruppo ha un solo admin
@@ -26,10 +29,6 @@ public class Group {
 
     // Ogni gruppo ha più membri (utenti)
     @ManyToMany
-    @JoinTable(
-            name = "group_members",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "group_members", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> members;
 }

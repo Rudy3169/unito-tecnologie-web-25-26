@@ -3,9 +3,9 @@ package com.phytosend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-import java.time.Duration;
-
+/**
+ * Classe che rappresenta la scheda botanica di una pianta
+ */
 @Data
 @Entity
 @Table(name = "botanical_cards", uniqueConstraints = {
@@ -15,28 +15,29 @@ public class BotanicalCard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // ID della scheda botanica
 
-    private String commonName;
-    private String scientificName;
-    private String family;
+    private String commonName; // Nome comune
+    private String scientificName; // Nome scientifico
+    private String family; // Famiglia
 
-    // Info di cura (statiche per la specie)
-    private String exposure;
-    private String irrigation;
-    private String waterFrequencyDays;
-    private String fertilization;
-    private String soil;
+    // Info di cura
+    private String exposure; // Esposizione
+    private String irrigation; // Irrigazione
+    private String waterFrequencyDays; // Frequenza di irrigazione in giorni
+    private String fertilization; // Fertilizzazione
+    private String soil; // Terreno
 
+    // URL foto di default
     @Column(length = 2048)
     private String urlDefaultPhoto;
 
     // Data di inserimento nel database
     @Column(name = "created_at", updatable = false)
-    private java.time.LocalDate createdAt;
+    private java.time.LocalDate createdAt; // Data di creazione
 
-    // Metodo che scatta in automatico un millisecondo prima di salvare la pianta
-    // nel DB
+    // Metodo che imposta la data di creazione automaticamente al momento della
+    // creazione
     @PrePersist
     protected void onCreate() {
         if (this.createdAt == null) {
@@ -44,12 +45,10 @@ public class BotanicalCard {
         }
     }
 
-    // Metodo per verificare se la pianta è stata inserita oggi
+    // Metodo che verifica se la scheda botanica è stata creata oggi
     public boolean isRecent() {
         if (this.createdAt == null)
             return false;
-
-        LocalDateTime now = LocalDateTime.now();
 
         return this.createdAt.equals(java.time.LocalDate.now());
     }

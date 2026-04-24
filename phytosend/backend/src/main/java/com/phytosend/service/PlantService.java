@@ -13,21 +13,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
+/**
+ * Gestore per le piante
+ */
 @Service
 @Transactional(readOnly = true)
 public class PlantService {
 
+    // Repository per le piante
     @Autowired
     private PlantRepository plantRepository;
 
+    // Repository per gli eventi di cura
     @Autowired
-    private CareEventRepository careEventRepository; // Per creare le notifiche
+    private CareEventRepository careEventRepository;
 
     /**
-     * Inserisce fisicamente una pianta associandole la relativa scheda botanica nel
-     * giardino dell'utente.
-     * Si occupa inoltre di programmare in automatico il primissimo evento di
-     * innaffiatura (CareEvent)
+     * Aggiunge una pianta al giardino dell'utente.
+     * Si occupa inoltre di programmare il primo evento di innaffiatura (CareEvent)
      * in base alla frequenza dichiarata dalla specie.
      *
      * @param user il proprietario chiamante
@@ -44,34 +47,43 @@ public class PlantService {
         // Salviamo la pianta
         newPlant = plantRepository.save(newPlant);
 
+        // Creiamo il primo evento di cura
         CareEvent firstEvent = new CareEvent();
         firstEvent.setPlant(newPlant);
         firstEvent.setType("ACQUA");
-        // Prendi la stringa dalla pianta usando getCard() (invece di
-        // getBotanicalCard())
+
+        // Stringa della frequenza di annaffiatura
         String frequenzaStr = newPlant.getCard().getWaterFrequencyDays();
 
-        // Estrai il numero. Se è "Sconosciuto", usiamo 7 giorni di default per non
-        // far morire la pianta
+        // Estrai il numero. Se è "Sconosciuto", usiamo 7 giorni di default
         long giorniDaAggiungere = 7;
         if (frequenzaStr != null && frequenzaStr.matches(".*\\d+.*")) {
-            // Questa magia rimuove tutte le lettere e tiene solo i numeri (es. da "Ogni 14
-            // giorni" diventa "14")
             giorniDaAggiungere = Long.parseLong(frequenzaStr.replaceAll("\\D+", ""));
         }
 
         // Calcoliamo la prossima annaffiatura partendo da OGGI
         LocalDate prossimaAnnaffiatura = LocalDate.now().plusDays(giorniDaAggiungere);
 
+        // Imposta i valori dell'evento
         firstEvent.setCompleted(false);
-
         firstEvent.setProgrammedDate(prossimaAnnaffiatura);
-
         careEventRepository.save(firstEvent);
 
-        firstEvent.setCompleted(false);
+        // Genera anche gli eventi standard per Concime e Travaso
+        CareEvent concimeEvent = new CareEvent();
+        concimeEvent.setPlant(newPlant);
+        concimeEvent.setType("CONCIME");
+        concimeEvent.setCompleted(false);
+        concimeEvent.setProgrammedDate(LocalDate.now().plusDays(30));
+        careEventRepository.save(concimeEvent);
 
-        careEventRepository.save(firstEvent);
+        // Creiamo l'evento di travaso
+        CareEvent travasoEvent = new CareEvent();
+        travasoEvent.setPlant(newPlant);
+        travasoEvent.setType("TRAVASO");
+        travasoEvent.setCompleted(false);
+        travasoEvent.setProgrammedDate(LocalDate.now().plusDays(365));
+        careEventRepository.save(travasoEvent);
 
         return newPlant;
     }
@@ -88,11 +100,9 @@ public class PlantService {
     }
 
     /**
-     * Esegue l'azione distruttiva per sganciare ed eliminare una pianta specifica
-     * dal DB.
-     * Attenzione: la JPA configurerà i clear a cascata sulle careEvent collegate.
+     * Elimina una pianta specifica dal DB.
      *
-     * @param plantId ID della pianta radice da distruggere
+     * @param plantId ID della pianta da eliminare
      */
     @Transactional
     public void rimuoviPianta(@NonNull Long plantId) {

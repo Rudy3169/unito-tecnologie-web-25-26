@@ -5,11 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO per la risposta di login
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginResponse {
-    private String token;
-    private UserDto user;
+    private String token; // Token di autenticazione
+    private UserDto user; // Utente loggato
 }

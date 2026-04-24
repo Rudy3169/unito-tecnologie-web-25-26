@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Classe che rappresenta un commento
+ */
 @Data
 @Entity
 @Table(name = "comments")
@@ -14,10 +17,10 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // ID commento
 
-    private String text;
-    private LocalDateTime creationDate;
+    private String text; // Testo del commento
+    private LocalDateTime creationDate; // Data e ora di creazione del commento
 
     // RELAZIONI
     // Ogni autore (utente) può avere molti commenti

@@ -12,19 +12,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Gestore per la gestione del giardino dell'utente
+ */
 @Service
 @Transactional(readOnly = true)
 public class GardenService {
 
+    // Repository per i giardini
     @Autowired
     private GardenRepository gardenRepository;
 
+    // Repository per gli utenti
     @Autowired
     private UserRepository userRepository;
 
     /**
      * Recupera l'unico giardino associato all'ID utente fornito.
-     * Dato che il sistema è impostato in OneToOne, restituisce il primo elemento o va in eccezione.
+     * Dato che l'associazione tra utente e giardino è OneToOne, restituisce il
+     * primo elemento o va in eccezione.
      *
      * @param userId l'ID utente di cui cercare il giardino
      * @return Garden trovato
@@ -35,14 +41,15 @@ public class GardenService {
         if (gardens.isEmpty()) {
             throw new ResourceNotFoundException("Nessun giardino trovato per l'utente " + userId);
         }
-        // Essendo OneToOne, ci aspettiamo un solo giardino, prendiamo il primo
+
         return gardens.get(0);
     }
 
     /**
-     * Inizializza e associa un nuovo giardino allo user, verificando che non ne esista già uno.
+     * Inizializza e associa un nuovo giardino allo user, verificando che non ne
+     * esista già uno.
      *
-     * @param userId l'id del proprietario
+     * @param userId     l'id del proprietario
      * @param gardenName un nome da assegnare o nullo per il fallback di default
      * @return il nuovo Garden salvato
      */
@@ -67,7 +74,7 @@ public class GardenService {
      * Aggiorna solamente la stringa descrittiva del nome del giardino.
      *
      * @param gardenId identificativo del giardino bersaglio
-     * @param newName il nuovo nome da applicare
+     * @param newName  il nuovo nome da applicare
      * @return l'identità del Garden col nuovo nome salvata nel repository
      */
     @Transactional

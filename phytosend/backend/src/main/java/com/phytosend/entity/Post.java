@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
+/**
+ * Classe che rappresenta un post
+ */
 @Data
 @Entity
 @Table(name = "posts")
@@ -16,18 +19,18 @@ public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // ID post
 
     @NotBlank(message = "Il titolo è obbligatorio")
-    private String title;
+    private String title; // Titolo post
 
     @NotBlank(message = "La descrizione è obbligatoria")
-    private String description;
+    private String description; // Descrizione post
 
     @Column(columnDefinition = "TEXT")
-    private String URLPhoto;
+    private String URLPhoto; // URL foto post
 
-    private LocalDateTime creationDate;
+    private LocalDateTime creationDate; // Data e ora di creazione
 
     // RELAZIONI
     // Ogni post ha un autore (utente)

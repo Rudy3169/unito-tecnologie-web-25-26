@@ -10,20 +10,28 @@ import org.springframework.lang.NonNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller per la gestione delle piante
+ */
 @RestController
 @RequestMapping("/api/utenti")
 public class PlantController {
+
+    // Servizio per la gestione delle piante
     @Autowired
     private PlantService plantService;
 
+    // Convertitore di DTO
     @Autowired
     private DtoConverter dtoConverter;
 
     /**
-     * Recupera l'elenco completo delle piante possedute da uno specifico utente nel suo giardino.
+     * Recupera l'elenco completo delle piante possedute da uno specifico utente nel
+     * suo giardino.
      *
      * @param utenteId identificativo dell'utente proprietario
-     * @return una lista di piante formattate come stringhe DTO (Data Transfer Object)
+     * @return una lista di piante formattate come stringhe DTO (Data Transfer
+     *         Object)
      */
     @GetMapping("/{utenteId}/piante")
     public List<PlantDto> getPianteUtente(@PathVariable @NonNull Long utenteId) {
@@ -36,11 +44,12 @@ public class PlantController {
      * Elimina permanentemente una specifica pianta posseduta dall'utente.
      *
      * @param utenteId identificativo dell'utente proprietario del giardino
-     * @param plantId identificativo della pianta da rimuovere
+     * @param plantId  identificativo della pianta da rimuovere
      * @return un responso vuoto (204 No Content) in caso di successo
      */
     @DeleteMapping("/{utenteId}/piante/{plantId}")
-    public org.springframework.http.ResponseEntity<Void> removePlant(@PathVariable @NonNull Long utenteId, @PathVariable @NonNull Long plantId) {
+    public org.springframework.http.ResponseEntity<Void> removePlant(@PathVariable @NonNull Long utenteId,
+            @PathVariable @NonNull Long plantId) {
         plantService.rimuoviPianta(plantId);
         return org.springframework.http.ResponseEntity.noContent().build();
     }

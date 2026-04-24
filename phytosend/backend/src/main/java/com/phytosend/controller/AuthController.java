@@ -18,61 +18,71 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller per gestire le operazioni di autenticazione
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    // Servizio per la gestione degli utenti
     @Autowired
     private UserService userService;
+    // Gestisce l'autenticazione degli utenti
     @Autowired
     private AuthenticationManager authenticationManager;
+    // Utilita per la gestione dei token JWT
     @Autowired
     private JwtUtil jwtUtil;
+    // Convertitore di DTO
     @Autowired
     private DtoConverter dtoConverter;
 
     /**
      * Gestisce la richiesta di autenticazione per un utente esistente.
-     * Valida le credenziali e, in caso di successo, restituisce un token JWT firmato per l'accesso.
+     * Valida le credenziali e, in caso di successo, restituisce un token JWT
+     * firmato per l'accesso.
      *
      * @param request l'oggetto contenente email e password
      * @return la risposta con il token JWT e i dati base dell'utente
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        // Authenticate user
+        // Autentica l'utente
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                        request.getPassword()));
 
-        // If authentication successful, generate token
+        // Se l'autenticazione ha successo, genera il token
         UserDetails userDetails = userService.loadUserByUsername(request.getEmail());
         String token = jwtUtil.generateToken(userDetails);
 
-        // Fetch user data for response
-        User user = userService.findByEmail(request.getEmail()); 
+        // Recupera i dati per la response
+        User user = userService.findByEmail(request.getEmail());
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         return ResponseEntity.ok(new LoginResponse(token, dtoConverter.toUserDto(user)));
     }
+
     /**
      * Registra un nuovo utente nel sistema.
-     * Verifica la validità dei campi, salva l'utente e genera un token JWT per il login automatico.
+     * Verifica la validità dei campi, salva l'utente e genera un token JWT per il
+     * login automatico.
      *
      * @param user i dati del nuovo utente da registrare
      * @return la risposta con il token JWT e i dati base del nuovo utente
      */
     @PostMapping("/register")
     public ResponseEntity<LoginResponse> register(@Valid @RequestBody User user) {
+        // Registra l'utente
         User createdUser = userService.registerUser(user);
+        // Genera il token
         UserDetails userDetails = userService.loadUserByUsername(createdUser.getEmail());
         String token = jwtUtil.generateToken(userDetails);
-        
+
         return ResponseEntity.ok(new LoginResponse(token, dtoConverter.toUserDto(createdUser)));
     }
 }

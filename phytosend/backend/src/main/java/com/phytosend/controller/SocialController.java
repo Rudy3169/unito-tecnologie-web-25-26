@@ -17,13 +17,18 @@ import jakarta.validation.Valid;
 import java.util.Map;
 import java.util.List;
 
+/**
+ * Controller per la gestione dei post e dei commenti
+ */
 @RestController
 @RequestMapping("/api/social")
 public class SocialController {
 
+    // Servizio per la gestione dei post e dei commenti
     @Autowired
     private SocialService socialService;
 
+    // Convertitore di DTO
     @Autowired
     private DtoConverter dtoConverter;
 
@@ -31,16 +36,16 @@ public class SocialController {
      * Fornisce l'intera bacheca social pubblica, contenente i post ordinati
      * cronologicamente dalla data più recente, divisa in pagine.
      *
-     * @param page parametro opzionale della pagina (default 0)
-     * @param size parametro opzionale limitatore (default 10)
+     * @param page     parametro opzionale della pagina (default 0)
+     * @param size     parametro opzionale limitatore (default 10)
+     * @param utenteId ID dell'utente corrente (per calcolare likedByMe)
      * @return pagina dei post pubblicati (PostDto)
      */
     @GetMapping("/posts")
     public Page<PostDto> getBacheca(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long utenteId // ← nuovo parametro
-    ) {
+            @RequestParam(required = false) Long utenteId) {
         Page<Post> posts = socialService.getFeed(page, size);
         return posts.map(post -> {
             PostDto dto = dtoConverter.toPostDto(post);
@@ -71,35 +76,43 @@ public class SocialController {
      * Crea un nuovo post all'interno della piattaforma social e lo attribuisce
      * all'autore.
      *
-     * @param utenteId ID dell'autore (sostituito in query string per uso in dev
-     *                 localmente)
+     * @param utenteId ID dell'autore
      * @param post     entità post contente il testo ed eventuale foto
      * @return il post creato in DTO
      */
     @PostMapping("/posts")
-    public PostDto creaPost(@RequestParam @NonNull Long utenteId, @Valid @RequestBody Post post) {
-        Post created = socialService.createPost(utenteId, post);
+    public PostDto creaPost(@RequestParam @NonNull Long utenteId,
+            @Valid @RequestBody com.phytosend.dto.PostCreateDto postDto) {
+        Post created = socialService.createPost(utenteId, postDto);
         return dtoConverter.toPostDto(created);
     }
 
     /**
      * Aggiunge un commento al thread di uno specifico post esistente.
+     *
+     * @param postId   ID del post a cui aggiungere il commento
+     * @param utenteId ID dell'utente che aggiunge il commento
+     * @param body     corpo della richiesta contenente il testo del commento
+     * @return il commento aggiunto in formato DTO
      */
     @PostMapping("/posts/{postId}/commenti")
     public CommentDto commentaPost(@PathVariable @NonNull Long postId,
             @RequestParam @NonNull Long utenteId,
-            @RequestBody Map<String, Object> body) { // Cambiato in Object per accettare numeri
+            @RequestBody Map<String, Object> body) {
 
+        // Estraiamo il testo del commento
         String testo = (String) body.get("testo");
 
-        // Estraiamo il parentId in modo sicuro se è stato inviato dal frontend
+        // Estraiamo il parentId se è stato inviato dal frontend
         Long parentId = null;
         if (body.get("parentId") != null) {
             parentId = Long.valueOf(body.get("parentId").toString());
         }
 
-        // Passiamo anche parentId al servizio
+        // Aggiungiamo il commento al post tramite il servizio
         Comment comment = socialService.addComment(postId, utenteId, testo, parentId);
+
+        // Restituiamo il commento convertito in DTO
         return dtoConverter.toCommentDto(comment, null);
     }
 
@@ -121,7 +134,8 @@ public class SocialController {
     /**
      * Recupera tutti i commenti associati a un determinato post.
      *
-     * @param postId ID del post di cui si vogliono ottenere i commenti
+     * @param postId   ID del post di cui si vogliono ottenere i commenti
+     * @param utenteId ID dell'utente corrente (per calcolare likes)
      * @return lista di commenti in formato DTO
      */
     @GetMapping("/posts/{postId}/commenti")

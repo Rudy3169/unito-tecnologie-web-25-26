@@ -1,18 +1,19 @@
 package com.phytosend.dto;
 
 import lombok.Data;
-import java.time.LocalDateTime;
 
+/**
+ * DTO per la risposta del commento
+ */
 @Data
 public class CommentDto {
-    private Long id;
-    private String text;
-    private String creationDate;
-    private UserDto author;
-    private Long parentId;
-    private Long authorId;
-    private int likesCount;
-    private boolean likedByMe;
+    private Long id; // ID del commento
+    private String text; // Testo del commento
+    private String creationDate; // Data di creazione del commento
+    private UserDto author; // Autore del commento
+    private Long parentId; // ID del commento padre
+    private int likesCount; // Numero di like
+    private boolean likedByMe; // Se l'utente ha messo like
 
     /**
      * Getter per l'ID dell'autore
@@ -20,7 +21,7 @@ public class CommentDto {
      * @return ID dell'autore
      */
     public Long getAuthorId() {
-        return authorId;
+        return author.getId();
     }
 
     /**
@@ -29,7 +30,7 @@ public class CommentDto {
      * @param authorId ID dell'autore
      */
     public void setAuthorId(Long authorId) {
-        this.authorId = authorId;
+        this.author.setId(authorId);
     }
 
     /**

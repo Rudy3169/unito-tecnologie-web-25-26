@@ -3,13 +3,18 @@ package com.phytosend.service;
 import com.phytosend.dto.GardenDto;
 import com.phytosend.dto.PlantDto;
 import com.phytosend.dto.UserDto;
+import com.phytosend.dto.BotanicalCardDto;
 import com.phytosend.entity.Garden;
+import com.phytosend.entity.BotanicalCard;
 import com.phytosend.entity.Plant;
 import com.phytosend.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
 
+/**
+ * Gestore per la conversione di entità in DTO
+ */
 @Service
 public class DtoConverter {
 
@@ -38,6 +43,32 @@ public class DtoConverter {
     }
 
     /**
+     * Converte un'entità BotanicalCard del database in un Data Transfer Object.
+     * Utile per omettere campi sensibili come la password in fase di risposta API.
+     * 
+     * @param card l'entità origine
+     * @return l'oggetto BotanicalCardDto popolato
+     */
+    public BotanicalCardDto toBotanicalCardDto(BotanicalCard card) {
+        if (card == null) {
+            return null;
+        }
+        BotanicalCardDto dto = new BotanicalCardDto();
+        dto.setId(card.getId());
+        dto.setCommonName(card.getCommonName());
+        dto.setScientificName(card.getScientificName());
+        dto.setFamily(card.getFamily());
+        dto.setExposure(card.getExposure());
+        dto.setIrrigation(card.getIrrigation());
+        dto.setWaterFrequencyDays(card.getWaterFrequencyDays());
+        dto.setFertilization(card.getFertilization());
+        dto.setSoil(card.getSoil());
+        dto.setUrlDefaultPhoto(card.getUrlDefaultPhoto());
+        dto.setCreatedAt(card.getCreatedAt());
+        return dto;
+    }
+
+    /**
      * Mappa l'entità Plant (giardino) nel suo rispettivo PlantDto, astraendo le
      * relazioni complesse (Garden)
      * per evitare riferimenti circolari nella serializzazione JSON.
@@ -52,10 +83,7 @@ public class DtoConverter {
         dto.setId(plant.getId());
         dto.setUrlPhoto(plant.getUrlPhoto());
         dto.setPurchaseDate(plant.getPurchaseDate());
-        if (plant.getCard() != null) {
-            dto.setBotanicalCardId(plant.getCard().getId());
-            dto.setBotanicalCardName(plant.getCard().getScientificName()); // Assuming scientificName exists
-        }
+        dto.setBotanicalCard(toBotanicalCardDto(plant.getCard()));
         return dto;
     }
 
@@ -107,7 +135,9 @@ public class DtoConverter {
         dto.setLikedByMe(false);
         // Calcola quanti commenti ci sono. Se la lista è nulla, restituisce 0.
         int conteggio = (post.getComments() != null) ? post.getComments().size() : 0;
+        // Imposta il conteggio dei commenti.
         dto.setCommentsCount(conteggio);
+        dto.setPlant(toPlantDto(post.getPlant()));
         return dto;
     }
 
