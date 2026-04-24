@@ -12,6 +12,8 @@ public class PostCreateDto {
     @NotBlank(message = "Il titolo è obbligatorio")
     private String title; // Titolo del post
 
+    private String plantName; // Soprannome opzionale della pianta
+
     @NotBlank(message = "La descrizione è obbligatoria")
     private String description; // Descrizione del post
 

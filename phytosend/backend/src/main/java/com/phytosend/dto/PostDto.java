@@ -49,6 +49,15 @@ public class PostDto {
         if (this.plant == null) {
             return null;
         }
-        return this.plant.getPlantName();
+        return this.plant.getName();
+    }
+
+    // Getter per plantCommonName (specie della pianta)
+    @JsonProperty("plantCommonName")
+    public String getPlantCommonName() {
+        if (this.plant == null || this.plant.getCard() == null) {
+            return null;
+        }
+        return this.plant.getCard().getCommonName();
     }
 }

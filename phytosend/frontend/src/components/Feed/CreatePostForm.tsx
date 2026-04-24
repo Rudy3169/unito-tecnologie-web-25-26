@@ -16,19 +16,23 @@ interface PlantSuggestion {
 }
 
 export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFormProps) {
+    // State per gestire l'input del titolo/nome della pianta
     const [title, setTitle] = useState('');
     const [caption, setCaption] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [previewUrl, setPreviewUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [plantNickname, setPlantNickname] = useState('');
 
+    // State per gestire la selezione tra pianta nuova o pianta dal giardino
     const [postMode, setPostMode] = useState<'new' | 'garden'>('new');
     const [myPlants, setMyPlants] = useState<any[]>([]);
     const [selectedPlantId, setSelectedPlantId] = useState<number | null>(null);
     const [selectedBotanicalCardId, setSelectedBotanicalCardId] = useState<number | null>(null);
-    const [addToGarden, setAddToGarden] = useState(true);
+    const [addToGarden, setAddToGarden] = useState(false);
 
+    // State per la ricerca di piante nel catalogo
     const [suggestions, setSuggestions] = useState<PlantSuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
@@ -140,6 +144,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
 
         const payload = {
             title: title,
+            plantNickname: plantNickname,
             description: caption,
             urlPhoto: imageUrl,
             botanicalCardId: postMode === 'new' ? selectedBotanicalCardId : null,
@@ -257,7 +262,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                                 )}
                             </div>
 
-                            {/* NUOVO BOTTONE ANIMATO (Visibile solo se pianta nuova selezionata) */}
+                            {/* BOTTONE ANIMATO (Visibile solo se pianta nuova selezionata) */}
                             {postMode === 'new' && selectedBotanicalCardId && (
                                 <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <button
@@ -270,6 +275,19 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                                         </span>
                                         <span>{addToGarden ? 'Aggiunta al Giardino' : 'Aggiungi al Giardino'}</span>
                                     </button>
+                                </div>
+                            )}
+
+                            {/* Input Soprannome (Visibile solo se aggiungo al giardino) */}
+                            {postMode === 'new' && selectedBotanicalCardId && addToGarden && (
+                                <div className="form-group" style={{ marginTop: '4px', marginBottom: '8px' }}>
+                                    <input
+                                        type="text"
+                                        placeholder="Dai un nome alla tua pianta (es. Pina) - Facoltativo"
+                                        value={plantNickname}
+                                        onChange={(e) => setPlantNickname(e.target.value)}
+                                        className="search-input"
+                                    />
                                 </div>
                             )}
 

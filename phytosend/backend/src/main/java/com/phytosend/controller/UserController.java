@@ -1,11 +1,14 @@
 package com.phytosend.controller;
 
 import com.phytosend.dto.UserDto;
+import com.phytosend.entity.Plant;
 import com.phytosend.entity.User;
+import com.phytosend.repository.PlantRepository;
 import com.phytosend.repository.PostRepository;
 import com.phytosend.service.DtoConverter;
 import com.phytosend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.lang.NonNull;
 
@@ -29,6 +32,10 @@ public class UserController {
     // Repository per i post
     @Autowired
     private PostRepository postRepository;
+
+    // Repository per le piante
+    @Autowired
+    private PlantRepository plantRepository;
 
     /**
      * Recupera l'elenco di tutti gli utenti attualmente iscritti alla piattaforma
@@ -104,5 +111,28 @@ public class UserController {
 
         // Restituisci il profilo aggiornato convertito in DTO
         return dtoConverter.toUserDto(updatedUser);
+    }
+
+    /**
+     * Rinominare una pianta nel giardino dell'utente
+     * 
+     * @param userId  ID dell'utente
+     * @param plantId ID della pianta
+     * @param payload JSON contenente il nuovo nome della pianta
+     * @return ResponseEntity con codice 200 OK se l'operazione è andata a buon fine
+     */
+    @PutMapping("/{userId}/piante/{plantId}/name")
+    public ResponseEntity<?> renamePlant(@PathVariable Long userId, @PathVariable Long plantId,
+            @RequestBody java.util.Map<String, String> payload) {
+
+        // Cerca la pianta nel database
+        Plant plant = plantRepository.findById(plantId)
+                .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
+
+        // Aggiorna il nome estraendolo dal JSON inviato da React
+        plant.setName(payload.get("newName"));
+        plantRepository.save(plant);
+
+        return ResponseEntity.ok().build();
     }
 }

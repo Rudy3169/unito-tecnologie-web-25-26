@@ -129,3 +129,161 @@
 .stat-item svg {
     color: var(--color-primary);
 }
+
+/* --- Sistema di Rinomina Pianta --- */
+.garden-name-container {
+    min-height: 32px;
+    margin-bottom: 2px;
+}
+
+.view-name-mode {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-pencil-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0;
+    /* Appare solo al passaggio del mouse sulla card */
+}
+
+.garden-plant-card:hover .edit-pencil-btn {
+    opacity: 1;
+}
+
+.edit-pencil-btn:hover {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+}
+
+.edit-name-mode {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.edit-name-input {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    background: var(--color-bg-body);
+    outline: none;
+}
+
+.confirm-name-btn,
+.cancel-name-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-name-btn {
+    color: var(--color-primary);
+}
+
+.confirm-name-btn:hover {
+    background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.cancel-name-btn {
+    color: #ef4444;
+}
+
+.cancel-name-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* --- Sistema di Rinomina Pianta --- */
+.garden-name-container {
+    min-height: 32px;
+    margin-bottom: 2px;
+}
+
+.view-name-mode {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-pencil-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0;
+    /* Appare solo al passaggio del mouse sulla card */
+}
+
+.garden-plant-card:hover .edit-pencil-btn {
+    opacity: 1;
+}
+
+.edit-pencil-btn:hover {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+}
+
+.edit-name-mode {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.edit-name-input {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    background: var(--color-bg-body);
+    outline: none;
+}
+
+.confirm-name-btn,
+.cancel-name-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-name-btn {
+    color: var(--color-primary);
+}
+
+.confirm-name-btn:hover {
+    background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.cancel-name-btn {
+    color: #ef4444;
+}
+
+.cancel-name-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+}

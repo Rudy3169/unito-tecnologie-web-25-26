@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data
 public class PlantDto {
     private Long id; // ID della pianta
-    private String plantName; // Nome della pianta
+    private String name; // Soprannome opzionale della pianta
     private String urlPhoto; // URL della foto della pianta
     private LocalDate purchaseDate; // Data di acquisto della pianta
     private BotanicalCardDto card; // Scheda botanica della pianta

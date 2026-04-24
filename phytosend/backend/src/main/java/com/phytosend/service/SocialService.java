@@ -88,6 +88,13 @@ public class SocialService {
                         .orElseThrow(() -> new RuntimeException("Scheda botanica non trovata"));
                 // Crea una nuova pianta associata al giardino e all'utente
                 Plant newPlant = plantService.addPlantToGarden(author, card);
+
+                // Se l'utente ha inserito un soprannome, lo aggiunge alla pianta
+                if (postDto.getPlantName() != null && !postDto.getPlantName().trim().isEmpty()) {
+                    newPlant.setName(postDto.getPlantName());
+                    plantRepository.save(newPlant);
+                }
+
                 post.setPlant(newPlant); // Associa la nuova pianta al post
             }
         } else {

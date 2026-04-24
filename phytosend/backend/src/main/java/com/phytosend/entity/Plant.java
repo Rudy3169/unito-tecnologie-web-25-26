@@ -17,6 +17,8 @@ public class Plant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // ID della pianta
 
+    private String name; // Soprannome personale della pianta
+
     private String urlPhoto; // URL della foto
 
     private LocalDate purchaseDate; // Data di acquisto
