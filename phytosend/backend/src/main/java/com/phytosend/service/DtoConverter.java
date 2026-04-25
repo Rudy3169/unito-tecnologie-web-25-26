@@ -84,6 +84,7 @@ public class DtoConverter {
         dto.setName(plant.getName());
         dto.setUrlPhoto(plant.getUrlPhoto());
         dto.setPurchaseDate(plant.getPurchaseDate());
+        dto.setDeathDate(plant.getDeathDate());
         dto.setCard(toBotanicalCardDto(plant.getCard()));
         return dto;
     }

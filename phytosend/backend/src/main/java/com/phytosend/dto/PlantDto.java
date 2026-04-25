@@ -12,5 +12,6 @@ public class PlantDto {
     private String name; // Soprannome opzionale della pianta
     private String urlPhoto; // URL della foto della pianta
     private LocalDate purchaseDate; // Data di acquisto della pianta
+    private LocalDate deathDate; // Data di morte della pianta
     private BotanicalCardDto card; // Scheda botanica della pianta
 }

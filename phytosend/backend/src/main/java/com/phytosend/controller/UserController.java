@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.lang.NonNull;
 
+import java.time.LocalDate;
+
 import jakarta.validation.Valid;
 
 /**
@@ -131,6 +133,46 @@ public class UserController {
 
         // Aggiorna il nome estraendolo dal JSON inviato da React
         plant.setName(payload.get("newName"));
+        plantRepository.save(plant);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * ELIMINA DEFINITIVAMENTE: Rimuove la pianta dal database per sempre
+     * 
+     * @param userId  ID dell'utente
+     * @param plantId ID della pianta
+     * @return ResponseEntity con codice 204 No Content se l'operazione è andata a
+     *         buon fine
+     */
+    @DeleteMapping("/{userId}/piante/{plantId}")
+    public ResponseEntity<?> deletePlantPermanently(@PathVariable Long userId, @PathVariable Long plantId) {
+        // Cerca la pianta
+        Plant plant = plantRepository.findById(plantId)
+                .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
+
+        // La elimina fisicamente dal database (Hard Delete)
+        plantRepository.delete(plant);
+
+        return ResponseEntity.noContent().build(); // Ritorna 204 No Content (Successo)
+    }
+
+    /**
+     * SEGNA COME MORTA: Sposta la pianta nel cimitero ma conserva i ricordi
+     * 
+     * @param userId  ID dell'utente
+     * @param plantId ID della pianta
+     * @return ResponseEntity con codice 200 OK se l'operazione è andata a buon fine
+     */
+    @PutMapping("/{userId}/piante/{plantId}/dead")
+    public ResponseEntity<?> markPlantAsDead(@PathVariable Long userId, @PathVariable Long plantId) {
+        // Cerca la pianta
+        Plant plant = plantRepository.findById(plantId)
+                .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
+
+        // Cambia lo stato in "morta"
+        plant.setDeathDate(LocalDate.now());
         plantRepository.save(plant);
 
         return ResponseEntity.ok().build();

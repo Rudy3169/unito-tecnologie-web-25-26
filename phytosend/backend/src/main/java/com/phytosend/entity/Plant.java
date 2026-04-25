@@ -23,6 +23,8 @@ public class Plant {
 
     private LocalDate purchaseDate; // Data di acquisto
 
+    private LocalDate deathDate; // Data di morte
+
     // RELAZIONI
     // Ogni pianta appartiene a un giardino
     @ManyToOne
