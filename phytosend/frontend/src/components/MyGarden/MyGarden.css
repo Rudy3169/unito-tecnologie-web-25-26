@@ -1,3 +1,81 @@
+/* Contenitore Pagina */
+.my-garden-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px;
+    padding-top: 90px;
+    animation: fadeIn 0.4s ease;
+    min-height: 100vh;
+}
+
+/* Header */
+.garden-header {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    color: var(--color-primary);
+    /* Sfrutto i tuoi colori primari */
+}
+
+/* Stile Giardino Vuoto */
+.empty-garden {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    background: var(--color-bg-card);
+    border: 2px dashed var(--color-border);
+    border-radius: 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    color: var(--color-text-muted);
+    margin-bottom: 20px;
+}
+
+/* Bottone Call To Action */
+.add-plant-btn {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+}
+
+.add-plant-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* --- LAYOUT A LISTA (CARD ORIZZONTALI) --- */
 .garden-lists-container {
     display: flex;
@@ -396,4 +474,143 @@
 .btn-delete-full:hover {
     background: #ef4444;
     color: white;
+}
+
+/* --- Modale Aggiungi Pianta --- */
+.add-plant-dialog {
+    background: var(--color-bg-card);
+    padding: 32px;
+    border-radius: var(--border-radius-hard);
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    text-align: center;
+}
+
+.add-plant-dialog h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--color-primary);
+}
+
+.form-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.modal-input {
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-body);
+    color: var(--color-text-main);
+    font-size: 1rem;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.confirm-add-btn {
+    width: 100%;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.confirm-add-btn:hover {
+    background: #059669;
+    /* Oppure usa una tua variabile hover */
+}
+
+/* --- TENDINA AUTOCOMPLETAMENTO (MyGarden) --- */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-soft);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 100;
+    list-style: none;
+    padding: 0;
+    text-align: left;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--color-border);
+    transition: background 0.15s;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background: var(--color-bg-body);
+}
+
+.suggestion-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.suggestion-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.suggestion-name {
+    font-weight: 600;
+    color: var(--color-text-main);
+    font-size: 0.9rem;
+}
+
+.suggestion-scientific {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
 }

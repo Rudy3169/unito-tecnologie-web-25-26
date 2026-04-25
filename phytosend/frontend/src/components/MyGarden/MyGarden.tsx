@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Fence, Droplets, CalendarHeart, Trash2, Pencil, Check, X, Skull, Info, Image as ImageIcon } from 'lucide-react';
+import { Fence, Droplets, Plus, CalendarHeart, Trash2, Pencil, Check, X, Sprout, Skull, Info, Image as ImageIcon, Loader } from 'lucide-react';
 import './MyGarden.css';
 
+// Interfaccia base per un elemento del giardino
 interface PlantItem {
     id: number;
     plantName?: string;
-    urlPhoto?: string; // Foto dell'ultimo post o della pianta
+    urlPhoto?: string;
     purchaseDate: string;
-    isDead?: boolean; // Flag per capire se è morta
+    deathDate?: string;
     card: {
         commonName: string;
         scientificName: string;
@@ -20,16 +21,40 @@ interface PlantItem {
     };
 }
 
+// Interfaccia per i risultati della ricerca
+interface PlantSuggestion {
+    id: number;
+    commonName: string;
+    scientificName: string;
+    urlDefaultPhoto: string;
+}
+
+// Funzione principale che gestisce il giardino personale
 export function MyGarden() {
+    // Stati per la gestione delle piante nel giardino
     const [myPlants, setMyPlants] = useState<PlantItem[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Stati per l'aggiunta di una nuova pianta
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [newPlantCardId, setNewPlantCardId] = useState("");
+    const [newPlantName, setNewPlantName] = useState("");
+
+    // Stati per la modifica del nome della pianta
     const [editingPlantId, setEditingPlantId] = useState<number | null>(null);
     const [editNameValue, setEditNameValue] = useState("");
 
+    // Stati per la ricerca dinamica dal catalogo
+    const [searchQuery, setSearchQuery] = useState('');
+    const [suggestions, setSuggestions] = useState<PlantSuggestion[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+
+    // Stati per la selezione di una pianta e la gestione del prompt di eliminazione
     const [selectedPlant, setSelectedPlant] = useState<PlantItem | null>(null);
     const [deletePrompt, setDeletePrompt] = useState<number | null>(null);
 
+    // Effetto per il caricamento iniziale del giardino
     useEffect(() => {
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
@@ -38,14 +63,108 @@ export function MyGarden() {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
-            .then(data => setMyPlants(data || []))
+            .then(data => {
+                const mappedPlants = data.map((p: any) => ({
+                    ...p,
+                    plantName: p.name,
+                    isDead: p.deathDate !== null
+                }));
+                setMyPlants(mappedPlants);
+            })
             .catch(err => console.error("Errore recupero giardino:", err))
             .finally(() => setLoading(false));
     }, []);
 
-    // SALVATAGGIO NOME
+    // Effetto per la ricerca dinamica dal catalogo
+    useEffect(() => {
+        if (!searchQuery.trim() || searchQuery.length < 2 || newPlantCardId !== "") {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            setIsSearching(false);
+            return;
+        }
+
+        setIsSearching(true);
+        const timeoutId = setTimeout(async () => {
+            try {
+                const token = localStorage.getItem('phytosend_token');
+                const res = await fetch(`/api/catalogo/ricerca?q=${encodeURIComponent(searchQuery)}&page=0&size=5`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setSuggestions(data.content || []);
+                    setShowSuggestions(true);
+                }
+            } catch (err) {
+                console.error('Errore ricerca piante:', err);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, newPlantCardId]);
+
+    // Funzione per gestire la selezione della pianta dalla tendina
+    const handleSelectSuggestion = (suggestion: PlantSuggestion) => {
+        setNewPlantCardId(suggestion.id.toString());
+        setSearchQuery(suggestion.commonName);
+        setShowSuggestions(false);
+    };
+
+    // Funzione per chiudere la modale e pulire i campi
+    const handleCloseModal = () => {
+        setIsAddModalOpen(false);
+        setNewPlantCardId("");
+        setNewPlantName("");
+        setSearchQuery("");
+        setSuggestions([]);
+        setShowSuggestions(false);
+    };
+
+    // Funzione per aggiungere una nuova pianta al giardino
+    const handleAddNewPlant = async () => {
+        if (!newPlantCardId) return alert("Seleziona una specie botanica valida dalla tendina!");
+
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        try {
+            const response = await fetch(`/api/utenti/${userId}/piante`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    botanicalCardId: newPlantCardId,
+                    plantName: newPlantName
+                })
+            });
+
+            if (response.ok) {
+                const addedPlant = await response.json();
+                const newPlantMapped = {
+                    ...addedPlant,
+                    plantName: addedPlant.name,
+                    isDead: false
+                };
+
+                setMyPlants(prev => [...prev, newPlantMapped]);
+                handleCloseModal(); // Chiude e pulisce tutto
+            } else {
+                const errText = await response.text();
+                alert("Errore dal Server: " + errText);
+            }
+        } catch (error) {
+            console.error("Errore durante l'aggiunta", error);
+        }
+    };
+
+    // Funzione per salvare il nome modificato della pianta
     const handleSaveName = async (e: React.MouseEvent, plantId: number) => {
-        e.stopPropagation(); // Evita di aprire la modale
+        e.stopPropagation();
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
 
@@ -68,22 +187,19 @@ export function MyGarden() {
         }
     };
 
-    // ELIMINAZIONE / MORTE
+    // Funzione per eliminare la pianta dal giardino o segnarla come morta
     const handleDeleteAction = async (plantId: number, markAsDead: boolean) => {
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
 
         try {
             if (markAsDead) {
-                // Endpoint da creare nel backend per segnare come morta
                 await fetch(`/api/utenti/${userId}/piante/${plantId}/dead`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                // Aggiorna frontend istantaneamente
-                setMyPlants(prev => prev.map(p => p.id === plantId ? { ...p, isDead: true } : p));
+                setMyPlants(prev => prev.map(p => p.id === plantId ? { ...p, deathDate: new Date().toISOString() } : p));
             } else {
-                // Eliminazione fisica definitiva
                 const response = await fetch(`/api/utenti/${userId}/piante/${plantId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -100,25 +216,22 @@ export function MyGarden() {
         }
     };
 
-    const alivePlants = myPlants.filter(p => !p.isDead);
-    const deadPlants = myPlants.filter(p => p.isDead);
-
-    // COMPONENTE CARD SINGOLA
+    // Componente per visualizzare una singola pianta nel giardino
     const PlantCard = ({ plant }: { plant: PlantItem }) => {
         const displayName = plant.card?.commonName || 'Pianta Sconosciuta';
-        const nickname = plant.plantName || 'Nessun nickname';
+        const nickname = plant.plantName || plant.card?.commonName;
         const imgUrl = plant.urlPhoto || plant.card?.urlDefaultPhoto || '/placeholder-plant.png';
 
         return (
-            <div className={`garden-list-card ${plant.isDead ? 'dead-card' : ''}`} onClick={() => setSelectedPlant(plant)}>
+            <div className={`garden-list-card ${plant.deathDate ? 'dead-card' : ''}`} onClick={() => setSelectedPlant(plant)}>
                 <div className="garden-card-top">
-                    {/* FOTO (Sinistra) */}
+                    {/* Immagine della pianta con sfondo circolare */}
                     <div className="garden-card-img" style={{ backgroundImage: `url(${imgUrl})` }}>
-                        {plant.isDead && <div className="dead-overlay"><Skull size={24} /></div>}
+                        {plant.deathDate && <div className="dead-overlay"><Skull size={24} /></div>}
                     </div>
-
-                    {/* INFO (Destra) */}
+                    {/* Nome comune e nickname */}
                     <div className="garden-card-info">
+                        {/* Nome comune e icona elimina */}
                         <div className="garden-card-header">
                             <h3 className="common-name">{displayName}</h3>
                             <button
@@ -128,7 +241,7 @@ export function MyGarden() {
                                 <Trash2 size={18} />
                             </button>
                         </div>
-
+                        {/* Nickname con icona modifica */}
                         <div className="garden-card-nickname">
                             {editingPlantId === plant.id ? (
                                 <div className="edit-inline" onClick={e => e.stopPropagation()}>
@@ -139,7 +252,7 @@ export function MyGarden() {
                             ) : (
                                 <div className="view-inline">
                                     <span className="nick-text">"{nickname}"</span>
-                                    {!plant.isDead && (
+                                    {!plant.deathDate && (
                                         <button className="edit-pencil-btn" onClick={(e) => {
                                             e.stopPropagation(); setEditingPlantId(plant.id); setEditNameValue(plant.plantName || '');
                                         }}>
@@ -151,8 +264,7 @@ export function MyGarden() {
                         </div>
                     </div>
                 </div>
-
-                {/* EVENTI CURA (Sotto) */}
+                {/* Informazioni aggiuntive */}
                 <div className="garden-card-events">
                     <Droplets size={14} /> Prossima irrigazione: {plant.card?.waterFrequencyDays || 'Regolare'}
                 </div>
@@ -162,71 +274,136 @@ export function MyGarden() {
 
     return (
         <div className="my-garden-page">
+            {/* Header della pagina del giardino */}
             <header className="garden-header">
                 <div className="header-title">
                     <Fence size={36} className="header-icon" />
                     <h1>Il mio Giardino</h1>
                 </div>
+                {/* Descrizione */}
+                <p>La tua collezione personale di piante certificate Phytosend.</p>
             </header>
 
+            {/* Contenuto del giardino */}
             <div className="garden-content">
-                {loading ? (
-                    <p style={{ textAlign: 'center' }}>Caricamento giardino in corso...</p>
-                ) : myPlants.length === 0 ? (
+                {/* Sezione vuota quando non ci sono piante */}
+                {myPlants.length === 0 ? (
                     <div className="empty-garden">
-                        <Fence size={56} className="empty-icon" />
-                        <h2>Il tuo giardino è vuoto</h2>
+                        <Sprout size={56} className="empty-icon" />
+                        <h2>Il tuo giardino è ancora vuoto</h2>
+                        <p>Aggiungi la tua prima pianta collegandola a una scheda botanica!</p>
+                        <button className="add-plant-btn" onClick={() => setIsAddModalOpen(true)}>
+                            <Plus size={18} /> Aggiungi Pianta
+                        </button>
                     </div>
                 ) : (
                     <div className="garden-lists-container">
-                        {/* PIANTE VIVE */}
-                        {alivePlants.length > 0 && (
+                        {/* Bottone per aggiungere pianta */}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-16px' }}>
+                            <button className="add-plant-btn" style={{ marginTop: 0 }} onClick={() => setIsAddModalOpen(true)}>
+                                <Plus size={18} /> Aggiungi Pianta
+                            </button>
+                        </div>
+
+                        {/* Sezione piante vive */}
+                        {myPlants.filter(p => !p.deathDate).length > 0 && (
                             <div className="alive-section">
                                 <div className="list-grid">
-                                    {alivePlants.map(plant => <PlantCard key={plant.id} plant={plant} />)}
+                                    {myPlants.filter(p => !p.deathDate).map(plant => <PlantCard key={plant.id} plant={plant} />)}
                                 </div>
                             </div>
                         )}
-
-                        {/* PIANTE MORTE */}
-                        {deadPlants.length > 0 && (
+                        {/* Sezione piante morte */}
+                        {myPlants.filter(p => p.deathDate).length > 0 && (
                             <div className="dead-section">
                                 <h3><Skull size={18} /> Il cimitero delle piante</h3>
                                 <div className="list-grid">
-                                    {deadPlants.map(plant => <PlantCard key={plant.id} plant={plant} />)}
+                                    {myPlants.filter(p => p.deathDate).map(plant => <PlantCard key={plant.id} plant={plant} />)}
                                 </div>
                             </div>
                         )}
                     </div>
                 )}
+
+                {/* Sezione di aggiunta pianta */}
+                {isAddModalOpen && (
+                    <div className="modal-overlay" onClick={handleCloseModal}>
+                        <div className="add-plant-dialog" onClick={e => e.stopPropagation()}>
+                            <button className="close-modal-btn" onClick={handleCloseModal}><X size={24} /></button>
+                            <h3>Aggiungi una Nuova Pianta</h3>
+
+                            {/* Campo di ricerca */}
+                            <div className="form-group" style={{ position: 'relative' }}>
+                                <label>Cerca nel Catalogo Botanico *</label>
+                                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => {
+                                            setSearchQuery(e.target.value);
+                                            setNewPlantCardId("");
+                                            setShowSuggestions(true);
+                                        }}
+                                        placeholder="Es. Monstera..."
+                                        className="modal-input"
+                                        style={{ width: '100%' }}
+                                        autoComplete="off"
+                                    />
+                                    {isSearching && <Loader size={16} className="spin" style={{ position: 'absolute', right: '12px', color: 'var(--color-text-muted)' }} />}
+                                </div>
+
+                                {/* Tendina dei risultati */}
+                                {showSuggestions && suggestions.length > 0 && (
+                                    <ul className="autocomplete-dropdown">
+                                        {suggestions.map((plant) => (
+                                            <li key={plant.id} className="suggestion-item" onClick={() => handleSelectSuggestion(plant)}>
+                                                <img src={plant.urlDefaultPhoto || '/placeholder.png'} alt={plant.commonName} className="suggestion-img" />
+                                                <div className="suggestion-info">
+                                                    <span className="suggestion-name">{plant.commonName}</span>
+                                                    <span className="suggestion-scientific">{plant.scientificName}</span>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+
+                            {/* Campo del soprannome */}
+                            <div className="form-group">
+                                <label>Soprannome (Facoltativo)</label>
+                                <input
+                                    type="text"
+                                    placeholder="Es. Pina (la Monstera)"
+                                    value={newPlantName}
+                                    onChange={e => setNewPlantName(e.target.value)}
+                                    className="modal-input"
+                                />
+                            </div>
+
+                            {/* Bottone di conferma */}
+                            <button className="confirm-add-btn" onClick={handleAddNewPlant}>
+                                <Plus size={18} /> Salva nel Giardino
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* MODALE SCELTA ELIMINAZIONE */}
+            {/* Modali di eliminazione e dettaglio */}
             {deletePrompt !== null && (
                 <div className="modal-overlay" onClick={() => setDeletePrompt(null)}>
                     <div className="delete-dialog" onClick={e => e.stopPropagation()}>
                         <h3>Rimuovi Pianta</h3>
-                        {/* Cerchiamo la pianta nell'array per capire se è viva o morta */}
                         {(() => {
                             const plantToDelete = myPlants.find(p => p.id === deletePrompt);
-
                             return (
                                 <>
-                                    <p>
-                                        {plantToDelete?.isDead
-                                            ? "Vuoi eliminare definitivamente questa pianta dal tuo cimitero?"
-                                            : "Vuoi eliminare questa pianta definitivamente o dichiararne il decesso per tenerla come ricordo?"}
-                                    </p>
+                                    <p>{plantToDelete?.deathDate ? "Vuoi eliminare definitivamente questa pianta dal tuo cimitero?" : "Vuoi eliminare questa pianta definitivamente o dichiararne il decesso per tenerla come ricordo?"}</p>
                                     <div className="delete-actions">
-                                        {/* Mostra il bottone "Morta" SOLO se la pianta è ancora viva */}
-                                        {!plantToDelete?.isDead && (
-                                            <button className="btn-dead" onClick={() => handleDeleteAction(deletePrompt, true)}>
-                                                <Skull size={16} /> È Morta
-                                            </button>
+                                        {!plantToDelete?.deathDate && (
+                                            <button className="btn-dead" onClick={() => handleDeleteAction(deletePrompt, true)}><Skull size={16} /> È Morta</button>
                                         )}
-                                        <button className="btn-delete" onClick={() => handleDeleteAction(deletePrompt, false)}>
-                                            <Trash2 size={16} /> Elimina Definitivamente
-                                        </button>
+                                        <button className="btn-delete" onClick={() => handleDeleteAction(deletePrompt, false)}><Trash2 size={16} /> Elimina Definitivamente</button>
                                     </div>
                                 </>
                             );
@@ -235,19 +412,17 @@ export function MyGarden() {
                 </div>
             )}
 
-            {/* MODALE SCHEDA DETTAGLIO PIANTA */}
+            {/* Modale di dettaglio pianta */}
             {selectedPlant && (
                 <div className="modal-overlay" onClick={() => setSelectedPlant(null)}>
                     <div className="plant-detail-modal" onClick={e => e.stopPropagation()}>
                         <button className="close-modal-btn" onClick={() => setSelectedPlant(null)}><X size={24} /></button>
-
                         <div className="detail-header" style={{ backgroundImage: `url(${selectedPlant.urlPhoto || selectedPlant.card?.urlDefaultPhoto})` }}>
                             <div className="detail-header-content">
                                 <h2>{selectedPlant.plantName || selectedPlant.card?.commonName}</h2>
                                 <p><i>{selectedPlant.card?.scientificName}</i></p>
                             </div>
                         </div>
-
                         <div className="detail-body">
                             <div className="detail-section">
                                 <h4><Info size={16} /> Scheda Botanica</h4>
@@ -258,7 +433,6 @@ export function MyGarden() {
                                     <li><strong>Concimazione:</strong> {selectedPlant.card?.fertilization}</li>
                                 </ul>
                             </div>
-
                             <div className="detail-section">
                                 <h4><CalendarHeart size={16} /> Eventi Cura & Timeline</h4>
                                 <div className="timeline-placeholder">
@@ -266,17 +440,9 @@ export function MyGarden() {
                                     <div className="timeline-item">Irrigazione consigliata: {selectedPlant.card?.waterFrequencyDays}</div>
                                 </div>
                             </div>
-
-                            <div className="detail-section">
-                                <h4><ImageIcon size={16} /> Post Collegati</h4>
-                                <p className="text-muted">I post in cui hai taggato questa pianta appariranno qui.</p>
-                            </div>
                         </div>
-
                         <div className="detail-footer">
-                            <button className="btn-delete-full" onClick={() => { setDeletePrompt(selectedPlant.id); }}>
-                                <Trash2 size={18} /> Rimuovi o Segna Morta
-                            </button>
+                            <button className="btn-delete-full" onClick={() => { setDeletePrompt(selectedPlant.id); }}><Trash2 size={18} /> Rimuovi o Segna Morta</button>
                         </div>
                     </div>
                 </div>

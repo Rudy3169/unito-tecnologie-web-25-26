@@ -5,6 +5,7 @@ import com.phytosend.entity.Plant;
 import com.phytosend.entity.User;
 import com.phytosend.repository.PlantRepository;
 import com.phytosend.repository.PostRepository;
+import com.phytosend.repository.BotanicalCardRepository;
 import com.phytosend.service.DtoConverter;
 import com.phytosend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,10 @@ public class UserController {
     // Repository per le piante
     @Autowired
     private PlantRepository plantRepository;
+
+    // Repository per le schede botaniche
+    @Autowired
+    private BotanicalCardRepository botanicalCardRepository;
 
     /**
      * Recupera l'elenco di tutti gli utenti attualmente iscritti alla piattaforma
@@ -113,6 +118,43 @@ public class UserController {
 
         // Restituisci il profilo aggiornato convertito in DTO
         return dtoConverter.toUserDto(updatedUser);
+    }
+
+    /**
+     * Aggiunge una nuova pianta al giardino dell'utente
+     * 
+     * @param userId  ID dell'utente
+     * @param payload JSON contenente l'ID della scheda botanica e il nome opzionale
+     * @return ResponseEntity con codice 200 OK se l'operazione è andata a buon fine
+     */
+    @PostMapping("/{userId}/piante")
+    public ResponseEntity<com.phytosend.dto.PlantDto> addPlantToGarden(
+            @PathVariable Long userId,
+            @RequestBody java.util.Map<String, String> payload) {
+
+        // Trova l'utente
+        User user = userService.findById(userId);
+
+        // Trova la scheda botanica selezionata nel pop-up
+        Long cardId = Long.parseLong(payload.get("botanicalCardId"));
+        com.phytosend.entity.BotanicalCard card = botanicalCardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Scheda botanica non trovata"));
+
+        // Crea la nuova pianta
+        Plant newPlant = new Plant();
+        newPlant.setPurchaseDate(LocalDate.now());
+        newPlant.setDeathDate(null);
+        newPlant.setCard(card);
+        newPlant.setGarden(user.getGarden());
+
+        // Se l'utente ha inserito un soprannome, lo salviamo
+        if (payload.containsKey("plantName") && !payload.get("plantName").trim().isEmpty()) {
+            newPlant.setName(payload.get("plantName"));
+        }
+
+        // Salva e restituisci il DTO
+        Plant savedPlant = plantRepository.save(newPlant);
+        return ResponseEntity.ok(dtoConverter.toPlantDto(savedPlant));
     }
 
     /**

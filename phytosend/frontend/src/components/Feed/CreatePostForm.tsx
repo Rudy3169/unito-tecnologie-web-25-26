@@ -58,7 +58,6 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         }
     }, [isOpen]);
 
-    // FIX TENDINA: Se l'utente ha già selezionato una pianta, blocchiamo la ricerca!
     useEffect(() => {
         if (postMode !== 'new' || !title.trim() || title.length < 2 || selectedBotanicalCardId !== null) {
             setSuggestions([]);
@@ -89,6 +88,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         return () => clearTimeout(timeoutId);
     }, [title, postMode, selectedBotanicalCardId]);
 
+    // Gestione Caricamento Immagine
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -116,12 +116,14 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         img.src = objectUrl;
     };
 
+    // Selezione Pianta da Catalogo
     const handleSelectSuggestion = (suggestion: PlantSuggestion) => {
         setSelectedBotanicalCardId(suggestion.id);
         setTitle(suggestion.commonName);
-        setShowSuggestions(false); // La tendina si chiude
+        setShowSuggestions(false);
     };
 
+    // Selezione Pianta dal Giardino
     const handleSelectFromGarden = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const pId = Number(e.target.value);
         setSelectedPlantId(pId);
@@ -129,6 +131,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         if (selected) setTitle(selected.card?.commonName || 'Pianta dal giardino');
     };
 
+    // Gestione Invio Form
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setErrorMsg('');
