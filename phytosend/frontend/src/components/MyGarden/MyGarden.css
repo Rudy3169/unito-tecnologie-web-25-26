@@ -1,289 +1,399 @@
-/* --- Stile Griglia Piante Giardino --- */
-.garden-plant-card {
+/* --- LAYOUT A LISTA (CARD ORIZZONTALI) --- */
+.garden-lists-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 16px;
+}
+
+.garden-list-card {
+    display: flex;
+    flex-direction: column;
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-soft);
     overflow: hidden;
+    cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.garden-plant-card:hover {
-    transform: translateY(-4px);
+.garden-list-card:hover {
+    transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-accent);
 }
 
-.garden-plant-img {
-    height: 180px;
+.garden-card-top {
+    display: flex;
+    height: 120px;
+}
+
+.garden-card-img {
+    width: 120px;
     background-size: cover;
     background-position: center;
     position: relative;
+    border-right: 1px solid var(--color-border);
 }
 
-.garden-plant-date {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(26, 32, 28, 0.7);
-    backdrop-filter: blur(4px);
-    color: white;
-    padding: 6px 10px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
+.garden-card-info {
+    flex: 1;
+    padding: 12px 16px;
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.garden-plant-info {
-    padding: var(--spacing-md);
+.garden-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
-.garden-plant-info h3 {
+.common-name {
     margin: 0;
     font-size: 1.1rem;
     color: var(--color-text-main);
 }
 
-.garden-plant-info .scientific-name {
-    margin: 4px 0 16px 0;
-    font-size: 0.9rem;
+.delete-icon-btn {
+    background: transparent;
+    border: none;
     color: var(--color-text-muted);
-    font-style: italic;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
 }
 
-.garden-plant-actions {
+.delete-icon-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.garden-card-nickname {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+}
+
+.view-inline {
     display: flex;
+    align-items: center;
     gap: 8px;
 }
 
-.care-btn {
-    flex: 1;
+.nick-text {
+    font-style: italic;
+}
+
+.edit-pencil-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.garden-list-card:hover .edit-pencil-btn {
+    opacity: 1;
+}
+
+.edit-pencil-btn:hover {
+    color: var(--color-primary);
+}
+
+.edit-inline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.edit-input-small {
+    padding: 4px 8px;
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
+    width: 120px;
+    font-size: 0.9rem;
+    background: var(--color-bg-body);
+    color: var(--color-text-main);
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.icon-btn.ok {
+    color: var(--color-primary);
+}
+
+.icon-btn.no {
+    color: #ef4444;
+}
+
+/* EVENTI CURA (Fondo della card) */
+.garden-card-events {
+    padding: 10px 16px;
+    background: rgba(var(--color-primary-rgb), 0.05);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+/* --- PIANTE MORTE (Cimitero) --- */
+.dead-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.dead-card {
+    filter: grayscale(100%);
+    opacity: 0.7;
+    background: var(--color-bg-body);
+}
+
+.dead-card:hover {
+    filter: grayscale(80%);
+    opacity: 0.9;
+}
+
+.dead-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 8px;
+    color: white;
+}
+
+/* --- MODALI OVERLAY --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Dialog Scelta Eliminazione */
+.delete-dialog {
+    background: var(--color-bg-card);
+    padding: 24px;
+    border-radius: var(--border-radius-hard);
+    max-width: 400px;
+    text-align: center;
+}
+
+.delete-dialog h3 {
+    margin-top: 0;
+    color: var(--color-text-main);
+}
+
+.delete-dialog p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+}
+
+.delete-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-dead {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #374151;
+    color: white;
+    border: none;
+    padding: 12px;
     border-radius: 8px;
+    cursor: pointer;
     font-weight: 600;
-    font-size: 0.85rem;
-    background: rgba(var(--color-primary-rgb), 0.1);
-    color: var(--color-primary);
-    transition: background 0.2s;
 }
 
-.care-btn:hover {
-    background: rgba(var(--color-primary-rgb), 0.2);
+.btn-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
 }
 
-/* Bottone per eliminare la pianta */
-.delete-plant-btn {
+/* Modale Scheda Dettaglio Pianta */
+.plant-detail-modal {
+    background: var(--color-bg-card);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    border-radius: var(--border-radius-hard);
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.close-modal-btn {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    background: rgba(239, 68, 68, 0.85);
-    /* Rosso semi trasparente */
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
     padding: 6px;
     border-radius: 50%;
     cursor: pointer;
+    z-index: 10;
+}
+
+.detail-header {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-    transition: all 0.2s;
-    opacity: 0;
-    /* Nascosto di default */
+    align-items: flex-end;
 }
 
-/* Mostriamo il bottone delete solo quando passiamo col mouse sulla card */
-.garden-plant-card:hover .delete-plant-btn {
-    opacity: 1;
+.detail-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.8));
 }
 
-.delete-plant-btn:hover {
-    background: rgb(220, 38, 38);
-    transform: scale(1.1);
+.detail-header-content {
+    position: relative;
+    z-index: 5;
+    padding: 20px;
+    color: white;
 }
 
-/* Nuove info (Stats rapide) */
-.plant-quick-stats {
+.detail-header-content h2 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.detail-header-content p {
+    margin: 4px 0 0 0;
+    opacity: 0.8;
+}
+
+.detail-body {
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 16px;
-    background: var(--color-bg-body);
-    padding: 10px;
-    border-radius: var(--border-radius-soft);
+    gap: 24px;
 }
 
-.stat-item {
+.detail-section h4 {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.8rem;
+    margin: 0 0 12px 0;
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 8px;
+}
+
+.detail-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.detail-section li {
+    font-size: 0.95rem;
     color: var(--color-text-main);
 }
 
-.stat-item svg {
-    color: var(--color-primary);
-}
-
-/* --- Sistema di Rinomina Pianta --- */
-.garden-name-container {
-    min-height: 32px;
-    margin-bottom: 2px;
-}
-
-.view-name-mode {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.edit-pencil-btn {
-    background: transparent;
-    border: none;
+.detail-section li strong {
     color: var(--color-text-muted);
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    transition: all 0.2s;
-    opacity: 0;
-    /* Appare solo al passaggio del mouse sulla card */
 }
 
-.garden-plant-card:hover .edit-pencil-btn {
-    opacity: 1;
-}
-
-.edit-pencil-btn:hover {
-    background: rgba(var(--color-primary-rgb), 0.1);
-    color: var(--color-primary);
-}
-
-.edit-name-mode {
+.timeline-placeholder {
     display: flex;
-    align-items: center;
-    gap: 4px;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.edit-name-input {
-    flex: 1;
-    padding: 4px 8px;
-    border: 1px solid var(--color-primary);
-    border-radius: 4px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-main);
+.timeline-item {
+    padding: 12px;
     background: var(--color-bg-body);
-    outline: none;
+    border-left: 3px solid var(--color-primary);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
 }
 
-.confirm-name-btn,
-.cancel-name-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
+.text-muted {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+.detail-footer {
+    padding: 24px;
+    border-top: 1px solid var(--color-border);
+}
+
+.btn-delete-full {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.confirm-name-btn {
-    color: var(--color-primary);
-}
-
-.confirm-name-btn:hover {
-    background: rgba(var(--color-primary-rgb), 0.1);
-}
-
-.cancel-name-btn {
-    color: #ef4444;
-}
-
-.cancel-name-btn:hover {
-    background: rgba(239, 68, 68, 0.1);
-}
-
-/* --- Sistema di Rinomina Pianta --- */
-.garden-name-container {
-    min-height: 32px;
-    margin-bottom: 2px;
-}
-
-.view-name-mode {
-    display: flex;
-    align-items: center;
     gap: 8px;
-}
-
-.edit-pencil-btn {
-    background: transparent;
-    border: none;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    transition: all 0.2s;
-    opacity: 0;
-    /* Appare solo al passaggio del mouse sulla card */
-}
-
-.garden-plant-card:hover .edit-pencil-btn {
-    opacity: 1;
-}
-
-.edit-pencil-btn:hover {
-    background: rgba(var(--color-primary-rgb), 0.1);
-    color: var(--color-primary);
-}
-
-.edit-name-mode {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.edit-name-input {
-    flex: 1;
-    padding: 4px 8px;
-    border: 1px solid var(--color-primary);
-    border-radius: 4px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-main);
-    background: var(--color-bg-body);
-    outline: none;
-}
-
-.confirm-name-btn,
-.cancel-name-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.confirm-name-btn {
-    color: var(--color-primary);
-}
-
-.confirm-name-btn:hover {
-    background: rgba(var(--color-primary-rgb), 0.1);
-}
-
-.cancel-name-btn {
-    color: #ef4444;
-}
-
-.cancel-name-btn:hover {
     background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid transparent;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-delete-full:hover {
+    background: #ef4444;
+    color: white;
 }

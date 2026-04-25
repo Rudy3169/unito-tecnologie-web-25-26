@@ -11,7 +11,6 @@ import com.phytosend.repository.UserRepository;
 import com.phytosend.repository.PlantRepository;
 import com.phytosend.repository.BotanicalCardRepository;
 
-import com.phytosend.service.PlantService;
 import com.phytosend.entity.Plant;
 import com.phytosend.entity.BotanicalCard;
 

@@ -1,45 +1,42 @@
 package com.phytosend.config;
 
-import com.phytosend.repository.UserRepository;
+import com.phytosend.repository.BotanicalCardRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.core.annotation.Order;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 
-/**
- * Seeder utile a popolare il database all'avvio nel caso in cui la raccolta
- * degli utenti fosse completamente vuota. Inserisce 3 utenze didattiche.
- */
 @Component
+@Order(3) // 1. Utenti, 2. Post, 3. Catalogo
 @Slf4j
-public class DataSeeder implements CommandLineRunner {
+public class CatalogSeeder implements CommandLineRunner {
 
     @Autowired
-    private UserRepository userRepository;
+    private BotanicalCardRepository botanicalCardRepository;
 
     @Autowired
     private DataSource dataSource;
 
     @Override
     public void run(String... args) throws Exception {
-        // Se il database non ha utenti, significa che è vergine e va popolato
-        if (userRepository.count() == 0) {
-            log.info("🌱 Database vuoto rilevato! Inizio importazione massiva da data.sql...");
+        // Ora controlliamo se il CATALOGO è vuoto, non gli utenti!
+        if (botanicalCardRepository.count() == 0) {
+            log.info("🌱 Catalogo vuoto rilevato! Inizio importazione delle schede da data.sql...");
 
-            // Usiamo ScriptUtils per far eseguire nativamente TUTTO il file SQL al database
             try (Connection connection = dataSource.getConnection()) {
                 ScriptUtils.executeSqlScript(connection, new ClassPathResource("data.sql"));
-                log.info("✔️ Importazione completata! Piante, Utenti e Post caricati in un lampo.");
+                log.info("✔️ Importazione completata! Le schede botaniche sono state caricate.");
             } catch (Exception e) {
                 log.error("Errore durante l'esecuzione del file data.sql: ", e);
             }
         } else {
-            log.info("🌿 Dati già presenti nel database. Skip importazione automatica.");
+            log.info("🌿 Le schede botaniche sono già presenti nel database. Skip importazione.");
         }
     }
 }

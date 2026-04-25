@@ -43,6 +43,7 @@ public class PlantService {
         newPlant.setGarden(user.getGarden());
         newPlant.setCard(card);
         newPlant.setPurchaseDate(LocalDate.now());
+        newPlant.setDeathDate(null);
 
         // Salviamo la pianta
         newPlant = plantRepository.save(newPlant);
