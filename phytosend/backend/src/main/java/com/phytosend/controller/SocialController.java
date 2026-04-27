@@ -191,5 +191,4 @@ public class SocialController {
         socialService.deleteComment(postId, commentId, utenteId);
         return ResponseEntity.noContent().build();
     }
-
 }

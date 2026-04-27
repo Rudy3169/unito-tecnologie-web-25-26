@@ -36,4 +36,14 @@ public class Plant {
     @ManyToOne
     @JoinColumn(name = "botanical_card_id")
     private BotanicalCard card;
+
+    // Una pianta può essere taggata in molti post
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private java.util.List<Post> posts;
+
+    // Una pianta può avere molti eventi di cura
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private java.util.List<CareEvent> careEvents;
 }
