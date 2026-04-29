@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { MapPin, Settings, Grid3X3, Camera } from 'lucide-react';
+import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import { ProfileSettings } from './ProfileSettings';
 import type { PostProps } from '../Feed/PostCard';
@@ -89,6 +89,7 @@ export function Profile() {
 
     useEffect(() => {
         setLoading(true);
+        setSelectedPostIndex(null);
         loadProfile();
     }, [profileUserId]);
 
@@ -214,9 +215,9 @@ export function Profile() {
                                 onClick={() => setSelectedPostIndex(index)}
                             >
                                 <img src={post.urlphoto} alt={post.title} />
-                                <div className="thumb-overlay">
-                                    <span>❤️ {post.likesCount ?? 0}</span>
-                                    <span>💬 {post.commentsCount ?? 0}</span>
+                                <div className="post-thumb-overlay">
+                                    <span><Heart size={12} /> {post.likesCount}</span>
+                                    <span><MessageCircle size={12} /> {post.commentsCount || 0}</span>
                                 </div>
                             </div>
                         ))}

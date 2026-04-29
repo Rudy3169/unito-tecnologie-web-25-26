@@ -32,12 +32,28 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
     const [selectedBotanicalCardId, setSelectedBotanicalCardId] = useState<number | null>(null);
     const [addToGarden, setAddToGarden] = useState(false);
 
+    // State per la ricerca piante nel giardino
+    const [gardenSearchQuery, setGardenSearchQuery] = useState('');
+    const [showGardenDropdown, setShowGardenDropdown] = useState(false);
+
     // State per la ricerca di piante nel catalogo
     const [suggestions, setSuggestions] = useState<PlantSuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Chiudi i dropdown quando si clicca fuori
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setShowSuggestions(false);
+                setShowGardenDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -54,7 +70,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
             setTitle(''); setCaption(''); setImageUrl(''); setPreviewUrl('');
             setErrorMsg(''); setSuggestions([]); setShowSuggestions(false);
             setSelectedPlantId(null); setSelectedBotanicalCardId(null); setPostMode('new');
-            setAddToGarden(true);
+            setAddToGarden(false); setPlantNickname(''); setGardenSearchQuery(''); setShowGardenDropdown(false);
         }
     }, [isOpen]);
 
@@ -123,13 +139,24 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         setShowSuggestions(false);
     };
 
-    // Selezione Pianta dal Giardino
-    const handleSelectFromGarden = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const pId = Number(e.target.value);
-        setSelectedPlantId(pId);
-        const selected = myPlants.find(p => p.id === pId);
-        if (selected) setTitle(selected.card?.commonName || 'Pianta dal giardino');
+    // Selezione Pianta dal Giardino (con dropdown visuale)
+    const handleSelectFromGarden = (plant: any) => {
+        setSelectedPlantId(plant.id);
+        setTitle(plant.card?.commonName || 'Pianta dal giardino');
+        setGardenSearchQuery(plant.card?.commonName || '');
+        setShowGardenDropdown(false);
     };
+
+    // Piante filtrate nel giardino: solo piante vive, con ricerca
+    const filteredGardenPlants = myPlants.filter(p => {
+        // Escludi piante morte
+        if (p.deathDate) return false;
+        if (!gardenSearchQuery.trim()) return true;
+        const q = gardenSearchQuery.toLowerCase();
+        const commonName = (p.card?.commonName || '').toLowerCase();
+        const nickname = (p.name || '').toLowerCase();
+        return commonName.includes(q) || nickname.includes(q);
+    });
 
     // Gestione Invio Form
     const handleSubmit = async (e: FormEvent) => {
@@ -147,7 +174,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
 
         const payload = {
             title: title,
-            plantNickname: plantNickname,
+            plantName: plantNickname,
             description: caption,
             urlPhoto: imageUrl,
             botanicalCardId: postMode === 'new' ? selectedBotanicalCardId : null,
@@ -207,18 +234,18 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                             <div className="post-mode-tabs" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                                 <button type="button"
                                     style={{ flex: 1, padding: '8px', borderRadius: '8px', border: postMode === 'new' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)', background: postMode === 'new' ? 'rgba(30, 94, 75, 0.1)' : 'transparent', color: postMode === 'new' ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
-                                    onClick={() => { setPostMode('new'); setSelectedPlantId(null); setTitle(''); }}>
+                                    onClick={() => { setPostMode('new'); setSelectedPlantId(null); setTitle(''); setGardenSearchQuery(''); setShowGardenDropdown(false); }}>
                                     <Sprout size={16} style={{ marginBottom: '-3px', marginRight: '4px' }} /> Nuova Pianta
                                 </button>
                                 <button type="button"
-                                    disabled={myPlants.length === 0}
-                                    title={myPlants.length === 0 ? "Aggiungi prima una pianta al tuo giardino!" : ""}
+                                    disabled={myPlants.filter(p => !p.deathDate).length === 0}
+                                    title={myPlants.filter(p => !p.deathDate).length === 0 ? "Non hai piante vive nel tuo giardino!" : ""}
                                     style={{
                                         flex: 1, padding: '8px', borderRadius: '8px', border: postMode === 'garden' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
                                         background: postMode === 'garden' ? 'rgba(30, 94, 75, 0.1)' : 'transparent', color: postMode === 'garden' ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                                        opacity: myPlants.length === 0 ? 0.5 : 1, cursor: myPlants.length === 0 ? 'not-allowed' : 'pointer'
+                                        opacity: myPlants.filter(p => !p.deathDate).length === 0 ? 0.5 : 1, cursor: myPlants.filter(p => !p.deathDate).length === 0 ? 'not-allowed' : 'pointer'
                                     }}
-                                    onClick={() => { setPostMode('garden'); setSelectedBotanicalCardId(null); setTitle(''); }}>
+                                    onClick={() => { setPostMode('garden'); setSelectedBotanicalCardId(null); setTitle(''); setAddToGarden(false); setPlantNickname(''); }}>
                                     <Fence size={16} style={{ marginBottom: '-3px', marginRight: '4px' }} /> Dal Giardino
                                 </button>
                             </div>
@@ -254,14 +281,46 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                                         )}
                                     </div>
                                 ) : (
-                                    <select required className="search-input" value={selectedPlantId || ''} onChange={handleSelectFromGarden}>
-                                        <option value="" disabled>-- Scegli una pianta --</option>
-                                        {myPlants.map(plant => (
-                                            <option key={plant.id} value={plant.id}>
-                                                {plant.card?.commonName || 'Pianta Sconosciuta'} (Aggiunta il {new Date(plant.purchaseDate).toLocaleDateString()})
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div className="input-with-icon">
+                                        <input
+                                            type="text"
+                                            value={gardenSearchQuery}
+                                            onChange={(e) => {
+                                                setGardenSearchQuery(e.target.value);
+                                                setSelectedPlantId(null);
+                                                setTitle('');
+                                                setShowGardenDropdown(true);
+                                            }}
+                                            onFocus={() => setShowGardenDropdown(true)}
+                                            required={!selectedPlantId}
+                                            placeholder="Cerca tra le tue piante..."
+                                            className="search-input"
+                                            autoComplete="off"
+                                        />
+                                        {showGardenDropdown && (
+                                            <ul className="autocomplete-dropdown">
+                                                {filteredGardenPlants.length > 0 ? (
+                                                    filteredGardenPlants.map(plant => (
+                                                        <li key={plant.id} className="suggestion-item" onClick={() => handleSelectFromGarden(plant)}>
+                                                            <img src={plant.urlPhoto || plant.card?.urlDefaultPhoto || '/placeholder.png'} alt={plant.card?.commonName} className="suggestion-img" />
+                                                            <div className="suggestion-info">
+                                                                <span className="suggestion-name">{plant.card?.commonName || 'Pianta Sconosciuta'}</span>
+                                                                <span className="suggestion-scientific">
+                                                                    {plant.name ? `"${plant.name}" · ` : ''}
+                                                                    Aggiunta il {new Date(plant.purchaseDate).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
+                                                            {selectedPlantId === plant.id && <Check size={16} className="garden-check-icon" />}
+                                                        </li>
+                                                    ))
+                                                ) : (
+                                                    <li className="suggestion-item no-hover">
+                                                        <span className="suggestion-scientific">Nessuna pianta trovata</span>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        )}
+                                    </div>
                                 )}
                             </div>
 
@@ -283,13 +342,17 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
 
                             {/* Input Soprannome (Visibile solo se aggiungo al giardino) */}
                             {postMode === 'new' && selectedBotanicalCardId && addToGarden && (
-                                <div className="form-group" style={{ marginTop: '4px', marginBottom: '8px' }}>
+                                <div className="nickname-field">
+                                    <label className="nickname-label">
+                                        <Sprout size={14} />
+                                        Soprannome della pianta
+                                    </label>
                                     <input
                                         type="text"
-                                        placeholder="Dai un nome alla tua pianta (es. Pina) - Facoltativo"
+                                        placeholder='Es. "Pina" — facoltativo'
                                         value={plantNickname}
                                         onChange={(e) => setPlantNickname(e.target.value)}
-                                        className="search-input"
+                                        className="nickname-input"
                                     />
                                 </div>
                             )}

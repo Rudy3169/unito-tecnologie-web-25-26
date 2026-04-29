@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Controller per la gestione delle piante
+ * Controller per la gestione delle piante (sola lettura).
+ * Le operazioni di modifica (POST, PUT, DELETE) sono gestite da UserController.
  */
 @RestController
 @RequestMapping("/api/utenti")
@@ -38,19 +39,5 @@ public class PlantController {
         return plantService.findPlant(utenteId).stream()
                 .map(dtoConverter::toPlantDto)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Elimina permanentemente una specifica pianta posseduta dall'utente.
-     *
-     * @param utenteId identificativo dell'utente proprietario del giardino
-     * @param plantId  identificativo della pianta da rimuovere
-     * @return un responso vuoto (204 No Content) in caso di successo
-     */
-    @DeleteMapping("/{utenteId}/piante/{plantId}")
-    public org.springframework.http.ResponseEntity<Void> removePlant(@PathVariable @NonNull Long utenteId,
-            @PathVariable @NonNull Long plantId) {
-        plantService.rimuoviPianta(plantId);
-        return org.springframework.http.ResponseEntity.noContent().build();
     }
 }

@@ -454,3 +454,81 @@
 .animated-toggle-btn.active .toggle-icon-wrapper {
     transform: rotate(360deg) scale(1.1);
 }
+
+/* --- Nickname Field (Soprannome pianta) --- */
+.nickname-field {
+    margin-top: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeInNickname 0.25s ease;
+}
+
+@keyframes fadeInNickname {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.nickname-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.nickname-input {
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-primary);
+    border-radius: var(--border-radius-soft);
+    background: var(--color-bg-card);
+    color: var(--color-text-main);
+    font-size: 0.92rem;
+    font-style: italic;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nickname-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.nickname-input::placeholder {
+    font-style: italic;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+}
+
+/* --- Garden Dropdown Enhancements --- */
+.garden-check-icon {
+    color: var(--color-primary);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.suggestion-item.no-hover {
+    cursor: default;
+    padding: 14px 12px;
+    justify-content: center;
+    color: var(--color-text-muted);
+}
+
+.suggestion-item.no-hover:hover {
+    background: transparent;
+}
+
+/* Selected plant highlight in garden dropdown */
+.suggestion-item:has(.garden-check-icon) {
+    background: rgba(var(--color-primary-rgb), 0.06);
+    border-left: 3px solid var(--color-primary);
+}

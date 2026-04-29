@@ -1,5 +1,6 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { MessageCircle, X, Send, AlertCircle, Heart, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './CommentSection.css';
 
 interface Comment {
@@ -25,6 +26,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+    const navigate = useNavigate();
 
     // Stato per tracciare a CHI stiamo rispondendo e sotto quale COMMENTO GENITORE
     const [replyingTo, setReplyingTo] = useState<{ authorName: string, parentId: number } | null>(null);
@@ -285,7 +287,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                     {/* 1. IL COMMENTO GENITORE */}
                                     <div className="comment-item-content">
                                         <div className="comment-header-row">
-                                            <strong>{parent.authorName}</strong>
+                                            <strong onClick={() => navigate(`/profile/${parent.authorId}`)} style={{cursor: 'pointer'}}>{parent.authorName}</strong>
                                             <span className="comment-time">{getRelativeTime(parent.creationDate)}</span>
 
                                             {/* Il cestino ora è sulla riga del nome */}
@@ -324,7 +326,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                             return (
                                                                 <div key={`reply-${reply.id}`} className="comment-item-content">
                                                                     <div className="comment-header-row">
-                                                                        <strong>{reply.authorName}</strong>
+                                                                        <strong onClick={() => navigate(`/profile/${reply.authorId}`)} style={{cursor: 'pointer'}}>{reply.authorName}</strong>
                                                                         <span className="comment-time">{getRelativeTime(reply.creationDate)}</span>
                                                                     </div>
                                                                     <p>{reply.text}</p>

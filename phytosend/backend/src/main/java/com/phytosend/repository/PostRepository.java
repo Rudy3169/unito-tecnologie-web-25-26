@@ -28,4 +28,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      * @return Lista di post dell'autore
      */
     List<Post> findByAuthorIdOrderByCreationDateDesc(Long authorId);
+
+    /**
+     * Trova tutti i post associati a una pianta specifica
+     * 
+     * @param plantId ID della pianta
+     * @return Lista di post della pianta ordinati per data decrescente
+     */
+    List<Post> findByPlantIdOrderByCreationDateDesc(Long plantId);
 }

@@ -3,7 +3,6 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 24px;
-    padding-top: 90px;
     animation: fadeIn 0.4s ease;
     min-height: 100vh;
 }
@@ -346,6 +345,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    animation: slideUp 0.25s ease;
 }
 
 .close-modal-btn {
@@ -359,10 +359,15 @@
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
+    transition: background 0.2s;
+}
+
+.close-modal-btn:hover {
+    background: rgba(0, 0, 0, 0.75);
 }
 
 .detail-header {
-    height: 200px;
+    height: 220px;
     background-size: cover;
     background-position: center;
     position: relative;
@@ -374,7 +379,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.8));
+    background: linear-gradient(transparent 30%, rgba(0, 0, 0, 0.85));
 }
 
 .detail-header-content {
@@ -382,16 +387,43 @@
     z-index: 5;
     padding: 20px;
     color: white;
+    width: 100%;
 }
 
 .detail-header-content h2 {
-    margin: 0;
+    margin: 4px 0 0 0;
     font-size: 1.8rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .detail-header-content p {
     margin: 4px 0 0 0;
     opacity: 0.8;
+}
+
+/* Badge stato pianta */
+.plant-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.alive-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.dead-badge {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .detail-body {
@@ -430,17 +462,112 @@
     color: var(--color-text-muted);
 }
 
+/* Timeline migliorata */
 .timeline-placeholder {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .timeline-item {
-    padding: 12px;
+    padding: 10px 14px;
     background: var(--color-bg-body);
     border-left: 3px solid var(--color-primary);
     border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-main);
+}
+
+.timeline-death {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+}
+
+.timeline-date {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    min-width: fit-content;
+}
+
+.timeline-death .timeline-date {
+    color: #ef4444;
+}
+
+/* Griglia Post della Pianta */
+.plant-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.plant-post-thumb {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--color-bg-body);
+}
+
+.plant-post-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+}
+
+.plant-post-thumb:hover img {
+    transform: scale(1.05);
+}
+
+.post-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    background: var(--color-bg-body);
+}
+
+.post-thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.post-thumb-overlay span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.plant-post-thumb:hover .post-thumb-overlay {
+    opacity: 1;
+}
+
+/* Loading post */
+.posts-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+    color: var(--color-text-muted);
     font-size: 0.9rem;
 }
 
@@ -474,6 +601,17 @@
 .btn-delete-full:hover {
     background: #ef4444;
     color: white;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* --- Modale Aggiungi Pianta --- */

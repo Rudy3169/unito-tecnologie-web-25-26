@@ -244,27 +244,30 @@
     transform: scale(1.06);
 }
 
-.thumb-overlay {
+.post-thumb-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-lg);
+    gap: 12px;
     opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.profile-post-thumb:hover .thumb-overlay {
-    opacity: 1;
-}
-
-.thumb-overlay span {
+    transition: opacity 0.2s ease;
     color: white;
-    font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 0.3px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.post-thumb-overlay span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.profile-post-thumb:hover .post-thumb-overlay,
+.plant-post-thumb:hover .post-thumb-overlay {
+    opacity: 1;
 }
 
 /* ═══ MODALE POST SCROLL ═══ */
@@ -426,8 +429,13 @@
 
 /* ═══ ANIMAZIONI ═══ */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
@@ -435,6 +443,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

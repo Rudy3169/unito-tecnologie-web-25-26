@@ -1,6 +1,7 @@
 import { Heart, MessageCircle, Bookmark, Trash2 } from 'lucide-react';
 import { CommentSection } from './CommentSection';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PostCard.css';
 
 export interface AuthorDto {
@@ -18,6 +19,14 @@ export interface PostProps {
     urlphoto: string;
     creationDate: string;
     author: AuthorDto;
+    plant?: {
+        id: number;
+        name?: string;
+        card?: {
+            id: number;
+            commonName: string;
+        }
+    };
     likesCount?: number;
     isLikedByMe?: boolean;
     commentsCount?: number;
@@ -31,10 +40,11 @@ interface PostCardLayoutProps extends PostProps {
 }
 
 export function PostCard({
-    id, title, description, urlphoto, author, likesCount, isLikedByMe, commentsCount, onLike, onDelete, onCommentUpdate
+    id, title, description, urlphoto, author, plant, likesCount, isLikedByMe, commentsCount, onLike, onDelete, onCommentUpdate
 }: PostCardLayoutProps) {
     const [showComments, setShowComments] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
+    const navigate = useNavigate();
 
     // 2. Controllo di sicurezza Frontend: Questo post è mio?
     const currentUserId = localStorage.getItem('phytosend_userId');
@@ -50,10 +60,22 @@ export function PostCard({
             <header className="post-header">
                 {/* Raggruppiamo Avatar e Info in un div per gestire lo spazio */}
                 <div className="header-user-section">
-                    <div className="user-avatar">{author?.name?.charAt(0)?.toUpperCase() ?? '?'}</div>
+                    <div className="user-avatar" 
+                         onClick={() => author?.id && navigate(`/profile/${author.id}`)}
+                         style={{cursor: 'pointer'}}>
+                        {author?.name?.charAt(0)?.toUpperCase() ?? '?'}
+                    </div>
                     <div className="user-info">
-                        <span className="username">{author?.name ?? 'Anonimo'}</span>
-                        <span className="location">{title}</span>
+                        <span className="username" 
+                              onClick={() => author?.id && navigate(`/profile/${author.id}`)} 
+                              style={{cursor: 'pointer'}}>
+                            {author?.name ?? 'Anonimo'}
+                        </span>
+                        <span className="location" 
+                              onClick={() => plant?.card?.id && navigate(`/plant/${plant.card.id}`)}
+                              style={{cursor: plant?.card ? 'pointer' : 'default'}}>
+                            {plant ? (plant.name || plant.card?.commonName) : title}
+                        </span>
                     </div>
                 </div>
 
@@ -92,7 +114,9 @@ export function PostCard({
             <div className="post-content">
                 <span className="likes">{likesCount} like per Madre Natura</span>
                 <p className="post-caption">
-                    <span>{author?.name ?? 'Anonimo'}</span>
+                    <span onClick={() => author?.id && navigate(`/profile/${author.id}`)} style={{cursor: 'pointer'}}>
+                        {author?.name ?? 'Anonimo'}
+                    </span>
                     {description}
                 </p>
             </div>

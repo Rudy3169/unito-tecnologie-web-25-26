@@ -148,6 +148,27 @@ public class SocialService {
     }
 
     /**
+     * Recupera tutti i post associati a una pianta specifica.
+     *
+     * @param plantId       ID della pianta
+     * @param currentUserId ID dell'utente che sta facendo la richiesta (per
+     *                      calcolare likedByMe)
+     * @return lista di PostDto ordinati per data discendente
+     */
+    public List<PostDto> getPostsByPlant(Long plantId, Long currentUserId) {
+        List<Post> posts = postRepository.findByPlantIdOrderByCreationDateDesc(plantId);
+        return posts.stream().map(post -> {
+            PostDto dto = dtoConverter.toPostDto(post);
+            if (currentUserId != null && post.getLikedBy() != null) {
+                boolean liked = post.getLikedBy().stream()
+                        .anyMatch(u -> u.getId().equals(currentUserId));
+                dto.setLikedByMe(liked);
+            }
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
      * Gestisce l'aggiunta di un blocco di testo commento sotto un certo post
      * autorizzato da un utente valido.
      *

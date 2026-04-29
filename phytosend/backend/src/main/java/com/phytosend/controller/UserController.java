@@ -189,6 +189,7 @@ public class UserController {
      *         buon fine
      */
     @DeleteMapping("/{userId}/piante/{plantId}")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> deletePlantPermanently(@PathVariable Long userId, @PathVariable Long plantId) {
         // Cerca la pianta
         Plant plant = plantRepository.findById(plantId)

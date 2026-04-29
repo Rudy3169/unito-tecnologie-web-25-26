@@ -73,6 +73,20 @@ public class SocialController {
     }
 
     /**
+     * Recupera tutti i post associati a una specifica pianta.
+     *
+     * @param plantId  ID della pianta
+     * @param utenteId ID dell'utente corrente (per calcolare likedByMe)
+     * @return lista di PostDto ordinati per data discendente
+     */
+    @GetMapping("/posts/plant/{plantId}")
+    public List<PostDto> getPostsByPlant(
+            @PathVariable Long plantId,
+            @RequestParam(required = false) Long utenteId) {
+        return socialService.getPostsByPlant(plantId, utenteId);
+    }
+
+    /**
      * Crea un nuovo post all'interno della piattaforma social e lo attribuisce
      * all'autore.
      *
