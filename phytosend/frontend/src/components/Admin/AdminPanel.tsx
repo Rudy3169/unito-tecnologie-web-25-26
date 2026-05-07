@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, DatabaseBackup, Loader, Server, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { apiFetch } from '../../utils/apiFetch';
 import './AdminPanel.css';
 
 export function AdminPanel() {
@@ -26,7 +27,7 @@ export function AdminPanel() {
         const token = localStorage.getItem('phytosend_token');
         setIsFetchingStats(true);
         try {
-            const response = await fetch('/api/admin/stats', {
+            const response = await apiFetch('/api/admin/stats', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -50,7 +51,7 @@ export function AdminPanel() {
         const token = localStorage.getItem('phytosend_token');
         setLoadingState(true);
         try {
-            const response = await fetch(endpoint, {
+            const response = await apiFetch(endpoint, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

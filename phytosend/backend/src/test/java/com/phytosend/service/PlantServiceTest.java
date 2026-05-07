@@ -81,7 +81,7 @@ class PlantServiceTest {
         assertEquals(user.getGarden(), createdPlant.getGarden());
         assertEquals(card, createdPlant.getCard());
         verify(plantRepository).save(any(Plant.class));
-        verify(careEventRepository).save(any(CareEvent.class));
+        verify(careEventRepository, times(3)).save(any(CareEvent.class));
     }
 
     /**
@@ -116,8 +116,8 @@ class PlantServiceTest {
         plantService.addPlantToGarden(user, card);
 
         // Assert: catturiamo l'evento salvato e verifichiamo i campi
-        verify(careEventRepository).save(careEventCaptor.capture());
-        CareEvent savedEvent = careEventCaptor.getValue();
+        verify(careEventRepository, times(3)).save(careEventCaptor.capture());
+        CareEvent savedEvent = careEventCaptor.getAllValues().get(0); // Il primo è quello dell'ACQUA
 
         assertEquals("ACQUA", savedEvent.getType());
         assertFalse(savedEvent.isCompleted());

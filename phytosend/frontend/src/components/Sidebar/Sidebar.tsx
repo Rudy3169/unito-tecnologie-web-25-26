@@ -50,7 +50,7 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     const renderDropdownMenu = (classNameStr: string) => (
         <div className={classNameStr}>
-            <Link to="/saved" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>
+            <Link to="/saved-posts" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>
                 <Bookmark size={18} />
                 <span>Post Salvati</span>
             </Link>

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { PenLine, AlertTriangle } from 'lucide-react';
 import { PostList } from './PostList';
 import { CreatePostForm } from './CreatePostForm';
 import type { PostProps } from './PostCard';
+import { apiFetch } from '../../utils/apiFetch';
 import './HomeFeed.css';
 
 export function HomeFeed() {
@@ -16,36 +17,63 @@ export function HomeFeed() {
     // Funzione per eliminare un post
     const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
+    // Pagination state
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const observerRef = useRef<IntersectionObserver | null>(null);
+
+    // Sensore per l'infinite scroll
+    const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+        if (loading) return;
+        if (observerRef.current) observerRef.current.disconnect();
+
+        observerRef.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+
+        if (node) observerRef.current.observe(node);
+    }, [loading, hasMore]);
+
     // Funzione per caricare i post
-    const caricaPosts = () => {
+    const caricaPosts = (pageNum: number) => {
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
         const url = userId
-            ? `/api/social/posts?utenteId=${userId}`
-            : '/api/social/posts';
+            ? `/api/social/posts?utenteId=${userId}&page=${pageNum}&size=10`
+            : `/api/social/posts?page=${pageNum}&size=10`;
 
-        fetch(url, {
+        setLoading(true);
+        apiFetch(url, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => {
-                if (res.status === 401 || res.status === 403) {
-                    localStorage.clear();
-                    window.location.href = '/';
-                    return;
-                }
                 if (!res.ok) throw new Error(`Errore server: ${res.status}`);
                 return res.json();
             })
-            .then(data => setPosts(data.content ?? []))
-            .catch(err => console.error("Errore:", err));
+            .then(data => {
+                setPosts(prev => {
+                    if (pageNum === 0) return data.content ?? [];
+                    return [...prev, ...(data.content ?? [])];
+                });
+                setHasMore(!data.last);
+            })
+            .catch(err => console.error("Errore:", err))
+            .finally(() => setLoading(false));
     };
 
     useEffect(() => {
-        caricaPosts();
-    }, []);
+        caricaPosts(page);
+    }, [page]);
 
     const handleAddPost = () => {
-        caricaPosts();
+        if (page === 0) {
+            caricaPosts(0);
+        } else {
+            setPage(0);
+        }
     };
 
     // Funzione per mettere like a un post
@@ -65,12 +93,38 @@ export function HomeFeed() {
             return post;
         }));
 
-        fetch(`/api/social/posts/${postId}/like?utenteId=${userId}`, {
+        apiFetch(`/api/social/posts/${postId}/like?utenteId=${userId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(err => {
             console.error("Errore like:", err);
-            caricaPosts();
+            if (page === 0) caricaPosts(0);
+            else setPage(0);
+        });
+    };
+
+    // Funzione per salvare un post
+    const handleToggleSave = (postId: number) => {
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        setPosts(posts.map(post => {
+            if (post.id === postId) {
+                return {
+                    ...post,
+                    isSavedByMe: !post.isSavedByMe
+                };
+            }
+            return post;
+        }));
+
+        apiFetch(`/api/social/posts/${postId}/save?utenteId=${userId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(err => {
+            console.error("Errore save:", err);
+            if (page === 0) caricaPosts(0);
+            else setPage(0);
         });
     };
 
@@ -88,7 +142,7 @@ export function HomeFeed() {
         const userId = localStorage.getItem('phytosend_userId');
 
         try {
-            const response = await fetch(`/api/social/posts/${postId}?utenteId=${userId}`, {
+            const response = await apiFetch(`/api/social/posts/${postId}?utenteId=${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -126,8 +180,25 @@ export function HomeFeed() {
                 posts={posts}
                 onToggleLike={handleToggleLike}
                 onDeletePost={handleDeleteClick}
-                onCommentUpdate={caricaPosts}
+                onToggleSave={handleToggleSave}
+                onCommentUpdate={() => {
+                    if (page === 0) caricaPosts(0);
+                    else setPage(0);
+                }}
+                lastPostRef={lastElementRef}
             />
+
+            {loading && (
+                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-text-muted)' }}>
+                    Caricamento nuovi post...
+                </div>
+            )}
+
+            {!hasMore && posts.length > 0 && (
+                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-text-muted)', marginBottom: '40px' }}>
+                    Non ci sono altri post da mostrare.
+                </div>
+            )}
 
             {/* POP-UP DI CONFERMA ELIMINAZIONE */}
             {postToDelete !== null && (

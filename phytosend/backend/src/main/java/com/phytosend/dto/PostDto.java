@@ -23,6 +23,10 @@ public class PostDto {
     @JsonProperty("isLikedByMe")
     private boolean isLikedByMe;
 
+    // Flag per indicare se il post è salvato dall'utente
+    @JsonProperty("isSavedByMe")
+    private boolean isSavedByMe;
+
     // Getter e Setter per commentsCount
     @JsonProperty("commentsCount")
     public Integer getCommentsCount() {

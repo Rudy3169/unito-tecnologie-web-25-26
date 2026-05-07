@@ -143,6 +143,11 @@ public class SocialService {
                         .anyMatch(u -> u.getId().equals(currentUserId));
                 dto.setLikedByMe(liked);
             }
+            if (currentUserId != null && post.getSavedBy() != null) {
+                boolean saved = post.getSavedBy().stream()
+                        .anyMatch(u -> u.getId().equals(currentUserId));
+                dto.setSavedByMe(saved);
+            }
             return dto;
         }).collect(java.util.stream.Collectors.toList());
     }
@@ -163,6 +168,11 @@ public class SocialService {
                 boolean liked = post.getLikedBy().stream()
                         .anyMatch(u -> u.getId().equals(currentUserId));
                 dto.setLikedByMe(liked);
+            }
+            if (currentUserId != null && post.getSavedBy() != null) {
+                boolean saved = post.getSavedBy().stream()
+                        .anyMatch(u -> u.getId().equals(currentUserId));
+                dto.setSavedByMe(saved);
             }
             return dto;
         }).collect(java.util.stream.Collectors.toList());
@@ -365,5 +375,50 @@ public class SocialService {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Errore database: " + e.getMessage());
         }
+    }
+
+    /**
+     * Aggiunge o rimuove un post dai preferiti (salvati) di un utente.
+     * 
+     * @param postId   ID del post
+     * @param utenteId ID dell'utente
+     * @return true se il post è stato salvato, false se è stato rimosso
+     */
+    public boolean toggleSavePost(Long postId, Long utenteId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post non trovato"));
+        User user = userRepository.findById(utenteId)
+                .orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+
+        boolean isSaved = post.getSavedBy().contains(user);
+        if (isSaved) {
+            post.getSavedBy().remove(user);
+        } else {
+            post.getSavedBy().add(user);
+        }
+
+        postRepository.save(post);
+        return !isSaved;
+    }
+
+    /**
+     * Recupera tutti i post salvati da un utente specifico.
+     * 
+     * @param utenteId ID dell'utente
+     * @return lista di PostDto ordinati
+     */
+    public List<PostDto> getSavedPosts(Long utenteId) {
+        List<Post> savedPosts = postRepository.findBySavedByIdOrderByCreationDateDesc(utenteId);
+
+        return savedPosts.stream().map(post -> {
+            PostDto dto = dtoConverter.toPostDto(post);
+            if (post.getLikedBy() != null) {
+                boolean liked = post.getLikedBy().stream()
+                        .anyMatch(u -> u.getId().equals(utenteId));
+                dto.setLikedByMe(liked);
+            }
+            dto.setSavedByMe(true);
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
     }
 }

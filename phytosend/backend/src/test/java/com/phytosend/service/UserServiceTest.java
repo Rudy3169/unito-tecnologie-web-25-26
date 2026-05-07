@@ -221,29 +221,11 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act
-        User upgraded = userService.changeRole(1L, UserRole.PRO);
+        User upgraded = userService.changeRole(1L, UserRole.ADMIN);
 
         // Assert
-        assertEquals(UserRole.PRO, upgraded.getRole());
+        assertEquals(UserRole.ADMIN, upgraded.getRole());
         verify(userRepository).save(user);
-    }
-
-    /**
-     * Upgrade(): shortcut per promuovere a PRO — verifica che il ruolo risultante
-     * sia PRO.
-     */
-    @Test
-    void upgrade_PromotesUserToPro() {
-        // Arrange
-        user.setRole(UserRole.BASE);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
-
-        // Act
-        User result = userService.Upgrade(1L);
-
-        // Assert
-        assertEquals(UserRole.PRO, result.getRole());
     }
 
     /**

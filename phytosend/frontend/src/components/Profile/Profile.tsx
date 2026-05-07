@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import { ProfileSettings } from './ProfileSettings';
 import type { PostProps } from '../Feed/PostCard';
+import { apiFetch } from '../../utils/apiFetch';
 import './Profile.css';
 
 interface UserProfile {
@@ -26,6 +27,7 @@ export function Profile() {
     // L'ID dell'utente corrente (chi è loggato)
     const currentUserId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
+    const navigate = useNavigate();
 
     // Se c'è un parametro nella URL, mostriamo quel profilo, altrimenti il nostro
     const profileUserId = paramUserId || currentUserId;
@@ -49,12 +51,12 @@ export function Profile() {
         }
 
         // 1. Carica dati utente
-        fetch(`/api/utenti/${profileUserId}`, {
+        apiFetch(`/api/utenti/${profileUserId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => {
-                // Se il token è scaduto/invalido (401/403) oppure il MIO profilo è stato cancellato (404)
-                if (res.status === 401 || res.status === 403 || (res.status === 404 && isOwnProfile)) {
+                // Se il MIO profilo è stato cancellato (404), logout
+                if (res.status === 404 && isOwnProfile) {
                     localStorage.clear();
                     window.location.href = '/';
                     return null;
@@ -65,7 +67,7 @@ export function Profile() {
             .catch(err => console.error("Errore caricamento profilo:", err));
 
         // 2. Carica i post dell'utente
-        fetch(`/api/social/posts/user/${profileUserId}?utenteId=${currentUserId}`, {
+        apiFetch(`/api/social/posts/user/${profileUserId}?utenteId=${currentUserId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.ok ? res.json() : [])
@@ -109,7 +111,25 @@ export function Profile() {
             return post;
         }));
 
-        fetch(`/api/social/posts/${postId}/like?utenteId=${userId}`, {
+        apiFetch(`/api/social/posts/${postId}/like?utenteId=${userId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(() => loadProfile());
+    };
+
+    // Funzione per salvare un post
+    const handleToggleSave = (postId: number) => {
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        setPosts(posts.map(post => {
+            if (post.id === postId) {
+                return { ...post, isSavedByMe: !post.isSavedByMe };
+            }
+            return post;
+        }));
+
+        apiFetch(`/api/social/posts/${postId}/save?utenteId=${userId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(() => loadProfile());
@@ -194,6 +214,15 @@ export function Profile() {
                 </div>
             </div>
 
+            {/* ═══ BOTTONE VISITA GIARDINO ═══ */}
+            <button
+                className="visit-garden-btn"
+                onClick={() => navigate(isOwnProfile ? '/my-garden' : `/garden/${profileUserId}`)}
+            >
+                <Fence size={18} />
+                {isOwnProfile ? 'Il mio Giardino' : 'Visita Giardino'}
+            </button>
+
             {/* ═══ GRIGLIA POST ═══ */}
             <div className="profile-grid-section">
                 <div className="profile-grid-header">
@@ -244,8 +273,10 @@ export function Profile() {
                                     author={post.author}
                                     likesCount={post.likesCount}
                                     isLikedByMe={post.isLikedByMe}
+                                    isSavedByMe={post.isSavedByMe}
                                     commentsCount={post.commentsCount}
                                     onLike={handleToggleLike}
+                                    onSave={handleToggleSave}
                                     onCommentUpdate={loadProfile}
                                 />
                             </div>

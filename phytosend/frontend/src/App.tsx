@@ -8,6 +8,7 @@ import { SearchPage } from './components/Search/SearchPage';
 import { AdminPanel } from './components/Admin/AdminPanel';
 import { MyGarden } from './components/MyGarden/MyGarden';
 import { PlantDetail } from './components/Search/PlantDetail';
+import { SavedPosts } from './components/Feed/SavedPosts';
 import './styles/App.css';
 
 function App() {
@@ -41,6 +42,8 @@ function App() {
                     <Route path="/profile/:userId" element={<Profile />} />
                     <Route path="/admin" element={<AdminPanel />} />
                     <Route path="/my-garden" element={<MyGarden />} />
+                    <Route path="/garden/:userId" element={<MyGarden />} />
+                    <Route path="/saved-posts" element={<SavedPosts />} />
                 </Routes>
             </main>
 

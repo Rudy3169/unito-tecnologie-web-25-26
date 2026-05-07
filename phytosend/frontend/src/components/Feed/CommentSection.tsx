@@ -1,6 +1,7 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { MessageCircle, X, Send, AlertCircle, Heart, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../../utils/apiFetch';
 import './CommentSection.css';
 
 interface Comment {
@@ -78,7 +79,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
 
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
-        fetch(`/api/social/posts/${postId}/commenti?utenteId=${userId}`, {
+        apiFetch(`/api/social/posts/${postId}/commenti?utenteId=${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store' // Forza il ricaricamento da server
         })
@@ -118,7 +119,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
         }));
 
         // Chiamata al backend per rendere il dato permanente
-        fetch(`/api/social/commenti/${commentId}/like?utenteId=${userId}`, {
+        apiFetch(`/api/social/commenti/${commentId}/like?utenteId=${userId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(err => {
@@ -126,7 +127,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
             // In caso di errore, ricarichiamo i commenti dal server per ripristinare lo stato corretto
             const tokenFetch = localStorage.getItem('phytosend_token');
             const userId = localStorage.getItem('phytosend_userId');
-            fetch(`/api/social/posts/${postId}/commenti?utenteId=${userId}`, {
+            apiFetch(`/api/social/posts/${postId}/commenti?utenteId=${userId}`, {
                 headers: { 'Authorization': `Bearer ${tokenFetch}` },
                 cache: 'no-store'
             })
@@ -176,7 +177,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
 
         try {
             // Se stiamo rispondendo, potresti voler passare parentId al backend!
-            const response = await fetch(
+            const response = await apiFetch(
                 `/api/social/posts/${postId}/commenti?utenteId=${userId}`,
                 {
                     method: 'POST',
@@ -227,7 +228,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
         const userId = localStorage.getItem('phytosend_userId');
 
         try {
-            const response = await fetch(`/api/social/posts/${postId}/commenti/${commentToDelete}?utenteId=${userId}`, {
+            const response = await apiFetch(`/api/social/posts/${postId}/commenti/${commentToDelete}?utenteId=${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

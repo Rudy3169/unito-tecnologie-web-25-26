@@ -1,52 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
-import { Fence, Droplets, Plus, CalendarHeart, Trash2, Pencil, Check, X, Sprout, Skull, Info, Image as ImageIcon, Loader, Heart, MessageCircle } from 'lucide-react';
-import { PostCard } from '../Feed/PostCard';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { Fence, Plus, Sprout, Skull, Loader, ArrowLeft } from 'lucide-react';
 import type { PostProps } from '../Feed/PostCard';
+import { apiFetch } from '../../utils/apiFetch';
 import '../Profile/Profile.css';
 import './MyGarden.css';
 
-// Interfaccia base per un elemento del giardino
-interface PlantItem {
-    id: number;
-    plantName?: string;
-    urlPhoto?: string;
-    purchaseDate: string;
-    deathDate?: string;
-    card: {
-        commonName: string;
-        scientificName: string;
-        family: string;
-        urlDefaultPhoto: string;
-        exposure?: string;
-        waterFrequencyDays?: string;
-        fertilization?: string;
-        soil?: string;
-    };
-}
-
-// Interfaccia per i post associati a una pianta
-interface PostItem {
-    id: number;
-    title: string;
-    description: string;
-    urlphoto?: string;
-    URLPhoto?: string;
-    creationDate: string;
-    likesCount: number;
-    commentsCount: number;
-    author?: { username: string; profileImage?: string };
-}
-
-// Interfaccia per i risultati della ricerca
-interface PlantSuggestion {
-    id: number;
-    commonName: string;
-    scientificName: string;
-    urlDefaultPhoto: string;
-}
+import { PlantCard } from './PlantCard';
+import { AddPlantModal, DeletePlantModal, PlantDetailModal, PostsScrollModal } from './MyGardenModals';
+import type { PlantItem, PostItem, PlantSuggestion } from './types';
 
 // Funzione principale che gestisce il giardino personale
 export function MyGarden() {
+    const { userId: paramUserId } = useParams<{ userId: string }>();
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const currentUserId = localStorage.getItem('phytosend_userId');
+
+    // Se c'è un parametro nella URL, mostriamo il giardino di quell'utente
+    const gardenUserId = paramUserId || currentUserId;
+    const isOwnGarden = !paramUserId || paramUserId === currentUserId;
+
+    // Nome del proprietario del giardino (per quando visitiamo il giardino di un altro utente)
+    const [ownerName, setOwnerName] = useState<string>('');
+
     // Stati per la gestione delle piante nel giardino
     const [myPlants, setMyPlants] = useState<PlantItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -85,9 +62,25 @@ export function MyGarden() {
     // Effetto per il caricamento iniziale del giardino
     useEffect(() => {
         const token = localStorage.getItem('phytosend_token');
-        const userId = localStorage.getItem('phytosend_userId');
 
-        fetch(`/api/utenti/${userId}/piante`, {
+        setLoading(true);
+        setMyPlants([]);
+        setPlantPhotoMap({});
+        setOwnerName('');
+
+        // Se stiamo visitando il giardino di un altro utente, carichiamo il suo nome
+        if (!isOwnGarden && gardenUserId) {
+            apiFetch(`/api/utenti/${gardenUserId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data) setOwnerName(`${data.name} ${data.surname}`);
+                })
+                .catch(err => console.error("Errore caricamento nome proprietario:", err));
+        }
+
+        apiFetch(`/api/utenti/${gardenUserId}/piante`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -103,7 +96,7 @@ export function MyGarden() {
             .finally(() => setLoading(false));
 
         // Carica i post dell'utente per costruire la mappa foto piante
-        fetch(`/api/social/posts/user/${userId}?utenteId=${userId}`, {
+        apiFetch(`/api/social/posts/user/${gardenUserId}?utenteId=${currentUserId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.ok ? res.json() : [])
@@ -120,7 +113,18 @@ export function MyGarden() {
                 setPlantPhotoMap(photoMap);
             })
             .catch(err => console.error("Errore recupero post utente:", err));
-    }, []);
+    }, [gardenUserId]);
+
+    // Effetto per aprire automaticamente il popup della pianta se plantId è nella URL
+    useEffect(() => {
+        const plantIdParam = searchParams.get('plantId');
+        if (plantIdParam && myPlants.length > 0) {
+            const targetPlant = myPlants.find(p => p.id === Number(plantIdParam));
+            if (targetPlant) {
+                setSelectedPlant(targetPlant);
+            }
+        }
+    }, [myPlants, searchParams]);
 
     // Effetto per la ricerca dinamica dal catalogo
     useEffect(() => {
@@ -135,7 +139,7 @@ export function MyGarden() {
         const timeoutId = setTimeout(async () => {
             try {
                 const token = localStorage.getItem('phytosend_token');
-                const res = await fetch(`/api/catalogo/ricerca?q=${encodeURIComponent(searchQuery)}&page=0&size=5`, {
+                const res = await apiFetch(`/api/catalogo/ricerca?q=${encodeURIComponent(searchQuery)}&page=0&size=5`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -164,7 +168,7 @@ export function MyGarden() {
         const userId = localStorage.getItem('phytosend_userId');
         setLoadingPosts(true);
 
-        fetch(`/api/social/posts/plant/${selectedPlant.id}?utenteId=${userId}`, {
+        apiFetch(`/api/social/posts/plant/${selectedPlant.id}?utenteId=${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.ok ? res.json() : [])
@@ -202,7 +206,28 @@ export function MyGarden() {
             return post;
         }));
 
-        fetch(`/api/social/posts/${postId}/like?utenteId=${userId}`, {
+        apiFetch(`/api/social/posts/${postId}/like?utenteId=${userId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(console.error);
+    };
+
+    // Gestione save dalla modale post
+    const handleToggleSave = (postId: number) => {
+        const userId = localStorage.getItem('phytosend_userId');
+        const token = localStorage.getItem('phytosend_token');
+
+        setPlantPostCards(prev => prev.map(post => {
+            if (post.id === postId) {
+                return {
+                    ...post,
+                    isSavedByMe: !post.isSavedByMe
+                };
+            }
+            return post;
+        }));
+
+        apiFetch(`/api/social/posts/${postId}/save?utenteId=${userId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(console.error);
@@ -233,7 +258,7 @@ export function MyGarden() {
         const userId = localStorage.getItem('phytosend_userId');
 
         try {
-            const response = await fetch(`/api/utenti/${userId}/piante`, {
+            const response = await apiFetch(`/api/utenti/${userId}/piante`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -271,7 +296,7 @@ export function MyGarden() {
         const userId = localStorage.getItem('phytosend_userId');
 
         try {
-            const response = await fetch(`/api/utenti/${userId}/piante/${plantId}/name`, {
+            const response = await apiFetch(`/api/utenti/${userId}/piante/${plantId}/name`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ newName: editNameValue })
@@ -296,13 +321,13 @@ export function MyGarden() {
 
         try {
             if (markAsDead) {
-                await fetch(`/api/utenti/${userId}/piante/${plantId}/dead`, {
+                await apiFetch(`/api/utenti/${userId}/piante/${plantId}/dead`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 setMyPlants(prev => prev.map(p => p.id === plantId ? { ...p, deathDate: new Date().toISOString() } : p));
             } else {
-                const response = await fetch(`/api/utenti/${userId}/piante/${plantId}`, {
+                const response = await apiFetch(`/api/utenti/${userId}/piante/${plantId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -318,332 +343,150 @@ export function MyGarden() {
         }
     };
 
-    // Componente per visualizzare una singola pianta nel giardino
-    const PlantCard = ({ plant }: { plant: PlantItem }) => {
-        const displayName = plant.card?.commonName || 'Pianta Sconosciuta';
-        const hasNickname = !!plant.plantName && plant.plantName.trim() !== '';
-        // Usa la foto dell'ultimo post se disponibile, altrimenti la foto della scheda botanica
-        const imgUrl = plantPhotoMap[plant.id] || plant.urlPhoto || plant.card?.urlDefaultPhoto || '/placeholder-plant.png';
-
-        return (
-            <div className={`garden-list-card ${plant.deathDate ? 'dead-card' : ''}`} onClick={() => setSelectedPlant(plant)}>
-                <div className="garden-card-top">
-                    {/* Immagine della pianta */}
-                    <div className="garden-card-img" style={{ backgroundImage: `url(${imgUrl})` }}>
-                        {plant.deathDate && <div className="dead-overlay"><Skull size={24} /></div>}
-                    </div>
-                    {/* Nome comune e nickname */}
-                    <div className="garden-card-info">
-                        {/* Nome comune e icona elimina */}
-                        <div className="garden-card-header">
-                            <h3 className="common-name">{displayName}</h3>
-                            <button
-                                className="delete-icon-btn"
-                                onClick={(e) => { e.stopPropagation(); setDeletePrompt(plant.id); }}
-                            >
-                                <Trash2 size={18} />
-                            </button>
-                        </div>
-                        {/* Nickname: solo se effettivamente inserito */}
-                        {(hasNickname || editingPlantId === plant.id) && (
-                            <div className="garden-card-nickname">
-                                {editingPlantId === plant.id ? (
-                                    <div className="edit-inline" onClick={e => e.stopPropagation()}>
-                                        <input autoFocus value={editNameValue} onChange={e => setEditNameValue(e.target.value)} className="edit-input-small" />
-                                        <button className="icon-btn ok" onClick={(e) => handleSaveName(e, plant.id)}><Check size={14} /></button>
-                                        <button className="icon-btn no" onClick={() => setEditingPlantId(null)}><X size={14} /></button>
-                                    </div>
-                                ) : (
-                                    <div className="view-inline">
-                                        <span className="nick-text">"{plant.plantName}"</span>
-                                        {!plant.deathDate && (
-                                            <button className="edit-pencil-btn" onClick={(e) => {
-                                                e.stopPropagation(); setEditingPlantId(plant.id); setEditNameValue(plant.plantName || '');
-                                            }}>
-                                                <Pencil size={12} />
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-                {/* Informazioni aggiuntive */}
-                <div className="garden-card-events">
-                    <Droplets size={14} /> Prossima irrigazione: {plant.card?.waterFrequencyDays || 'Regolare'}
-                </div>
-            </div>
-        );
-    };
-
     return (
-        <div className="my-garden-page">
-            {/* Header della pagina del giardino */}
-            <header className="garden-header">
-                <div className="header-title">
-                    <Fence size={36} className="header-icon" />
-                    <h1>Il mio Giardino</h1>
-                </div>
-                {/* Descrizione */}
-                <p>La tua collezione personale di piante certificate Phytosend.</p>
-            </header>
+        <>
+            <div className="my-garden-page">
 
-            {/* Contenuto del giardino */}
-            <div className="garden-content">
-                {/* Sezione vuota quando non ci sono piante */}
-                {myPlants.length === 0 ? (
-                    <div className="empty-garden">
-                        <Sprout size={56} className="empty-icon" />
-                        <h2>Il tuo giardino è ancora vuoto</h2>
-                        <p>Aggiungi la tua prima pianta collegandola a una scheda botanica!</p>
-                        <button className="add-plant-btn" onClick={() => setIsAddModalOpen(true)}>
-                            <Plus size={18} /> Aggiungi Pianta
-                        </button>
-                    </div>
-                ) : (
-                    <div className="garden-lists-container">
-                        {/* Bottone per aggiungere pianta */}
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-16px' }}>
-                            <button className="add-plant-btn" style={{ marginTop: 0 }} onClick={() => setIsAddModalOpen(true)}>
-                                <Plus size={18} /> Aggiungi Pianta
-                            </button>
-                        </div>
-
-                        {/* Sezione piante vive */}
-                        {myPlants.filter(p => !p.deathDate).length > 0 && (
-                            <div className="alive-section">
-                                <div className="list-grid">
-                                    {myPlants.filter(p => !p.deathDate).map(plant => <PlantCard key={plant.id} plant={plant} />)}
-                                </div>
-                            </div>
-                        )}
-                        {/* Sezione piante morte */}
-                        {myPlants.filter(p => p.deathDate).length > 0 && (
-                            <div className="dead-section">
-                                <h3><Skull size={18} /> Il cimitero delle piante</h3>
-                                <div className="list-grid">
-                                    {myPlants.filter(p => p.deathDate).map(plant => <PlantCard key={plant.id} plant={plant} />)}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                {/* Pulsante Torna al Profilo (visibile solo se visitiamo il giardino di un altro utente) */}
+                {!isOwnGarden && (
+                    <button
+                        className="back-to-profile-btn"
+                        onClick={() => navigate(`/profile/${gardenUserId}`)}
+                    >
+                        <ArrowLeft size={18} /> Torna al Profilo di {ownerName || 'Utente'}
+                    </button>
                 )}
 
-                {/* Sezione di aggiunta pianta */}
-                {isAddModalOpen && (
-                    <div className="modal-overlay" onClick={handleCloseModal}>
-                        <div className="add-plant-dialog" onClick={e => e.stopPropagation()}>
-                            <button className="close-modal-btn" onClick={handleCloseModal}><X size={24} /></button>
-                            <h3>Aggiungi una Nuova Pianta</h3>
+                {/* Header della pagina del giardino */}
+                <header className="garden-header">
+                    <div className="header-title">
+                        <Fence size={36} className="header-icon" />
+                        <h1>{isOwnGarden ? 'Il mio Giardino' : `Giardino di ${ownerName || '...'}`}</h1>
+                    </div>
+                    {/* Descrizione */}
+                    <p>{isOwnGarden ? 'La tua collezione personale di piante certificate Phytosend.' : `Esplora le piante di ${ownerName || 'questo utente'}.`}</p>
+                </header>
 
-                            {/* Campo di ricerca */}
-                            <div className="form-group" style={{ position: 'relative' }}>
-                                <label>Cerca nel Catalogo Botanico *</label>
-                                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                    <input
-                                        type="text"
-                                        value={searchQuery}
-                                        onChange={(e) => {
-                                            setSearchQuery(e.target.value);
-                                            setNewPlantCardId("");
-                                            setShowSuggestions(true);
-                                        }}
-                                        placeholder="Es. Monstera..."
-                                        className="modal-input"
-                                        style={{ width: '100%' }}
-                                        autoComplete="off"
-                                    />
-                                    {isSearching && <Loader size={16} className="spin" style={{ position: 'absolute', right: '12px', color: 'var(--color-text-muted)' }} />}
-                                </div>
+                {/* Contenuto del giardino */}
+                <div className="garden-content">
+                    {/* Indicatore di caricamento */}
+                    {loading ? (
+                        <div className="empty-garden">
+                            <Loader size={36} className="spin" />
+                            <p>Caricamento del giardino...</p>
+                        </div>
+                    ) : myPlants.length === 0 ? (
+                        <div className="empty-garden">
+                            <Sprout size={56} className="empty-icon" />
+                            <h2>{isOwnGarden ? 'Il tuo giardino è ancora vuoto' : 'Questo giardino è ancora vuoto'}</h2>
+                            <p>{isOwnGarden ? 'Aggiungi la tua prima pianta collegandola a una scheda botanica!' : `${ownerName || 'Questo utente'} non ha ancora aggiunto piante.`}</p>
+                            {isOwnGarden && (
+                                <button className="add-plant-btn" onClick={() => setIsAddModalOpen(true)}>
+                                    <Plus size={18} /> Aggiungi Pianta
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="garden-lists-container">
+                            {/* Bottone per aggiungere pianta (solo nel proprio giardino) */}
+                            {isOwnGarden && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-16px' }}>
+                                <button className="add-plant-btn" style={{ marginTop: 0 }} onClick={() => setIsAddModalOpen(true)}>
+                                    <Plus size={18} /> Aggiungi Pianta
+                                </button>
+                            </div>}
 
-                                {/* Tendina dei risultati */}
-                                {showSuggestions && suggestions.length > 0 && (
-                                    <ul className="autocomplete-dropdown">
-                                        {suggestions.map((plant) => (
-                                            <li key={plant.id} className="suggestion-item" onClick={() => handleSelectSuggestion(plant)}>
-                                                <img src={plant.urlDefaultPhoto || '/placeholder.png'} alt={plant.commonName} className="suggestion-img" />
-                                                <div className="suggestion-info">
-                                                    <span className="suggestion-name">{plant.commonName}</span>
-                                                    <span className="suggestion-scientific">{plant.scientificName}</span>
-                                                </div>
-                                            </li>
+                            {/* Sezione piante vive */}
+                            {myPlants.filter(p => !p.deathDate).length > 0 && (
+                                <div className="alive-section">
+                                    <div className="list-grid">
+                                        {myPlants.filter(p => !p.deathDate).map(plant => (
+                                            <PlantCard
+                                                key={plant.id}
+                                                plant={plant}
+                                                plantPhotoMap={plantPhotoMap}
+                                                isOwnGarden={isOwnGarden}
+                                                editingPlantId={editingPlantId}
+                                                editNameValue={editNameValue}
+                                                setEditingPlantId={setEditingPlantId}
+                                                setEditNameValue={setEditNameValue}
+                                                handleSaveName={handleSaveName}
+                                                setDeletePrompt={setDeletePrompt}
+                                                setSelectedPlant={setSelectedPlant}
+                                            />
                                         ))}
-                                    </ul>
-                                )}
-                            </div>
-
-                            {/* Campo del soprannome */}
-                            <div className="form-group">
-                                <label>Soprannome (Facoltativo)</label>
-                                <input
-                                    type="text"
-                                    placeholder="Es. Pina (la Monstera)"
-                                    value={newPlantName}
-                                    onChange={e => setNewPlantName(e.target.value)}
-                                    className="modal-input"
-                                />
-                            </div>
-
-                            {/* Bottone di conferma */}
-                            <button className="confirm-add-btn" onClick={handleAddNewPlant}>
-                                <Plus size={18} /> Salva nel Giardino
-                            </button>
+                                    </div>
+                                </div>
+                            )}
+                            {/* Sezione piante morte */}
+                            {myPlants.filter(p => p.deathDate).length > 0 && (
+                                <div className="dead-section">
+                                    <h3><Skull size={18} /> Il cimitero delle piante</h3>
+                                    <div className="list-grid">
+                                        {myPlants.filter(p => p.deathDate).map(plant => (
+                                            <PlantCard
+                                                key={plant.id}
+                                                plant={plant}
+                                                plantPhotoMap={plantPhotoMap}
+                                                isOwnGarden={isOwnGarden}
+                                                editingPlantId={editingPlantId}
+                                                editNameValue={editNameValue}
+                                                setEditingPlantId={setEditingPlantId}
+                                                setEditNameValue={setEditNameValue}
+                                                handleSaveName={handleSaveName}
+                                                setDeletePrompt={setDeletePrompt}
+                                                setSelectedPlant={setSelectedPlant}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
-            {/* Modali di eliminazione e dettaglio */}
-            {deletePrompt !== null && (
-                <div className="modal-overlay" onClick={() => setDeletePrompt(null)}>
-                    <div className="delete-dialog" onClick={e => e.stopPropagation()}>
-                        <h3>Rimuovi Pianta</h3>
-                        {(() => {
-                            const plantToDelete = myPlants.find(p => p.id === deletePrompt);
-                            return (
-                                <>
-                                    <p>{plantToDelete?.deathDate ? "Vuoi eliminare definitivamente questa pianta dal tuo cimitero?" : "Vuoi eliminare questa pianta definitivamente o dichiararne il decesso per tenerla come ricordo?"}</p>
-                                    <div className="delete-actions">
-                                        {!plantToDelete?.deathDate && (
-                                            <button className="btn-dead" onClick={() => handleDeleteAction(deletePrompt, true)}><Skull size={16} /> È Morta</button>
-                                        )}
-                                        <button className="btn-delete" onClick={() => handleDeleteAction(deletePrompt, false)}><Trash2 size={16} /> Elimina Definitivamente</button>
-                                    </div>
-                                </>
-                            );
-                        })()}
-                    </div>
-                </div>
-            )}
+            <AddPlantModal
+                isOpen={isAddModalOpen}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                newPlantCardId={newPlantCardId}
+                setNewPlantCardId={setNewPlantCardId}
+                newPlantName={newPlantName}
+                setNewPlantName={setNewPlantName}
+                showSuggestions={showSuggestions}
+                setShowSuggestions={setShowSuggestions}
+                suggestions={suggestions}
+                isSearching={isSearching}
+                handleSelectSuggestion={handleSelectSuggestion}
+                handleCloseModal={handleCloseModal}
+                handleAddNewPlant={handleAddNewPlant}
+            />
 
-            {/* Modale di dettaglio pianta */}
-            {selectedPlant && (
-                <div className="modal-overlay" onClick={() => setSelectedPlant(null)}>
-                    <div className="plant-detail-modal" onClick={e => e.stopPropagation()}>
-                        <button className="close-modal-btn" onClick={() => setSelectedPlant(null)}><X size={24} /></button>
+            <DeletePlantModal
+                deletePrompt={deletePrompt}
+                myPlants={myPlants}
+                setDeletePrompt={setDeletePrompt}
+                handleDeleteAction={handleDeleteAction}
+            />
 
-                        {/* Header con foto (ultimo post o scheda botanica) */}
-                        <div className="detail-header" style={{ backgroundImage: `url(${(plantPosts.length > 0 ? (plantPosts[0].urlphoto || plantPosts[0].URLPhoto) : null) || selectedPlant.urlPhoto || selectedPlant.card?.urlDefaultPhoto})` }}>
-                            <div className="detail-header-content">
-                                {selectedPlant.deathDate && <span className="plant-status-badge dead-badge"><Skull size={12} /> Deceduta</span>}
-                                {!selectedPlant.deathDate && <span className="plant-status-badge alive-badge"><Sprout size={12} /> In vita</span>}
-                                <h2>{selectedPlant.plantName || selectedPlant.card?.commonName}</h2>
-                                <p><i>{selectedPlant.card?.scientificName}</i></p>
-                            </div>
-                        </div>
-                        <div className="detail-body">
-                            {/* Scheda Botanica */}
-                            <div className="detail-section">
-                                <h4><Info size={16} /> Scheda Botanica</h4>
-                                <ul>
-                                    <li><strong>Famiglia:</strong> {selectedPlant.card?.family}</li>
-                                    <li><strong>Esposizione:</strong> {selectedPlant.card?.exposure}</li>
-                                    <li><strong>Terreno:</strong> {selectedPlant.card?.soil}</li>
-                                    <li><strong>Concimazione:</strong> {selectedPlant.card?.fertilization}</li>
-                                </ul>
-                            </div>
+            <PlantDetailModal
+                selectedPlant={selectedPlant}
+                setSelectedPlant={setSelectedPlant}
+                plantPosts={plantPosts}
+                loadingPosts={loadingPosts}
+                setPlantPostCards={setPlantPostCards}
+                setSelectedPostIndex={setSelectedPostIndex}
+                isOwnGarden={isOwnGarden}
+                setDeletePrompt={setDeletePrompt}
+            />
 
-                            {/* Timeline */}
-                            <div className="detail-section">
-                                <h4><CalendarHeart size={16} /> Timeline</h4>
-                                <div className="timeline-placeholder">
-                                    <div className="timeline-item">
-                                        <span className="timeline-date">{new Date(selectedPlant.purchaseDate).toLocaleDateString()}</span>
-                                        <span>Aggiunta al giardino</span>
-                                    </div>
-                                    {selectedPlant.deathDate && (
-                                        <div className="timeline-item timeline-death">
-                                            <span className="timeline-date">{new Date(selectedPlant.deathDate).toLocaleDateString()}</span>
-                                            <span>Dichiarata morta</span>
-                                        </div>
-                                    )}
-                                    <div className="timeline-item">
-                                        <Droplets size={14} />
-                                        <span>Irrigazione consigliata: {selectedPlant.card?.waterFrequencyDays || 'Regolare'}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Galleria Post */}
-                            <div className="detail-section">
-                                <h4><ImageIcon size={16} /> Post ({plantPosts.length})</h4>
-                                {loadingPosts ? (
-                                    <div className="posts-loading"><Loader size={20} className="spin" /> Caricamento post...</div>
-                                ) : plantPosts.length > 0 ? (
-                                    <div className="plant-posts-grid">
-                                        {plantPosts.map((post, index) => (
-                                            <div key={post.id} className="plant-post-thumb" onClick={(e) => {
-                                                e.stopPropagation();
-                                                // Prepara i post come PostProps per il PostCard
-                                                const cards: PostProps[] = plantPosts.map((p: any) => ({
-                                                    id: p.id,
-                                                    title: p.title,
-                                                    description: p.description,
-                                                    urlphoto: p.urlphoto || p.URLPhoto || '',
-                                                    creationDate: p.creationDate,
-                                                    author: p.author,
-                                                    likesCount: p.likesCount ?? 0,
-                                                    isLikedByMe: p.likedByMe ?? p.isLikedByMe ?? false,
-                                                    commentsCount: p.commentsCount ?? 0,
-                                                    onCommentUpdate: () => {},
-                                                }));
-                                                setPlantPostCards(cards);
-                                                setSelectedPostIndex(index);
-                                            }}>
-                                                {(post.urlphoto || post.URLPhoto) ? (
-                                                    <img src={(post.urlphoto || post.URLPhoto)!} alt={post.title} />
-                                                ) : (
-                                                    <div className="post-thumb-placeholder"><ImageIcon size={24} /></div>
-                                                )}
-                                                <div className="post-thumb-overlay">
-                                                    <span><Heart size={12} /> {post.likesCount}</span>
-                                                    <span><MessageCircle size={12} /> {post.commentsCount || 0}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-muted">Nessun post associato a questa pianta.</p>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="detail-footer">
-                            <button className="btn-delete-full" onClick={() => { setDeletePrompt(selectedPlant.id); setSelectedPlant(null); }}><Trash2 size={18} /> {selectedPlant.deathDate ? 'Elimina definitivamente' : 'Rimuovi o segna come morta'}</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* ═══ MODALE POST SCROLLABILE (stile Profile) ═══ */}
-            {selectedPostIndex !== null && (
-                <div className="profile-post-modal-overlay" onClick={() => setSelectedPostIndex(null)}>
-                    <div
-                        className="profile-post-modal-scroll"
-                        ref={modalScrollRef}
-                        onClick={e => e.stopPropagation()}
-                    >
-                        {plantPostCards.map((post) => (
-                            <div key={post.id} className="profile-modal-post">
-                                <PostCard
-                                    id={post.id}
-                                    title={post.title}
-                                    description={post.description}
-                                    urlphoto={post.urlphoto}
-                                    creationDate={post.creationDate}
-                                    author={post.author}
-                                    likesCount={post.likesCount}
-                                    isLikedByMe={post.isLikedByMe}
-                                    commentsCount={post.commentsCount}
-                                    onLike={handleToggleLike}
-                                    onCommentUpdate={() => {}}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
+            <PostsScrollModal
+                selectedPostIndex={selectedPostIndex}
+                setSelectedPostIndex={setSelectedPostIndex}
+                plantPostCards={plantPostCards}
+                handleToggleLike={handleToggleLike}
+                handleToggleSave={handleToggleSave}
+            />
+        </>
     );
 }

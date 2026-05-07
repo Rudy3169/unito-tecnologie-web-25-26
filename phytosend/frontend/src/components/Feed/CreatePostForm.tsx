@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { ImagePlus, X, Check, Loader, Sprout, Fence, Plus } from 'lucide-react';
+import { apiFetch } from '../../utils/apiFetch';
 import './CreatePostForm.css';
 
 interface CreatePostFormProps {
@@ -36,6 +37,9 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
     const [gardenSearchQuery, setGardenSearchQuery] = useState('');
     const [showGardenDropdown, setShowGardenDropdown] = useState(false);
 
+    // Mappa plantId -> foto dell'ultimo post (stessa logica di MyGarden)
+    const [plantPhotoMap, setPlantPhotoMap] = useState<Record<number, string>>({});
+
     // State per la ricerca di piante nel catalogo
     const [suggestions, setSuggestions] = useState<PlantSuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -60,17 +64,36 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
             const token = localStorage.getItem('phytosend_token');
             const userId = localStorage.getItem('phytosend_userId');
 
-            fetch(`/api/utenti/${userId}/piante`, {
+            apiFetch(`/api/utenti/${userId}/piante`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
                 .then(data => setMyPlants(data || []))
                 .catch(err => console.error("Errore caricamento giardino:", err));
+
+            // Carica i post dell'utente per costruire la mappa foto piante (stessa logica di MyGarden)
+            apiFetch(`/api/social/posts/user/${userId}?utenteId=${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.ok ? res.json() : [])
+                .then((posts: any[]) => {
+                    const photoMap: Record<number, string> = {};
+                    posts.forEach((p: any) => {
+                        const pId = p.plantId;
+                        const photo = p.urlphoto || p.URLPhoto;
+                        if (pId && photo && !photoMap[pId]) {
+                            photoMap[pId] = photo;
+                        }
+                    });
+                    setPlantPhotoMap(photoMap);
+                })
+                .catch(err => console.error("Errore recupero post utente:", err));
         } else {
             setTitle(''); setCaption(''); setImageUrl(''); setPreviewUrl('');
             setErrorMsg(''); setSuggestions([]); setShowSuggestions(false);
             setSelectedPlantId(null); setSelectedBotanicalCardId(null); setPostMode('new');
             setAddToGarden(false); setPlantNickname(''); setGardenSearchQuery(''); setShowGardenDropdown(false);
+            setPlantPhotoMap({});
         }
     }, [isOpen]);
 
@@ -86,7 +109,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         const timeoutId = setTimeout(async () => {
             try {
                 const token = localStorage.getItem('phytosend_token');
-                const res = await fetch(`/api/catalogo/ricerca?q=${encodeURIComponent(title)}&page=0&size=5`, {
+                const res = await apiFetch(`/api/catalogo/ricerca?q=${encodeURIComponent(title)}&page=0&size=5`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -183,7 +206,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         };
 
         try {
-            const response = await fetch(`/api/social/posts?utenteId=${userId}`, {
+            const response = await apiFetch(`/api/social/posts?utenteId=${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(payload)
@@ -302,7 +325,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                                                 {filteredGardenPlants.length > 0 ? (
                                                     filteredGardenPlants.map(plant => (
                                                         <li key={plant.id} className="suggestion-item" onClick={() => handleSelectFromGarden(plant)}>
-                                                            <img src={plant.urlPhoto || plant.card?.urlDefaultPhoto || '/placeholder.png'} alt={plant.card?.commonName} className="suggestion-img" />
+                                                            <img src={plantPhotoMap[plant.id] || plant.urlPhoto || plant.card?.urlDefaultPhoto || '/placeholder.png'} alt={plant.card?.commonName} className="suggestion-img" />
                                                             <div className="suggestion-info">
                                                                 <span className="suggestion-name">{plant.card?.commonName || 'Pianta Sconosciuta'}</span>
                                                                 <span className="suggestion-scientific">

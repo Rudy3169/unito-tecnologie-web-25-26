@@ -53,4 +53,10 @@ public class Post {
     @JoinTable(name = "post_likes", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     @JsonIgnore
     private Set<User> likedBy = new HashSet<>();
+
+    // Ogni post può essere salvato da più utenti
+    @ManyToMany
+    @JoinTable(name = "post_saved", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @JsonIgnore
+    private Set<User> savedBy = new HashSet<>();
 }

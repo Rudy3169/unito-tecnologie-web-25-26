@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { X, Save } from 'lucide-react';
+import { apiFetch } from '../../utils/apiFetch';
 
 interface UserProfile {
     id: number;
@@ -36,7 +37,7 @@ export function ProfileSettings({ user, onClose, onSaved }: ProfileSettingsProps
         const token = localStorage.getItem('phytosend_token');
 
         try {
-            const response = await fetch(`/api/utenti/${user.id}`, {
+            const response = await apiFetch(`/api/utenti/${user.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

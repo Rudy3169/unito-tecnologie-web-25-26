@@ -195,12 +195,4 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    /**
-     * Wrapper per l'upgrade veloce d'utente al tier PRO.
-     */
-    @Transactional
-    public @NonNull User Upgrade(@NonNull Long id) {
-        // Cambia il ruolo dell'utente in PRO
-        return changeRole(id, UserRole.PRO);
-    }
 }

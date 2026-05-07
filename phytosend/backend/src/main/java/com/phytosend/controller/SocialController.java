@@ -54,6 +54,11 @@ public class SocialController {
                         .anyMatch(u -> u.getId().equals(utenteId));
                 dto.setLikedByMe(liked);
             }
+            if (utenteId != null && post.getSavedBy() != null) {
+                boolean saved = post.getSavedBy().stream()
+                        .anyMatch(u -> u.getId().equals(utenteId));
+                dto.setSavedByMe(saved);
+            }
             return dto;
         });
     }
@@ -204,5 +209,32 @@ public class SocialController {
 
         socialService.deleteComment(postId, commentId, utenteId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Aggiunge o rimuove un post dai preferiti (salvati).
+     * 
+     * @param postId   ID del post
+     * @param utenteId ID dell'utente
+     * @return true se salvato, false se rimosso
+     */
+    @PostMapping("/posts/{postId}/save")
+    public ResponseEntity<Map<String, Object>> toggleSavePost(
+            @PathVariable Long postId,
+            @RequestParam Long utenteId) {
+        boolean isNowSaved = socialService.toggleSavePost(postId, utenteId);
+        return ResponseEntity.ok(Map.of("isSavedByMe", isNowSaved));
+    }
+
+    /**
+     * Recupera tutti i post salvati da un utente.
+     * 
+     * @param utenteId ID dell'utente
+     * @return lista di PostDto
+     */
+    @GetMapping("/posts/saved")
+    public List<PostDto> getSavedPosts(
+            @RequestParam Long utenteId) {
+        return socialService.getSavedPosts(utenteId);
     }
 }

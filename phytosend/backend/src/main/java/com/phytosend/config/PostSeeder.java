@@ -1,7 +1,9 @@
 package com.phytosend.config;
 
+import com.phytosend.entity.Plant;
 import com.phytosend.entity.Post;
 import com.phytosend.entity.User;
+import com.phytosend.repository.PlantRepository;
 import com.phytosend.repository.PostRepository;
 import com.phytosend.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -11,16 +13,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Seeder per popolare la tabella dei Post con 10 contenuti fittizi.
- * L'annotazione @Order(2) assicura che venga eseguito DOPO il DatabaseSeeder
- * (che crea gli utenti).
- */
 @Component
-@Order(2)
+@Order(4)
 @Slf4j
 public class PostSeeder implements CommandLineRunner {
 
@@ -30,82 +27,94 @@ public class PostSeeder implements CommandLineRunner {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PlantRepository plantRepository;
+
     @Override
     public void run(String... args) throws Exception {
 
-        // Il controllo troverà 0 post e farà partire il popolamento!
         if (postRepository.count() == 0) {
-            log.info("Nessun post rilevato. Popolamento tabella Posts con 10 post di test in corso...");
+            log.info("Nessun post rilevato. Generazione di 3 post per ogni pianta di ogni utente...");
 
-            // Recuperiamo gli utenti creati dal DatabaseSeeder per assegnargli i post
-            User admin = userRepository.findByEmail("admin@phytosend.com").orElse(null);
-            User pro = userRepository.findByEmail("pro@phytosend.com").orElse(null);
-            User base = userRepository.findByEmail("user@phytosend.com").orElse(null);
-
-            if (admin == null || pro == null || base == null) {
-                log.warn("Impossibile creare i post: utenti di base mancanti. Eseguire prima il DatabaseSeeder.");
+            List<User> users = userRepository.findAll();
+            if (users.isEmpty()) {
+                log.warn("Impossibile creare i post: utenti mancanti.");
                 return;
             }
 
-            // Creazione di 10 post fittizi
-            List<Post> testPosts = Arrays.asList(
-                    createPost("La mia nuova Monstera! 🌿",
-                            "Oggi ho finalmente comprato una Monstera Deliciosa. Guardate che foglie meravigliose! Qualche consiglio per l'esposizione?",
-                            "https://plantersplace.com/wp-content/uploads/2022/08/20200309_110255-scaled.jpg",
-                            base),
-                    createPost("Fioritura Phalaenopsis",
-                            "Dopo mesi di attesa, la mia orchidea è sbocciata. Il segreto? Poca acqua e luce filtrata.",
-                            "https://fasolipiante.com/wp-content/uploads/2020/08/3-rami.jpeg",
-                            pro),
-                    createPost("Pothos infinito",
-                            "Il mio Epipremnum aureum sta conquistando tutto il salotto. È davvero la pianta più facile da curare per i principianti.",
-                            "https://www.pianteincasa.com/wp-content/uploads/2021/06/Pothos-Altezza-scaled.jpg",
-                            base),
-                    createPost("Problemi con il Ficus",
-                            "Aiuto! Il mio Ficus Elastica sta perdendo le foglie basse. Annaffio una volta a settimana. Cosa sbaglio?",
-                            "https://unquadratodigiardino.it/media/kunena/attachments/10321/20220522_082907.jpg",
-                            base),
-                    createPost("Angolo delle succulente 🌵",
-                            "Ho riorganizzato il mio davanzale con le nuove piante grasse prese al vivaio. Adoro questo mix di colori.",
-                            "https://i.redd.it/e9ibns9lssw91.jpg",
-                            pro),
-                    createPost("Calathea: amore e odio",
-                            "È bellissima, ma quanto è capricciosa! Solo acqua demineralizzata e umidità al 70%.",
-                            "https://thursd.com/storage/media/101706/Man-with-a-huge-leafed-Calathea-plant.jpg",
-                            admin),
-                    createPost("Raccolta Aloe Vera",
-                            "Oggi ho tagliato una foglia dalla mia Aloe per estrarre il gel. Perfetto per le scottature solari.",
-                            "https://aloevonderweid.com/wp-content/uploads/2016/06/SEZIONE-CARATTERISTICHE-EXTRA-PRODOTTO-WOOCOMMERCE-1-1280x853.jpg",
-                            base),
-                    createPost("Il mio primo Cactus",
-                            "Piccolo, spinoso e adorabile. Speriamo di non annaffiarlo troppo!",
-                            "https://i.etsystatic.com/23308416/r/il/54c0da/4595512158/il_fullxfull.4595512158_jbf2.jpg",
-                            base),
-                    createPost("Sansevieria indistruttibile",
-                            "Se vi dimenticate sempre di annaffiare, questa è la pianta che fa per voi. La lingua di suocera perdona tutto.",
-                            "https://www.simegarden.com/cdn/shop/files/simegarden-sansevieria-trifasciata-30-cm-61584599089485.jpg?v=1735027351&width=480",
-                            pro),
-                    createPost("Felce in bagno 🚿",
-                            "La mia nuova Nephrolepis exaltata ha trovato casa in bagno. L'umidità della doccia la sta facendo esplodere di verde!",
-                            "https://www.giunglaurbana.com/wp-content/uploads/2026/01/arredare-bagno-con-le-piante.jpg",
-                            admin));
+            List<Post> testPosts = new ArrayList<>();
+
+            // Array di immagini generiche a tema botanico per i post
+            String[] photos = {
+                "https://images.unsplash.com/photo-1416879598555-2571221b6a71?w=800&q=80",
+                "https://images.unsplash.com/photo-1545241047-6083a36ee15f?w=800&q=80",
+                "https://images.unsplash.com/photo-1453904300235-0f2f60b15b5d?w=800&q=80",
+                "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800&q=80",
+                "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?w=800&q=80",
+                "https://images.unsplash.com/photo-1491147334573-44cbb4602074?w=800&q=80",
+                "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=800&q=80",
+                "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?w=800&q=80",
+                "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=800&q=80",
+                "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=800&q=80"
+            };
+
+            // Array di descrizioni per diversificare i post
+            String[] captions = {
+                "Guardate come sta crescendo bene! Qualche consiglio per farla sviluppare ancora di più?",
+                "Oggi ho finalmente trovato il tempo per rinvasarla. Spero gradisca il nuovo terriccio e il vaso più grande.",
+                "Le foglie nuove sono di un verde stupendo. Questa luce del mattino è perfetta per i colori.",
+                "Piccolo aggiornamento settimanale. Sembra stare benissimo in questa posizione del soggiorno.",
+                "Non mi stanco mai di guardarla. Sicuramente la mia preferita del giardino al momento!",
+                "Qualcuno ha esperienza con questo tipo di esposizione? Mi sembra un po' giù di corda in questi giorni.",
+                "Acqua, luce e tanto amore. Ecco il vero segreto per mantenerle sane e forti!",
+                "Oggi pulizia delicata delle foglie e un po' di nebulizzazione per aumentare l'umidità. Si merita queste attenzioni.",
+                "Cresce a vista d'occhio! Tra poco dovrò trovarle uno spazio tutto suo per quanto è diventata grande.",
+                "La soddisfazione di veder spuntare un nuovo germoglio non ha eguali. La natura è meravigliosa."
+            };
+
+            int counter = 0;
+
+            // Per ogni utente
+            for (User user : users) {
+                // Recupera le sue piante
+                List<Plant> userPlants = plantRepository.findByGardenOwnerId(user.getId());
+                
+                // Per ogni pianta
+                for (Plant plant : userPlants) {
+                    
+                    // Creiamo 3 post
+                    for (int i = 0; i < 3; i++) {
+                        String photo = photos[(counter) % photos.length];
+                        String caption = captions[(counter) % captions.length];
+                        int daysAgo = (counter * 3) % 90 + 1; // da 1 a 90 giorni fa
+                        
+                        testPosts.add(createPost(caption, photo, user, plant, daysAgo));
+                        counter++;
+                    }
+                }
+            }
 
             postRepository.saveAll(testPosts);
-            log.info("✔️ Autoseed completato! Inseriti 10 post fittizi.");
+            log.info("✔️ Autoseed completato! Inseriti {} post totali (3 per ogni pianta).", testPosts.size());
         } else {
             log.info("I post di test sono già presenti per via di un seeding precedente.");
         }
     }
 
-    // Metodo helper per creare i post più agilmente
-    private Post createPost(String title, String description, String photoUrl, User author) {
+    private Post createPost(String description, String photoUrl, User author, Plant plant, int daysAgo) {
         Post post = new Post();
-        post.setTitle(title); // Il titolo è obbligatorio (@NotBlank)
-        post.setDescription(description); // La descrizione è obbligatoria (@NotBlank)
+        
+        // Titolo: soprannome se presente, altrimenti nome comune scheda
+        String title = (plant != null && plant.getName() != null && !plant.getName().isBlank())
+                ? plant.getName()
+                : (plant != null && plant.getCard() != null ? plant.getCard().getCommonName() : "Post");
+                
+        post.setTitle(title);
+        post.setDescription(description);
         post.setURLPhoto(photoUrl);
-        post.setCreationDate(LocalDateTime.now());
-        post.setAuthor(author); // Imposta l'autore (relazione @ManyToOne)
-        // Lasciamo 'plant' nullo, poiché non è obbligatorio nel tuo modello Post
+        post.setCreationDate(LocalDateTime.now().minusDays(daysAgo).minusHours((daysAgo * 5) % 24));
+        post.setAuthor(author);
+        post.setPlant(plant); 
         return post;
     }
 }

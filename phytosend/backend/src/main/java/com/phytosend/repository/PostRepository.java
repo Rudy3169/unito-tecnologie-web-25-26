@@ -36,4 +36,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      * @return Lista di post della pianta ordinati per data decrescente
      */
     List<Post> findByPlantIdOrderByCreationDateDesc(Long plantId);
+
+    /**
+     * Trova tutti i post salvati da un utente specifico
+     * 
+     * @param userId ID dell'utente
+     * @return Lista di post salvati dall'utente ordinati per data decrescente
+     */
+    List<Post> findBySavedByIdOrderByCreationDateDesc(Long userId);
 }

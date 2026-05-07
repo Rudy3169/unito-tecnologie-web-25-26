@@ -13,7 +13,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 
 @Component
-@Order(3) // 1. Utenti, 2. Post, 3. Catalogo
+@Order(2) // 1. Utenti, 2. Catalogo, 3. Giardini, 4. Post
 @Slf4j
 public class CatalogSeeder implements CommandLineRunner {
 
@@ -36,7 +36,7 @@ public class CatalogSeeder implements CommandLineRunner {
                 log.error("Errore durante l'esecuzione del file data.sql: ", e);
             }
         } else {
-            log.info("🌿 Le schede botaniche sono già presenti nel database. Skip importazione.");
+            log.info("Le schede botaniche sono già presenti nel database. Skip importazione.");
         }
     }
 }

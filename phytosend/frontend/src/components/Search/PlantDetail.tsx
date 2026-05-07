@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sun, Droplets, Flower2, Sprout, FlaskConical, Leaf } from 'lucide-react';
+import { apiFetch } from '../../utils/apiFetch';
 import './PlantDetail.css';
 
 interface BotanicalCard {
@@ -29,7 +30,7 @@ export function PlantDetail() {
     useEffect(() => {
         if (!plantId) return;
 
-        fetch(`/api/catalogo/${plantId}`, {
+        apiFetch(`/api/catalogo/${plantId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Users, Leaf, Sparkles } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../../utils/apiFetch';
 import './SearchPage.css';
 
 interface UserResult {
@@ -71,7 +72,7 @@ export function SearchPage() {
         const token = localStorage.getItem('phytosend_token');
         setLoading(true);
         if (type === 'users') {
-            fetch('/api/utenti', { headers: { 'Authorization': `Bearer ${token}` } })
+            apiFetch('/api/utenti', { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(res => res.json())
                 .then(data => {
                     const allUsers = data.content ?? [];
@@ -85,7 +86,7 @@ export function SearchPage() {
                 .finally(() => setLoading(false));
         } else if (type === 'plants') {
             // Passiamo page e size al backend!
-            fetch(`/api/catalogo/ricerca?q=${encodeURIComponent(query)}&page=${page}&size=15`, {
+            apiFetch(`/api/catalogo/ricerca?q=${encodeURIComponent(query)}&page=${page}&size=15`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())

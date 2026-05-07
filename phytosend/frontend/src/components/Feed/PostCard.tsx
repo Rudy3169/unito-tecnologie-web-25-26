@@ -29,6 +29,7 @@ export interface PostProps {
     };
     likesCount?: number;
     isLikedByMe?: boolean;
+    isSavedByMe?: boolean;
     commentsCount?: number;
     onCommentUpdate: () => void;
 }
@@ -36,14 +37,14 @@ export interface PostProps {
 interface PostCardLayoutProps extends PostProps {
     onLike?: (id: number) => void;
     onDelete?: (id: number) => void;
+    onSave?: (id: number) => void;
     onCommentUpdate: () => void;
 }
 
 export function PostCard({
-    id, title, description, urlphoto, author, plant, likesCount, isLikedByMe, commentsCount, onLike, onDelete, onCommentUpdate
+    id, title, description, urlphoto, author, plant, likesCount, isLikedByMe, isSavedByMe, commentsCount, onLike, onDelete, onSave, onCommentUpdate
 }: PostCardLayoutProps) {
     const [showComments, setShowComments] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
     const navigate = useNavigate();
 
     // 2. Controllo di sicurezza Frontend: Questo post è mio?
@@ -72,9 +73,9 @@ export function PostCard({
                             {author?.name ?? 'Anonimo'}
                         </span>
                         <span className="location" 
-                              onClick={() => plant?.card?.id && navigate(`/plant/${plant.card.id}`)}
-                              style={{cursor: plant?.card ? 'pointer' : 'default'}}>
-                            {plant ? (plant.name || plant.card?.commonName) : title}
+                              onClick={() => plant && author?.id && navigate(`/garden/${author.id}?plantId=${plant.id}`)}
+                              style={{cursor: plant ? 'pointer' : 'default'}}>
+                            {plant?.name || plant?.card?.commonName || title}
                         </span>
                     </div>
                 </div>
@@ -106,8 +107,8 @@ export function PostCard({
                 </div>
 
                 {/* Segnalibro a Destra con Animazione */}
-                <button className={`action-btn ${isSaved ? 'saved' : ''}`} onClick={() => setIsSaved(!isSaved)}>
-                    <Bookmark size={24} fill={isSaved ? "currentColor" : "none"} />
+                <button className={`action-btn ${isSavedByMe ? 'saved' : ''}`} onClick={() => onSave && onSave(id)}>
+                    <Bookmark size={24} fill={isSavedByMe ? "currentColor" : "none"} />
                 </button>
             </div>
 
