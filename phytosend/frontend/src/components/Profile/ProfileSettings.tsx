@@ -31,6 +31,12 @@ export function ProfileSettings({ user, onClose, onSaved }: ProfileSettingsProps
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+
+        if (!name.trim() || !surname.trim()) {
+            setError('Il nome e il cognome sono campi obbligatori.');
+            return;
+        }
+
         setSaving(true);
         setError('');
 

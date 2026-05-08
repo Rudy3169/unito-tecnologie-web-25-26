@@ -191,6 +191,16 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
             return;
         }
 
+        if (postMode === 'new' && !selectedBotanicalCardId) {
+            setErrorMsg("La pianta inserita non esiste nel catalogo botanico. \n Selezionane una dai suggerimenti.");
+            return;
+        }
+
+        if (postMode === 'garden' && !selectedPlantId) {
+            setErrorMsg("La pianta inserita non esiste nel tuo giardino.");
+            return;
+        }
+
         setIsLoading(true);
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');

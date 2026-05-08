@@ -90,24 +90,24 @@ export function AdminPanel() {
                     </div>
                 </div>
 
-                {/* CARD 2: Ripristino Database */}
+                {/* CARD 2: Sincronizzazione Database */}
                 <div className="admin-card">
-                    <div className="admin-card-header"><DatabaseBackup size={24} /> Ripristino Database</div>
-                    <p>Forza il ricaricamento del file <strong>data.sql</strong> per ripristinare i dati base del catalogo, utile in caso di dati corrotti o test.</p>
+                    <div className="admin-card-header"><DatabaseBackup size={24} /> Sincronizza Catalogo</div>
+                    <p>Aggiorna il database locale con le ultime schede botaniche dal file <strong>data.sql</strong>. <br />I nuovi dati verranno aggiunti senza sovrascrivere o eliminare i tuoi progressi.</p>
                     <button
-                        className="admin-btn danger"
+                        className="admin-btn"
                         onClick={() => setModalConfig({
                             isOpen: true,
                             type: 'confirm',
-                            title: 'Attenzione!',
-                            message: 'Sei sicuro di voler ripristinare il database? \nLe modifiche ai dati base potrebbero essere sovrascritte.',
-                            icon: 'warning',
-                            onConfirm: () => { closePopup(); handleAction('/api/admin/reload-catalog', setIsReloading, 'Ripristino avviato con successo!'); }
+                            title: 'Sincronizzazione Catalogo',
+                            message: 'Vuoi aggiornare il catalogo botanico caricando eventuali nuove informazioni?',
+                            icon: 'info',
+                            onConfirm: () => { closePopup(); handleAction('/api/admin/reload-catalog', setIsReloading, 'Sincronizzazione avviata con successo!'); }
                         })}
                         disabled={isReloading}
                         style={{ marginTop: 'auto' }}
                     >
-                        {isReloading ? <><Loader size={18} className="spin" /> Ripristino in corso...</> : <><AlertTriangle size={18} /> Avvia Ripristino SQL</>}
+                        {isReloading ? <><Loader size={18} className="spin" /> Sincronizzazione in corso...</> : <><DatabaseBackup size={18} /> Avvia Sincronizzazione</>}
                     </button>
                 </div>
             </div>

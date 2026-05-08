@@ -196,6 +196,7 @@ export function PlantDetailModal({
                                             urlphoto: p.urlphoto || p.URLPhoto || '',
                                             creationDate: p.creationDate,
                                             author: p.author,
+                                            plant: p.plant,
                                             likesCount: p.likesCount ?? 0,
                                             isLikedByMe: p.likedByMe ?? p.isLikedByMe ?? false,
                                             isSavedByMe: p.savedByMe ?? p.isSavedByMe ?? false,
@@ -276,6 +277,7 @@ export function PostsScrollModal({
                             urlphoto={post.urlphoto}
                             creationDate={post.creationDate}
                             author={post.author}
+                            plant={post.plant}
                             likesCount={post.likesCount}
                             isLikedByMe={post.isLikedByMe}
                             isSavedByMe={post.isSavedByMe}

@@ -61,6 +61,7 @@ export function MyGarden() {
 
     // Effetto per il caricamento iniziale del giardino
     useEffect(() => {
+        window.scrollTo(0, 0);
         const token = localStorage.getItem('phytosend_token');
 
         setLoading(true);
@@ -347,13 +348,13 @@ export function MyGarden() {
         <>
             <div className="my-garden-page">
 
-                {/* Pulsante Torna al Profilo (visibile solo se visitiamo il giardino di un altro utente) */}
+                {/* Pulsante Vai al Profilo (visibile solo se visitiamo il giardino di un altro utente) */}
                 {!isOwnGarden && (
                     <button
                         className="back-to-profile-btn"
                         onClick={() => navigate(`/profile/${gardenUserId}`)}
                     >
-                        <ArrowLeft size={18} /> Torna al Profilo di {ownerName || 'Utente'}
+                        <ArrowLeft size={18} /> Vai al Profilo di {ownerName || 'Utente'}
                     </button>
                 )}
 

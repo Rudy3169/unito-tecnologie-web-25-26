@@ -79,6 +79,7 @@ export function Profile() {
                     urlphoto: p.urlphoto ?? p.URLPhoto ?? p.urlPhoto ?? '',
                     creationDate: p.creationDate,
                     author: p.author,
+                    plant: p.plant,
                     likesCount: p.likesCount ?? 0,
                     isLikedByMe: p.likedByMe ?? p.isLikedByMe ?? false,
                     commentsCount: p.commentsCount ?? 0,
@@ -90,6 +91,7 @@ export function Profile() {
     };
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         setLoading(true);
         setSelectedPostIndex(null);
         loadProfile();
@@ -271,6 +273,7 @@ export function Profile() {
                                     urlphoto={post.urlphoto}
                                     creationDate={post.creationDate}
                                     author={post.author}
+                                    plant={post.plant}
                                     likesCount={post.likesCount}
                                     isLikedByMe={post.isLikedByMe}
                                     isSavedByMe={post.isSavedByMe}

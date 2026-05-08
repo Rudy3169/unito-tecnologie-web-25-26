@@ -100,7 +100,7 @@
 }
 
 .admin-btn:hover:not(:disabled) {
-    background: var(--color-primary-dark);
+    background: var(--color-primary-light);
 }
 
 .admin-btn.danger {

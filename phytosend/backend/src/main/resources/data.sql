@@ -344,4 +344,5 @@ INSERT INTO botanical_cards (common_name, scientific_name, family, exposure, irr
 ('Zucca (Acorn)', 'Cucurbita pepo', 'Cucurbitaceae', 'Pieno sole', 'Moderata', 7, 'Bilanciato', 'Terriccio ricco', 'https://upload.wikimedia.org/wikipedia/commons/b/b0/BinOfPumpkins.jpg'),
 ('Zucca spinosa', 'Sechium edule', 'Cucurbitaceae', 'Pieno sole', 'Moderata', 7, 'Bilanciato', 'Ben drenato', 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Starr-100621-7593-plant-Sechium_edule-habit-Honokowai_Ditch_Trail.jpg'),
 ('Zucca violina', 'Cucurbita moschata', 'Cucurbitaceae', 'Pieno sole', 'Moderata', 7, 'Organico', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/9/93/Courge.jpg'),
-('Zucchina', 'Cucurbita pepo', 'Cucurbitaceae', 'Pieno sole', 'Abbondante', 4, 'Bilanciato', 'Ben drenato', 'https://upload.wikimedia.org/wikipedia/commons/f/ff/1024_Zucchini-0732.jpg');
+('Zucchina', 'Cucurbita pepo', 'Cucurbitaceae', 'Pieno sole', 'Abbondante', 4, 'Bilanciato', 'Ben drenato', 'https://upload.wikimedia.org/wikipedia/commons/f/ff/1024_Zucchini-0732.jpg')
+ON CONFLICT (common_name, scientific_name) DO NOTHING;

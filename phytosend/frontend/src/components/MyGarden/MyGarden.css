@@ -13,7 +13,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 18px;
-    background: transparent;
+    background: var(--color-bg-main);
     color: var(--color-text-muted);
     border: 1px solid var(--color-border);
     border-radius: 20px;
@@ -23,6 +23,9 @@
     transition: all 0.2s ease;
     margin-bottom: 24px;
     align-self: flex-start;
+    position: sticky;
+    top: 80px;
+    z-index: 100;
 }
 
 .back-to-profile-btn:hover {
@@ -184,6 +187,28 @@
     color: var(--color-text-muted);
 }
 
+.add-nickname-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    color: var(--color-primary);
+    border: 1px dashed var(--color-primary);
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.add-nickname-btn:hover {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    opacity: 1;
+}
+
 .view-inline {
     display: flex;
     align-items: center;
@@ -225,7 +250,7 @@
     border-radius: 4px;
     width: 120px;
     font-size: 0.9rem;
-    background: var(--color-bg-body);
+    background: var(--color-bg-main);
     color: var(--color-text-main);
 }
 
@@ -272,7 +297,7 @@
 .dead-card {
     filter: grayscale(100%);
     opacity: 0.7;
-    background: var(--color-bg-body);
+    background: var(--color-bg-main);
 }
 
 .dead-card:hover {
@@ -496,7 +521,7 @@
 
 .timeline-item {
     padding: 10px 14px;
-    background: var(--color-bg-body);
+    background: var(--color-bg-main);
     border-left: 3px solid var(--color-primary);
     border-radius: 0 8px 8px 0;
     font-size: 0.9rem;
@@ -536,7 +561,7 @@
     aspect-ratio: 1 / 1;
     overflow: hidden;
     cursor: pointer;
-    background: var(--color-bg-body);
+    background: var(--color-bg-main);
 }
 
 .plant-post-thumb img {
@@ -557,7 +582,7 @@
     align-items: center;
     justify-content: center;
     color: var(--color-text-muted);
-    background: var(--color-bg-body);
+    background: var(--color-bg-main);
 }
 
 .post-thumb-overlay {
@@ -674,7 +699,7 @@
     padding: 12px;
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    background: var(--color-bg-body);
+    background: var(--color-bg-main);
     color: var(--color-text-main);
     font-size: 1rem;
 }
@@ -740,7 +765,7 @@
 }
 
 .suggestion-item:hover {
-    background: var(--color-bg-body);
+    background: var(--color-bg-main);
 }
 
 .suggestion-img {

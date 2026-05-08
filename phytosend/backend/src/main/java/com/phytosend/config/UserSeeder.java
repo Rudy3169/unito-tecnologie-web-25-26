@@ -65,15 +65,15 @@ public class UserSeeder implements CommandLineRunner {
             userService.registerUser(marco);
 
             // User 3
-            User sofia = new User();
-            sofia.setName("Sofia");
-            sofia.setSurname("Gallo");
-            sofia.setEmail("sofia@phytosend.com");
-            sofia.setPassword("password");
-            sofia.setRole(UserRole.BASE);
-            sofia.setCity("Firenze");
-            sofia.setBio("Trasformo la mia casa in una giungla urbana. Adoro le grandi foglie! 🌿");
-            userService.registerUser(sofia);
+            User federica = new User();
+            federica.setName("Federica");
+            federica.setSurname("Gallo");
+            federica.setEmail("federica@phytosend.com");
+            federica.setPassword("password");
+            federica.setRole(UserRole.BASE);
+            federica.setCity("Firenze");
+            federica.setBio("Trasformo la mia casa in una giungla urbana. Adoro le grandi foglie! 🌿");
+            userService.registerUser(federica);
 
             // User 4
             User alessandro = new User();

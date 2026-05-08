@@ -1,5 +1,5 @@
 import React from 'react';
-import { Skull, Droplets, Pencil, Check, X, Trash2 } from 'lucide-react';
+import { Skull, Droplets, Pencil, Check, X, Trash2, Plus } from 'lucide-react';
 import type { PlantItem } from './types';
 
 interface PlantCardProps {
@@ -59,18 +59,34 @@ export function PlantCard({
                             <button className="btn-icon-cancel" onClick={() => setEditingPlantId(null)}><X size={16} /></button>
                         </div>
                     ) : (
-                        <div className="garden-card-nickname-row">
-                            <span className="garden-card-nickname">{hasNickname ? plant.plantName : 'Senza nome'}</span>
-                            {isOwnGarden && (
-                                <button className="btn-icon-edit" onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditNameValue(plant.plantName || "");
-                                    setEditingPlantId(plant.id);
-                                }}>
-                                    <Pencil size={14} />
-                                </button>
+                        <>
+                            {(hasNickname || isOwnGarden) && (
+                                <div className="garden-card-nickname-row">
+                                    {hasNickname ? (
+                                        <>
+                                            <span className="garden-card-nickname">{plant.plantName}</span>
+                                            {isOwnGarden && (
+                                                <button className="btn-icon-edit" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setEditNameValue(plant.plantName || "");
+                                                    setEditingPlantId(plant.id);
+                                                }}>
+                                                    <Pencil size={14} />
+                                                </button>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <button className="add-nickname-btn" onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditNameValue("");
+                                            setEditingPlantId(plant.id);
+                                        }}>
+                                            <Plus size={14} /> Aggiungi soprannome
+                                        </button>
+                                    )}
+                                </div>
                             )}
-                        </div>
+                        </>
                     )}
                 </div>
             </div>
