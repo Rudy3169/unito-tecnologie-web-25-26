@@ -28,6 +28,12 @@
     margin-bottom: var(--spacing-md);
 }
 
+/* Avatar wrapper */
+.profile-avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
 .profile-avatar {
     width: 90px;
     height: 90px;
@@ -41,6 +47,119 @@
     font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+}
+
+.profile-avatar.editable {
+    cursor: pointer;
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    border-radius: 50%;
+}
+
+.profile-avatar.editable:hover .profile-avatar-overlay {
+    opacity: 1;
+}
+
+/* Menu azioni foto profilo */
+.photo-action-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    padding: 6px 0;
+    min-width: 180px;
+    z-index: 50;
+    animation: photoMenuIn 0.2s ease;
+    overflow: hidden;
+}
+
+@keyframes photoMenuIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-6px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+.photo-action-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 18px;
+    background: none;
+    border: none;
+    color: var(--color-text-main);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    font-family: inherit;
+}
+
+.photo-action-item:hover {
+    background: var(--color-border);
+}
+
+.photo-action-item.danger {
+    color: #e74c3c;
+}
+
+.photo-action-item.danger:hover {
+    background: rgba(231, 76, 60, 0.08);
+}
+
+/* Indicatore upload */
+.photo-uploading-indicator {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+}
+
+.photo-uploading-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .profile-header-info {

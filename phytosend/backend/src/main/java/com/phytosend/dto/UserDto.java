@@ -17,6 +17,7 @@ public class UserDto {
     private String bio; // Biografia dell'utente
     private String birthDate; // Data di nascita dell'utente
     private UserRole role; // Ruolo dell'utente
+    private String profilePhotoUrl; // URL foto profilo dell'utente
     private int postsCount; // Numero di post dell'utente
     private int plantsCount; // Numero di piante dell'utente
 }

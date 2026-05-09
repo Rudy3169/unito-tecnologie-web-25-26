@@ -189,6 +189,7 @@
     background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
     color: white;
     transition: box-shadow 0.2s;
+    overflow: hidden;
 }
 
 .navbar-icon-btn:hover .navbar-avatar-mini,
@@ -196,6 +197,13 @@
 .bottom-nav-item:hover .navbar-avatar-mini,
 .bottom-nav-item.active .navbar-avatar-mini {
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.25);
+}
+
+.navbar-avatar-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 /* ══════════════════════════════════

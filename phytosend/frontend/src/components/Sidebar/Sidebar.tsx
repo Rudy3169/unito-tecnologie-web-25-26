@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { Home, Search, User, LogOut, Settings, Leaf, Menu, Bookmark, Sun, Moon, Fence } from 'lucide-react';
+import { apiFetch } from '../../utils/apiFetch';
 import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
 import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
 import './Sidebar.css';
@@ -20,6 +21,28 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     const menuRef = useRef<HTMLDivElement>(null);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+    const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
+
+    // Carica la foto profilo dell'utente corrente
+    useEffect(() => {
+        const userId = localStorage.getItem('phytosend_userId');
+        const token = localStorage.getItem('phytosend_token');
+        if (!userId || !token) return;
+
+        apiFetch(`/api/utenti/${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data?.profilePhotoUrl) {
+                    setProfilePhotoUrl(data.profilePhotoUrl);
+                } else {
+                    setProfilePhotoUrl(null);
+                }
+            })
+            .catch(() => { });
+    }, [location.pathname]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -125,7 +148,11 @@ export function Sidebar({ userRole }: SidebarProps) {
                     {/* Profilo */}
                     <Link to="/profile" className={`navbar-icon-btn ${isActive('/profile')}`} title="Profilo">
                         <div className="navbar-avatar-mini">
-                            <User size={16} />
+                            {profilePhotoUrl ? (
+                                <img src={profilePhotoUrl} alt="Profilo" className="navbar-avatar-photo" />
+                            ) : (
+                                <User size={16} />
+                            )}
                         </div>
                         <span className="icon-label">Profilo</span>
                     </Link>
@@ -190,7 +217,11 @@ export function Sidebar({ userRole }: SidebarProps) {
                 {/* Profilo */}
                 <Link to="/profile" className={`bottom-nav-item ${isActive('/profile')}`}>
                     <div className="navbar-avatar-mini">
-                        <User size={16} />
+                        {profilePhotoUrl ? (
+                            <img src={profilePhotoUrl} alt="Profilo" className="navbar-avatar-photo" />
+                        ) : (
+                            <User size={16} />
+                        )}
                     </div>
                     <span className="icon-label">Profilo</span>
                 </Link>

@@ -38,6 +38,7 @@ public class DtoConverter {
         dto.setBio(user.getBio());
         dto.setBirthDate(user.getBirthDate());
         dto.setRole(user.getRole());
+        dto.setProfilePhotoUrl(user.getProfilePhotoUrl());
         // postsCount e plantsCount vengono impostati dal controller quando serve
         return dto;
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence } from 'lucide-react';
+import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import { ProfileSettings } from './ProfileSettings';
 import type { PostProps } from '../Feed/PostCard';
@@ -19,6 +19,7 @@ interface UserProfile {
     role: string;
     postsCount: number;
     plantsCount: number;
+    profilePhotoUrl?: string;
 }
 
 export function Profile() {
@@ -38,6 +39,10 @@ export function Profile() {
     const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
     const [showSettings, setShowSettings] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const modalScrollRef = useRef<HTMLDivElement>(null);
 
@@ -96,6 +101,18 @@ export function Profile() {
         setSelectedPostIndex(null);
         loadProfile();
     }, [profileUserId]);
+
+    // Chiude il menu foto quando si clicca fuori
+    useEffect(() => {
+        if (!showPhotoMenu) return;
+        const handleClick = () => setShowPhotoMenu(false);
+        // Piccolo delay per evitare che il click di apertura lo chiuda subito
+        const timer = setTimeout(() => document.addEventListener('click', handleClick), 0);
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('click', handleClick);
+        };
+    }, [showPhotoMenu]);
 
     // Gestione like dai post in modale
     const handleToggleLike = (postId: number) => {
@@ -170,8 +187,153 @@ export function Profile() {
         <div className="profile-container">
             {/* ═══ HEADER PROFILO ═══ */}
             <div className="profile-header-card">
-                <div className="profile-avatar">
-                    <span>{user.name?.charAt(0)?.toUpperCase()}{user.surname?.charAt(0)?.toUpperCase()}</span>
+                <div className="profile-avatar-wrapper">
+                    <div
+                        className={`profile-avatar ${isOwnProfile ? 'editable' : ''}`}
+                        onClick={() => {
+                            if (!isOwnProfile) return;
+                            if (user.profilePhotoUrl) {
+                                // Se ha già una foto, mostra il menu modifica/elimina
+                                setShowPhotoMenu(!showPhotoMenu);
+                            } else {
+                                // Se non ha foto, apri direttamente la galleria
+                                fileInputRef.current?.click();
+                            }
+                        }}
+                    >
+                        {user.profilePhotoUrl ? (
+                            <img src={user.profilePhotoUrl} alt="Foto profilo" className="profile-avatar-img" />
+                        ) : (
+                            <span>{user.name?.charAt(0)?.toUpperCase()}{user.surname?.charAt(0)?.toUpperCase()}</span>
+                        )}
+                        {isOwnProfile && (
+                            <div className="profile-avatar-overlay">
+                                <Camera size={20} />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Input file nascosto */}
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+
+                            setUploadingPhoto(true);
+                            setShowPhotoMenu(false);
+                            const token = localStorage.getItem('phytosend_token');
+
+                            try {
+                                // 1. Upload del file
+                                const formData = new FormData();
+                                formData.append('file', file);
+
+                                const uploadRes = await apiFetch('/api/upload/profile-photo', {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${token}` },
+                                    body: formData
+                                });
+
+                                if (!uploadRes.ok) throw new Error('Upload fallito');
+                                const { url } = await uploadRes.json();
+
+                                // 2. Se c'era una foto precedente, eliminala dal server
+                                if (user.profilePhotoUrl?.startsWith('/uploads/')) {
+                                    await apiFetch('/api/upload/profile-photo', {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${token}`
+                                        },
+                                        body: JSON.stringify({ url: user.profilePhotoUrl })
+                                    }).catch(() => { });
+                                }
+
+                                // 3. Aggiorna il profilo con il nuovo URL
+                                await apiFetch(`/api/utenti/${user.id}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
+                                    },
+                                    body: JSON.stringify({ profilePhotoUrl: url })
+                                });
+
+                                loadProfile();
+                            } catch (err) {
+                                console.error('Errore upload foto profilo:', err);
+                            } finally {
+                                setUploadingPhoto(false);
+                                // Reset dell'input per permettere ri-selezione dello stesso file
+                                e.target.value = '';
+                            }
+                        }}
+                    />
+
+                    {/* Indicatore di caricamento */}
+                    {uploadingPhoto && (
+                        <div className="photo-uploading-indicator">
+                            <div className="photo-uploading-spinner" />
+                        </div>
+                    )}
+
+                    {/* Menu modifica/elimina foto */}
+                    {showPhotoMenu && (
+                        <div className="photo-action-menu">
+                            <button
+                                className="photo-action-item"
+                                onClick={() => {
+                                    setShowPhotoMenu(false);
+                                    fileInputRef.current?.click();
+                                }}
+                            >
+                                <Pencil size={16} />
+                                <span>Modifica foto</span>
+                            </button>
+                            <button
+                                className="photo-action-item danger"
+                                onClick={async () => {
+                                    setShowPhotoMenu(false);
+                                    const token = localStorage.getItem('phytosend_token');
+
+                                    try {
+                                        // Elimina il file dal server
+                                        if (user.profilePhotoUrl?.startsWith('/uploads/')) {
+                                            await apiFetch('/api/upload/profile-photo', {
+                                                method: 'DELETE',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'Authorization': `Bearer ${token}`
+                                                },
+                                                body: JSON.stringify({ url: user.profilePhotoUrl })
+                                            }).catch(() => { });
+                                        }
+
+                                        // Rimuovi l'URL dal profilo
+                                        await apiFetch(`/api/utenti/${user.id}`, {
+                                            method: 'PUT',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${token}`
+                                            },
+                                            body: JSON.stringify({ profilePhotoUrl: '' })
+                                        });
+
+                                        loadProfile();
+                                    } catch (err) {
+                                        console.error('Errore eliminazione foto:', err);
+                                    }
+                                }}
+                            >
+                                <Trash2 size={16} />
+                                <span>Elimina foto</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="profile-header-info">

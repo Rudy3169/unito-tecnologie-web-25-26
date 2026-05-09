@@ -172,6 +172,10 @@ public class UserService implements UserDetailsService {
             existing.setBio(updatedData.getBio());
         if (updatedData.getBirthDate() != null)
             existing.setBirthDate(updatedData.getBirthDate());
+        if (updatedData.getProfilePhotoUrl() != null) {
+            String photoUrl = updatedData.getProfilePhotoUrl().trim();
+            existing.setProfilePhotoUrl(photoUrl.isEmpty() ? null : photoUrl);
+        }
 
         // Salva l'utente aggiornato
         return userRepository.save(existing);

@@ -61,10 +61,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Login,
-                                                                                                          // Register e
-                                                                                                          // Swagger
-                                                                                                          // pubblici
+                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/uploads/**")
+                        .permitAll() // Login, Register, Swagger e file statici pubblici
                         .anyRequest().authenticated() // Tutto il resto richiede token
                 )
                 // Imposta sessione stateless per JWT

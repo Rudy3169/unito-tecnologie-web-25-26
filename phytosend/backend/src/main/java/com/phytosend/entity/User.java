@@ -45,6 +45,9 @@ public class User {
     @Column(length = 300)
     private String bio; // Biografia
 
+    @Column(columnDefinition = "TEXT")
+    private String profilePhotoUrl; // URL foto profilo
+
     @Enumerated(EnumType.STRING)
     private UserRole role; // Ruolo
 
