@@ -1,4 +1,4 @@
-# PhytoSend - Social Network & Giardinaggio Virtuale
+# PhytoSend
 
 <p align="center">
   <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot" />
@@ -21,7 +21,7 @@ Il repository è organizzato come segue:
 
 ```txt
 .
-├── documentation/         # Documentazione di progetto (Ideazione, Visione, Diagramma ER)
+├── documentation/         # Documentazione di progetto
 └── phytosend/             # Codice sorgente dell'applicazione
     ├── backend/           # API REST sviluppate con Spring Boot (Java + Maven)
     └── frontend/          # Applicazione Client in React + TypeScript (Vite + PrimeReact)
@@ -33,9 +33,9 @@ Il repository è organizzato come segue:
 
 Prima di iniziare, assicurati di avere installato sul tuo sistema:
 
-- **Java Development Kit (JDK)** 17 o superiore (consigliato JDK 21+)
+- **Java Development Kit (JDK)** 17 o superiore
 - **Node.js** v18+ e **npm**
-- **DBMS SQL** (es. PostgreSQL o MySQL) o database H2 in memoria (a seconda della tua configurazione in `application.properties`/`application.yml`)
+- **DBMS SQL**
 
 ---
 
@@ -103,7 +103,7 @@ Il frontend sarà raggiungibile nel browser all'indirizzo indicato nel terminale
 
 ---
 
-## 🐳 Containerizzazione e Orchestrazione (Docker)
+## 🐳 Docker
 
 Sia il backend che il frontend sono dotati di file `DockerFile` dedicati per semplificare la compilazione e la distribuzione in container. Inoltre, viene fornito un file di orchestrazione con **Docker Compose** per avviare l'intera suite di servizi (Database, Backend e Frontend) con un solo comando.
 
@@ -121,36 +121,6 @@ Questo comando avvierà in modo automatico:
 1. **Database PostgreSQL** (`phytosend-db`) sulla porta standard `5432`.
 2. **Backend Spring Boot** (`phytosend-backend`) sulla porta `8080`.
 3. **Frontend Nginx + React** (`phytosend-frontend`) sulla porta `5173`.
-
----
-
-## 🌐 Architettura di Rete & Reverse Proxy (Nginx)
-
-In ambiente Docker, il client React viene servito tramite un web server **Nginx**. Quest'ultimo funge anche da **Reverse Proxy** per semplificare la comunicazione con le API del backend ed evitare blocchi relativi al CORS.
-
-Il file di configurazione `nginx.conf` definisce le seguenti regole di routing:
-
-* Tutte le richieste statiche alla root `/` caricano l'applicazione React.
-* Qualsiasi chiamata verso `/api` viene intercettata da Nginx e inoltrata internamente al container del backend (`http://backend:8080`), nascondendo la complessità di rete al browser dell'utente.
-
-```nginx
-server {
-    listen 80;
-    server_name localhost;
-
-    location / {
-        root /usr/share/nginx/html;
-        index index.html index.htm;
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api {
-        proxy_pass http://backend:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
 
 ---
 
