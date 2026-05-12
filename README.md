@@ -141,7 +141,7 @@ Puoi utilizzare uno dei seguenti account di test pronti all'uso per esplorare le
 
 ---
 
-## 👥 Autori e Informazioni Accademiche
+## 👥 Informazioni Accademiche
 
 Progetto sviluppato per il corso di **Tecnologie Web** (A.A. 2025/2026).
 
