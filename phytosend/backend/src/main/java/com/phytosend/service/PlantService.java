@@ -112,4 +112,41 @@ public class PlantService {
         }
         plantRepository.deleteById(plantId);
     }
+
+    /**
+     * Completa un evento di cura e crea automaticamente il prossimo evento.
+     *
+     * @param eventId ID dell'evento da completare
+     * @return l'evento completato
+     */
+    @Transactional
+    public CareEvent completeCareEvent(@NonNull Long eventId) {
+        CareEvent event = careEventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento di cura con ID " + eventId + " non trovato"));
+
+        // Segna come completato
+        event.setCompleted(true);
+        event.setCompletedDate(LocalDate.now());
+        careEventRepository.save(event);
+
+        // Crea il prossimo evento dello stesso tipo
+        CareEvent nextEvent = new CareEvent();
+        nextEvent.setPlant(event.getPlant());
+        nextEvent.setType(event.getType());
+        nextEvent.setCompleted(false);
+
+        // Calcola la data del prossimo evento basata sulla frequenza della scheda botanica
+        long giorniDaAggiungere = 7; // Default
+        if (event.getPlant().getCard() != null) {
+            String frequenzaStr = event.getPlant().getCard().getWaterFrequencyDays();
+            if (frequenzaStr != null && frequenzaStr.matches(".*\\d+.*")) {
+                giorniDaAggiungere = Long.parseLong(frequenzaStr.replaceAll("\\D+", ""));
+            }
+        }
+
+        nextEvent.setProgrammedDate(LocalDate.now().plusDays(giorniDaAggiungere));
+        careEventRepository.save(nextEvent);
+
+        return event;
+    }
 }

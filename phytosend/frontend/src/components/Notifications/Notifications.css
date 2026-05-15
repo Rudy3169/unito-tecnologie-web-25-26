@@ -1,0 +1,516 @@
+/* ==========================================================================
+   NOTIFICATION SYSTEM — Stili coerenti col Design System PhytoSend
+   Usa le variabili CSS del tema "Pergamena Botanica" (Forest Teal)
+   ========================================================================== */
+
+/* ── Badge sulla campanella ── */
+.notification-bell-container {
+    position: relative;
+}
+
+.notification-bell-btn {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--color-error);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    pointer-events: none;
+    animation: badge-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 2px 6px rgba(181, 74, 63, 0.4);
+}
+
+@keyframes badge-pop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* ── Dropdown ── */
+.notification-dropdown-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 998;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 380px;
+    max-height: 480px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-soft);
+    box-shadow: var(--shadow-md);
+    z-index: 999;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.notification-dropdown.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.notification-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.notification-dropdown-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.notification-mark-all-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-hard);
+    transition: background 0.2s;
+}
+
+.notification-mark-all-btn:hover {
+    background: rgba(var(--color-primary-rgb), 0.08);
+}
+
+.notification-dropdown-list {
+    max-height: 360px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.notification-dropdown-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.notification-dropdown-list::-webkit-scrollbar-thumb {
+    background: var(--color-primary-accent);
+    border-radius: 2px;
+}
+
+.notification-view-all-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-primary);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.notification-view-all-btn:hover {
+    background: rgba(var(--color-primary-rgb), 0.06);
+}
+
+/* ── Notification Item ── */
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    position: relative;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background: rgba(var(--color-primary-rgb), 0.04);
+}
+
+.notification-item.unread {
+    background: rgba(var(--color-primary-rgb), 0.06);
+}
+
+.notification-item.unread:hover {
+    background: rgba(var(--color-primary-rgb), 0.10);
+}
+
+/* Pallino non letta */
+.notification-unread-dot {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    animation: dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Avatar attore */
+.notification-avatar {
+    position: relative;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+}
+
+.notification-avatar-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-border);
+}
+
+.notification-avatar-fallback {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.notification-type-icon {
+    position: absolute;
+    bottom: -2px;
+    right: -4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(var(--color-primary-rgb), 0.15);
+}
+
+/* Contenuto */
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-message {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-main);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.notification-item.unread .notification-message {
+    font-weight: 600;
+}
+
+.notification-time {
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+    display: block;
+}
+
+/* Azione rapida (CARE_WATER) */
+.notification-quick-action {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary);
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.notification-quick-action:hover {
+    background: var(--color-primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.notification-quick-action:active {
+    transform: scale(0.95);
+}
+
+/* Empty state */
+.notification-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.notification-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.6;
+}
+
+.notification-empty p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+/* ── Sidebar (Drawer) ── */
+.notification-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    z-index: 1000;
+    transition: background 0.3s ease;
+}
+
+.notification-sidebar-overlay.visible {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(2px);
+}
+
+.notification-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 420px;
+    max-width: 90vw;
+    height: 100vh;
+    background: var(--color-bg-card);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -8px 0 40px rgba(var(--color-primary-rgb), 0.12);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notification-sidebar.visible {
+    transform: translateX(0);
+}
+
+.notification-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.notification-sidebar-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.notification-sidebar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-sidebar-mark-all,
+.notification-sidebar-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(var(--color-primary-rgb), 0.08);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.notification-sidebar-mark-all:hover,
+.notification-sidebar-close:hover {
+    background: rgba(var(--color-primary-rgb), 0.15);
+    color: var(--color-text-main);
+}
+
+.notification-sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.notification-sidebar-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.notification-sidebar-list::-webkit-scrollbar-thumb {
+    background: var(--color-primary-accent);
+    border-radius: 2px;
+}
+
+/* Carica altre */
+.notification-load-more {
+    display: block;
+    width: calc(100% - 32px);
+    margin: 16px auto;
+    padding: 12px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--border-radius-hard);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.notification-load-more:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.04);
+}
+
+.notification-load-more:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Pagina Mobile ── */
+.notification-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--color-bg-main);
+}
+
+.notification-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    background: var(--color-bg-card);
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+}
+
+.notification-page-header h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.notification-page-back,
+.notification-page-mark-all {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(var(--color-primary-rgb), 0.08);
+    color: var(--color-text-main);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.notification-page-back:hover,
+.notification-page-mark-all:hover {
+    background: rgba(var(--color-primary-rgb), 0.15);
+}
+
+.notification-page-list {
+    padding-bottom: 80px; /* Spazio per bottom nav mobile */
+}
+
+.notification-empty-page {
+    padding-top: 80px;
+}
+
+/* ── Comment Highlight Flash Animation ── */
+@keyframes comment-flash {
+    0%, 100% { background-color: transparent; }
+    25% { background-color: rgba(var(--color-primary-rgb), 0.15); }
+    50% { background-color: rgba(var(--color-primary-rgb), 0.08); }
+    75% { background-color: rgba(var(--color-primary-rgb), 0.15); }
+}
+
+.comment-highlight {
+    animation: comment-flash 0.8s ease-in-out 2;
+    border-radius: var(--border-radius-hard);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .notification-dropdown {
+        width: calc(100vw - 32px);
+        right: -40px;
+        max-height: 400px;
+    }
+
+    .notification-item {
+        padding: 12px 16px;
+    }
+
+    .notification-avatar,
+    .notification-avatar-img,
+    .notification-avatar-fallback {
+        width: 38px;
+        height: 38px;
+    }
+    
+    .notification-message {
+        font-size: 0.82rem;
+    }
+
+    /* Nascondi la campanella label su mobile */
+    .notification-bell-btn .icon-label {
+        display: none;
+    }
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import { ProfileSettings } from './ProfileSettings';
@@ -29,6 +29,7 @@ export function Profile() {
     const currentUserId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Se c'è un parametro nella URL, mostriamo quel profilo, altrimenti il nostro
     const profileUserId = paramUserId || currentUserId;
@@ -166,6 +167,21 @@ export function Profile() {
             }, 50);
         }
     }, [selectedPostIndex]);
+
+    // Gestione parametri URL (da notifiche)
+    useEffect(() => {
+        if (!loading && posts.length > 0) {
+            const searchParams = new URLSearchParams(location.search);
+            const openPostId = searchParams.get('openPost');
+            
+            if (openPostId) {
+                const index = posts.findIndex(p => p.id === Number(openPostId));
+                if (index !== -1 && selectedPostIndex !== index) {
+                    setSelectedPostIndex(index);
+                }
+            }
+        }
+    }, [loading, posts, location.search]);
 
     if (loading) {
         return (
@@ -443,6 +459,8 @@ export function Profile() {
                                     onLike={handleToggleLike}
                                     onSave={handleToggleSave}
                                     onCommentUpdate={loadProfile}
+                                    defaultOpenComments={new URLSearchParams(location.search).get('openPost') === String(post.id) && new URLSearchParams(location.search).get('openComments') === 'true'}
+                                    highlightCommentId={new URLSearchParams(location.search).get('openPost') === String(post.id) ? (new URLSearchParams(location.search).get('commentId') ? Number(new URLSearchParams(location.search).get('commentId')) : undefined) : undefined}
                                 />
                             </div>
                         ))}

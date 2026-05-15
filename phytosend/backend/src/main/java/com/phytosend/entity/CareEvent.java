@@ -21,6 +21,8 @@ public class CareEvent {
 
     private boolean completed; // Indica se l'evento è stato completato
 
+    private LocalDate completedDate; // Data di completamento effettivo
+
     private String notes; // Note aggiuntive
 
     // RELAZIONE: Ogni evento di cura è associato a una pianta

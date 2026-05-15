@@ -54,6 +54,10 @@ public class SocialService {
     @Autowired
     private PlantService plantService;
 
+    // Servizio per le notifiche
+    @Autowired
+    private NotificationService notificationService;
+
     // Convertitore di DTO
     @Autowired
     private DtoConverter dtoConverter;
@@ -207,10 +211,51 @@ public class SocialService {
         if (parentId != null) {
             Comment parentComment = commentRepository.findById(parentId).orElse(null);
             newComment.setParent(parentComment);
+
+            // Salva il commento prima di generare notifiche
+            Comment saved = commentRepository.save(newComment);
+
+            // Notifica REPLY all'autore del commento padre
+            if (parentComment != null) {
+                notificationService.createNotification(
+                        parentComment.getAuthor(),
+                        author,
+                        com.phytosend.entity.NotificationType.REPLY,
+                        post.getId(),
+                        saved.getId(),
+                        author.getName() + " ha risposto al tuo commento"
+                );
+            }
+
+            // Notifica COMMENT all'autore del post (se diverso dall'autore del commento padre)
+            if (parentComment != null && !post.getAuthor().getId().equals(parentComment.getAuthor().getId())) {
+                notificationService.createNotification(
+                        post.getAuthor(),
+                        author,
+                        com.phytosend.entity.NotificationType.COMMENT,
+                        post.getId(),
+                        saved.getId(),
+                        author.getName() + " ha commentato il tuo post"
+                );
+            }
+
+            return saved;
         }
 
         // Salva il commento
-        return commentRepository.save(newComment);
+        Comment saved = commentRepository.save(newComment);
+
+        // Notifica COMMENT all'autore del post
+        notificationService.createNotification(
+                post.getAuthor(),
+                author,
+                com.phytosend.entity.NotificationType.COMMENT,
+                post.getId(),
+                saved.getId(),
+                author.getName() + " ha commentato il tuo post"
+        );
+
+        return saved;
     }
 
     /**
@@ -276,6 +321,16 @@ public class SocialService {
         } else {
             post.getLikedBy().add(user);
             postRepository.save(post);
+
+            // Genera notifica LIKE_POST per l'autore del post
+            notificationService.createNotification(
+                    post.getAuthor(),
+                    user,
+                    com.phytosend.entity.NotificationType.LIKE_POST,
+                    post.getId(),
+                    user.getName() + " ha messo mi piace al tuo post"
+            );
+
             return true;
         }
     }
@@ -303,6 +358,25 @@ public class SocialService {
         } else {
             comment.getLikedBy().add(user);
             commentRepository.save(comment);
+
+            // Trova il post associato al commento per il referenceId
+            Long postId = null;
+            if (comment.getPost() != null) {
+                postId = comment.getPost().getId();
+            } else if (comment.getParent() != null && comment.getParent().getPost() != null) {
+                postId = comment.getParent().getPost().getId();
+            }
+
+            // Genera notifica LIKE_COMMENT per l'autore del commento
+            notificationService.createNotification(
+                    comment.getAuthor(),
+                    user,
+                    com.phytosend.entity.NotificationType.LIKE_COMMENT,
+                    postId,
+                    comment.getId(),
+                    user.getName() + " ha messo mi piace al tuo commento"
+            );
+
             return true; // Like aggiunto
         }
     }

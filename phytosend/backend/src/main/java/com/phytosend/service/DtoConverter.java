@@ -8,6 +8,8 @@ import com.phytosend.entity.Garden;
 import com.phytosend.entity.BotanicalCard;
 import com.phytosend.entity.Plant;
 import com.phytosend.entity.User;
+import com.phytosend.repository.PostRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
@@ -17,6 +19,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class DtoConverter {
+
+    @Autowired
+    private PostRepository postRepository;
 
     /**
      * Converte un'entità User del database in un Data Transfer Object.
@@ -167,6 +172,41 @@ public class DtoConverter {
         dto.setLikesCount(comment.getLikedBy() != null ? comment.getLikedBy().size() : 0);
         dto.setLikedByMe(currentUserId != null && comment.getLikedBy() != null &&
                 comment.getLikedBy().stream().anyMatch(u -> u.getId().equals(currentUserId)));
+        return dto;
+    }
+
+    /**
+     * Converte un'entità Notification nel suo DTO per il frontend.
+     *
+     * @param notification l'entità notifica origine
+     * @return l'oggetto NotificationDto popolato
+     */
+    public com.phytosend.dto.NotificationDto toNotificationDto(com.phytosend.entity.Notification notification) {
+        if (notification == null)
+            return null;
+        com.phytosend.dto.NotificationDto dto = new com.phytosend.dto.NotificationDto();
+        dto.setId(notification.getId());
+        dto.setType(notification.getType());
+        dto.setReferenceId(notification.getReferenceId());
+        dto.setSecondaryReferenceId(notification.getSecondaryReferenceId());
+        dto.setMessage(notification.getMessage());
+        dto.setRead(notification.isRead());
+        if (notification.getCreatedAt() != null) {
+            // Aggiungiamo 'Z' per forzare il parsing in UTC sul frontend e correggere il fuso orario (+2h)
+            dto.setCreatedAt(notification.getCreatedAt().toString() + "Z");
+        }
+        // Se è una notifica social, recuperiamo l'ID dell'autore del post
+        if (notification.getType() != com.phytosend.entity.NotificationType.CARE_WATER && notification.getReferenceId() != null) {
+            postRepository.findById(notification.getReferenceId()).ifPresent(post -> {
+                dto.setPostAuthorId(post.getAuthor().getId());
+            });
+        }
+        // Info sull'attore
+        if (notification.getActor() != null) {
+            dto.setActorId(notification.getActor().getId());
+            dto.setActorName(notification.getActor().getName() + " " + notification.getActor().getSurname());
+            dto.setActorProfilePhotoUrl(notification.getActor().getProfilePhotoUrl());
+        }
         return dto;
     }
 }

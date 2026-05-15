@@ -9,6 +9,7 @@ import { AdminPanel } from './components/Admin/AdminPanel';
 import { MyGarden } from './components/MyGarden/MyGarden';
 import { PlantDetail } from './components/Search/PlantDetail';
 import { SavedPosts } from './components/Feed/SavedPosts';
+import { NotificationPage } from './components/Notifications/NotificationPage';
 import './styles/App.css';
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
                     <Route path="/my-garden" element={<MyGarden />} />
                     <Route path="/garden/:userId" element={<MyGarden />} />
                     <Route path="/saved-posts" element={<SavedPosts />} />
+                    <Route path="/notifiche" element={<NotificationPage />} />
                 </Routes>
             </main>
 

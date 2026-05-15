@@ -39,12 +39,14 @@ interface PostCardLayoutProps extends PostProps {
     onDelete?: (id: number) => void;
     onSave?: (id: number) => void;
     onCommentUpdate: () => void;
+    defaultOpenComments?: boolean;
+    highlightCommentId?: number;
 }
 
 export function PostCard({
-    id, title, description, urlphoto, author, plant, likesCount, isLikedByMe, isSavedByMe, commentsCount, onLike, onDelete, onSave, onCommentUpdate
+    id, title, description, urlphoto, author, plant, likesCount, isLikedByMe, isSavedByMe, commentsCount, onLike, onDelete, onSave, onCommentUpdate, defaultOpenComments, highlightCommentId
 }: PostCardLayoutProps) {
-    const [showComments, setShowComments] = useState(false);
+    const [showComments, setShowComments] = useState(defaultOpenComments || false);
     const navigate = useNavigate();
 
     // 2. Controllo di sicurezza Frontend: Questo post è mio?
@@ -128,6 +130,7 @@ export function PostCard({
                 isOpen={showComments}
                 onClose={() => setShowComments(false)}
                 onCommentsUpdated={onCommentUpdate}
+                highlightCommentId={highlightCommentId}
             />
         </article>
     );

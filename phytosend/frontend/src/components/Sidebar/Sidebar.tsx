@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { Home, Search, User, LogOut, Settings, Leaf, Menu, Bookmark, Sun, Moon, Fence } from 'lucide-react';
+import { NotificationBell } from '../Notifications/NotificationBell';
 import { apiFetch } from '../../utils/apiFetch';
 import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
 import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
@@ -137,6 +138,9 @@ export function Sidebar({ userRole }: SidebarProps) {
                         <span className="icon-label">MyGarden</span>
                     </Link>
 
+                    {/* Notifiche */}
+                    <NotificationBell />
+
                     {/* Admin */}
                     {userRole === 'ADMIN' && (
                         <Link to="/admin" className={`navbar-icon-btn ${isActive('/admin')}`} title="Admin">
@@ -213,6 +217,9 @@ export function Sidebar({ userRole }: SidebarProps) {
                     <Fence size={22} />
                     <span className="icon-label">MyGarden</span>
                 </Link>
+
+                {/* Notifiche */}
+                <NotificationBell />
 
                 {/* Profilo */}
                 <Link to="/profile" className={`bottom-nav-item ${isActive('/profile')}`}>

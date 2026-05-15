@@ -1,4 +1,4 @@
-import { useState, type FormEvent, useEffect } from 'react';
+import { useState, type FormEvent, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send, AlertCircle, Heart, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../utils/apiFetch';
@@ -21,13 +21,16 @@ interface CommentSectionProps {
     isOpen: boolean;
     onClose: () => void;
     onCommentsUpdated?: () => void;
+    highlightCommentId?: number;
 }
 
-export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommentsUpdated }: CommentSectionProps) {
+export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommentsUpdated, highlightCommentId }: CommentSectionProps) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const navigate = useNavigate();
+    const [highlightedId, setHighlightedId] = useState<number | null>(null);
+    const commentListRef = useRef<HTMLDivElement>(null);
 
     // Stato per tracciare a CHI stiamo rispondendo e sotto quale COMMENTO GENITORE
     const [replyingTo, setReplyingTo] = useState<{ authorName: string, parentId: number } | null>(null);
@@ -99,6 +102,31 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
             })
             .catch(err => console.error("Errore caricamento commenti:", err));
     }, [isOpen, postId]);
+
+    // Effetto per scrollare e evidenziare il commento target
+    useEffect(() => {
+        if (!highlightCommentId || comments.length === 0 || !isOpen) return;
+
+        // Espandi automaticamente il thread che contiene il commento target
+        const targetComment = comments.find(c => c.id === highlightCommentId);
+        if (targetComment?.parentId) {
+            setExpandedReplies(prev => ({ ...prev, [targetComment.parentId!]: true }));
+        }
+
+        // Piccolo delay per lasciare tempo al DOM di renderizzare
+        const timer = setTimeout(() => {
+            const element = document.querySelector(`[data-comment-id="${highlightCommentId}"]`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setHighlightedId(highlightCommentId);
+
+                // Rimuovi l'highlight dopo l'animazione
+                setTimeout(() => setHighlightedId(null), 3000);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [highlightCommentId, comments, isOpen]);
 
     // Funzione per aggiungere o rimuovere un like a un commento
     const handleLikeComment = (commentId: number) => {
@@ -286,7 +314,10 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                             return (
                                 <div key={`parent-${parent.id}`} className="comment-thread">
                                     {/* 1. IL COMMENTO GENITORE */}
-                                    <div className="comment-item-content">
+                                    <div
+                                        className={`comment-item-content ${highlightedId === parent.id ? 'comment-highlight' : ''}`}
+                                        data-comment-id={parent.id}
+                                    >
                                         <div className="comment-header-row">
                                             <strong onClick={() => navigate(`/profile/${parent.authorId}`)} style={{cursor: 'pointer'}}>{parent.authorName}</strong>
                                             <span className="comment-time">{getRelativeTime(parent.creationDate)}</span>
@@ -325,7 +356,11 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                             const canDeleteReply = isPostAuthor || isReplyAuthor;
 
                                                             return (
-                                                                <div key={`reply-${reply.id}`} className="comment-item-content">
+                                                                <div
+                                                                    key={`reply-${reply.id}`}
+                                                                    className={`comment-item-content ${highlightedId === reply.id ? 'comment-highlight' : ''}`}
+                                                                    data-comment-id={reply.id}
+                                                                >
                                                                     <div className="comment-header-row">
                                                                         <strong onClick={() => navigate(`/profile/${reply.authorId}`)} style={{cursor: 'pointer'}}>{reply.authorName}</strong>
                                                                         <span className="comment-time">{getRelativeTime(reply.creationDate)}</span>
