@@ -183,6 +183,25 @@ public class SocialService {
     }
 
     /**
+     * Recupera la lista di utenti che hanno messo like a un post.
+     *
+     * @param postId ID del post
+     * @return lista di UserDto
+     */
+    public List<com.phytosend.dto.UserDto> getPostLikes(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post non trovato"));
+        
+        if (post.getLikedBy() == null) {
+            return java.util.Collections.emptyList();
+        }
+        
+        return post.getLikedBy().stream()
+                .map(dtoConverter::toUserDto)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
      * Gestisce l'aggiunta di un blocco di testo commento sotto un certo post
      * autorizzato da un utente valido.
      *

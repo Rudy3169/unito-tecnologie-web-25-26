@@ -152,6 +152,13 @@
     margin-right: 8px;
 }
 
+.post-time {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+}
+
 .action-count {
     font-size: 0.9rem;
     font-weight: 600;
@@ -225,4 +232,116 @@
 .confirm-delete-btn:hover {
     filter: brightness(0.9);
     transform: scale(1.02);
+}
+
+/* ---- POP-UP LIKES LIST ---- */
+.likes-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+.likes-modal {
+    background-color: var(--color-bg-card);
+    width: 90%;
+    max-width: 400px;
+    border-radius: var(--border-radius-hard);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    animation: slideUp 0.2s ease;
+    overflow: hidden;
+}
+
+.likes-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.likes-modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.close-likes-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.close-likes-btn:hover {
+    background-color: var(--color-border);
+    color: var(--color-text-main);
+}
+
+.likes-modal-body {
+    padding: 0;
+    overflow-y: auto;
+    min-height: 100px;
+}
+
+.likes-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-muted);
+    gap: 8px;
+}
+
+.likes-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.like-user-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px var(--spacing-lg);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.like-user-item:hover {
+    background-color: var(--color-border);
+}
+
+.like-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.like-user-name {
+    font-weight: 500;
+    color: var(--color-text-main);
 }

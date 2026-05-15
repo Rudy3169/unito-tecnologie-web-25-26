@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil } from 'lucide-react';
+import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import { ProfileSettings } from './ProfileSettings';
 import type { PostProps } from '../Feed/PostCard';
@@ -42,6 +42,7 @@ export function Profile() {
     const [loading, setLoading] = useState(true);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+    const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -153,6 +154,32 @@ export function Profile() {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(() => loadProfile());
+    };
+
+    // Funzione per eliminare un post dal profilo
+    const confirmDeletePost = async () => {
+        if (postToDelete === null) return;
+        const postId = postToDelete;
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        try {
+            const response = await apiFetch(`/api/social/posts/${postId}?utenteId=${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                setPosts(posts.filter(post => post.id !== postId));
+                setSelectedPostIndex(null); // Chiudiamo la modale del post se eravamo lì
+            } else {
+                alert("Errore: Impossibile eliminare il post.");
+            }
+        } catch (err) {
+            console.error("Errore cancellazione:", err);
+        } finally {
+            setPostToDelete(null);
+        }
     };
 
     // Quando un post viene aperto in modale, scrolla alla posizione corretta
@@ -458,6 +485,7 @@ export function Profile() {
                                     commentsCount={post.commentsCount}
                                     onLike={handleToggleLike}
                                     onSave={handleToggleSave}
+                                    onDelete={setPostToDelete}
                                     onCommentUpdate={loadProfile}
                                     defaultOpenComments={new URLSearchParams(location.search).get('openPost') === String(post.id) && new URLSearchParams(location.search).get('openComments') === 'true'}
                                     highlightCommentId={new URLSearchParams(location.search).get('openPost') === String(post.id) ? (new URLSearchParams(location.search).get('commentId') ? Number(new URLSearchParams(location.search).get('commentId')) : undefined) : undefined}
@@ -478,6 +506,25 @@ export function Profile() {
                         loadProfile();
                     }}
                 />
+            )}
+
+            {/* POP-UP DI CONFERMA ELIMINAZIONE POST */}
+            {postToDelete !== null && (
+                <div className="comment-overlay" onClick={() => setPostToDelete(null)} style={{ zIndex: 9999 }}>
+                    <div className="delete-modal" onClick={e => e.stopPropagation()}>
+                        <h3><AlertTriangle color="var(--color-error)" size={24} /> Elimina Post</h3>
+                        <p>Sei sicuro di voler eliminare definitivamente questo post?</p>
+
+                        <div className="delete-modal-actions">
+                            <button className="cancel-btn" onClick={() => setPostToDelete(null)}>
+                                Annulla
+                            </button>
+                            <button className="confirm-delete-btn" onClick={confirmDeletePost}>
+                                Elimina
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

@@ -92,6 +92,17 @@ public class SocialController {
     }
 
     /**
+     * Recupera la lista di utenti che hanno messo like a un post.
+     *
+     * @param postId ID del post
+     * @return lista di UserDto
+     */
+    @GetMapping("/posts/{postId}/likes")
+    public List<com.phytosend.dto.UserDto> getPostLikes(@PathVariable Long postId) {
+        return socialService.getPostLikes(postId);
+    }
+
+    /**
      * Crea un nuovo post all'interno della piattaforma social e lo attribuisce
      * all'autore.
      *

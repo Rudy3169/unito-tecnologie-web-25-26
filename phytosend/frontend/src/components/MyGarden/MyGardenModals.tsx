@@ -241,10 +241,11 @@ interface PostsScrollModalProps {
     plantPostCards: PostProps[];
     handleToggleLike: (postId: number) => void;
     handleToggleSave: (postId: number) => void;
+    handleDeleteClick: (postId: number) => void;
 }
 
 export function PostsScrollModal({
-    selectedPostIndex, setSelectedPostIndex, plantPostCards, handleToggleLike, handleToggleSave
+    selectedPostIndex, setSelectedPostIndex, plantPostCards, handleToggleLike, handleToggleSave, handleDeleteClick
 }: PostsScrollModalProps) {
     const modalScrollRef = useRef<HTMLDivElement>(null);
 
@@ -284,6 +285,7 @@ export function PostsScrollModal({
                             commentsCount={post.commentsCount}
                             onLike={handleToggleLike}
                             onSave={handleToggleSave}
+                            onDelete={handleDeleteClick}
                             onCommentUpdate={() => { }}
                         />
                     </div>

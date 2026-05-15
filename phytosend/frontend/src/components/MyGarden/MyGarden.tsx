@@ -57,6 +57,7 @@ export function MyGarden() {
     // Stati per la modale post scrollabile (stile Profile)
     const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
     const [plantPostCards, setPlantPostCards] = useState<PostProps[]>([]);
+    const [postToDelete, setPostToDelete] = useState<number | null>(null);
     const modalScrollRef = useRef<HTMLDivElement>(null);
 
     // Effetto per il caricamento iniziale del giardino
@@ -232,6 +233,33 @@ export function MyGarden() {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(console.error);
+    };
+
+    // Gestione delete dalla modale post
+    const handleDeletePost = async () => {
+        if (postToDelete === null) return;
+        const postId = postToDelete;
+        const userId = localStorage.getItem('phytosend_userId');
+        const token = localStorage.getItem('phytosend_token');
+
+        try {
+            const response = await apiFetch(`/api/social/posts/${postId}?utenteId=${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                setPlantPostCards(prev => prev.filter(p => p.id !== postId));
+                setPlantPosts(prev => prev.filter(p => p.id !== postId));
+                setSelectedPostIndex(null);
+            } else {
+                alert("Errore: Impossibile eliminare il post.");
+            }
+        } catch (error) {
+            console.error("Errore eliminazione post", error);
+        } finally {
+            setPostToDelete(null);
+        }
     };
 
     // Funzione per gestire la selezione della pianta dalla tendina
@@ -487,7 +515,35 @@ export function MyGarden() {
                 plantPostCards={plantPostCards}
                 handleToggleLike={handleToggleLike}
                 handleToggleSave={handleToggleSave}
+                handleDeleteClick={setPostToDelete}
             />
+
+            {/* POP-UP DI CONFERMA ELIMINAZIONE POST */}
+            {postToDelete !== null && (
+                <div className="comment-overlay" onClick={() => setPostToDelete(null)} style={{ zIndex: 9999 }}>
+                    <div className="delete-modal" onClick={e => e.stopPropagation()}>
+                        <h3 style={{ margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Skull color="var(--color-error)" size={24} /> Elimina Post
+                        </h3>
+                        <p style={{ marginBottom: '20px', color: 'var(--color-text-main)' }}>Sei sicuro di voler eliminare definitivamente questo post?</p>
+
+                        <div className="delete-modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button 
+                                onClick={() => setPostToDelete(null)}
+                                style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'transparent', cursor: 'pointer', color: 'var(--color-text-main)' }}
+                            >
+                                Annulla
+                            </button>
+                            <button 
+                                onClick={handleDeletePost}
+                                style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: 'var(--color-error)', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                Elimina
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
