@@ -138,6 +138,7 @@ Puoi utilizzare uno dei seguenti account di test pronti all'uso per esplorare le
 | **BASE** |  Federica Gallo  |  `federica@phytosend.com`  | `password` |
 | **BASE** | Alessandro Costa | `alessandro@phytosend.com` | `password` |
 | **BASE** |   Elena Romano   |   `elena@phytosend.com`   | `password` |
+| **BASE** |   Matteo Bianchi   |   `matteo@phytosend.com`   | `password` |
 
 ---
 
