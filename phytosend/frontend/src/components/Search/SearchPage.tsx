@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { Users, Leaf, Sparkles } from 'lucide-react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useNavigationType } from 'react-router-dom';
 import { apiFetch } from '../../utils/apiFetch';
 import './SearchPage.css';
 
@@ -19,20 +19,46 @@ interface PlantResult {
     scientificName: string;
     family: string;
     urlDefaultPhoto?: string;
-    createdAt?: string; // <-- AGGIUNTO: per ricevere la data dal DB
+    createdAt?: string;
 }
+
+interface SearchCache {
+    query: string;
+    type: string;
+    plants: PlantResult[];
+    page: number;
+    hasMore: boolean;
+    scrollY: number;
+}
+
+// Cache in memoria (si perde al reload della pagina, perfetto per il nostro caso)
+let moduleCache: SearchCache | null = null;
 
 export function SearchPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const navigationType = useNavigationType();
     const query = searchParams.get('q') || '';
     const type = searchParams.get('type') || 'plants';
 
+    // Ripristina dalla cache solo se stiamo tornando indietro (POP) e la cache corrisponde
+    const cachedRef = useRef<SearchCache | null>(null);
+    const restoredRef = useRef(false);
+
+    if (!restoredRef.current) {
+        if (navigationType === 'POP' && moduleCache && moduleCache.query === query && moduleCache.type === type) {
+            cachedRef.current = moduleCache;
+        }
+        moduleCache = null; // Consumata o scartata, pulisci sempre
+        restoredRef.current = true;
+    }
+
     const [users, setUsers] = useState<UserResult[]>([]);
-    const [plants, setPlants] = useState<PlantResult[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
+    const [plants, setPlants] = useState<PlantResult[]>(cachedRef.current?.plants ?? []);
+    const [loading, setLoading] = useState(cachedRef.current ? false : true);
+    const [page, setPage] = useState(cachedRef.current?.page ?? 0);
+    const [hasMore, setHasMore] = useState(cachedRef.current?.hasMore ?? true);
+    const [restoringScroll, setRestoringScroll] = useState(!!cachedRef.current);
     const observerRef = useRef<IntersectionObserver | null>(null);
 
     // FUNZIONE DI UTILITÀ: Controlla se la pianta è stata importata nelle ultime 12 ore
@@ -59,9 +85,30 @@ export function SearchPage() {
         if (node) observerRef.current.observe(node);
     }, [loading, hasMore]);
 
+    // Nasconde la pagina durante il ripristino per evitare l'animazione di scroll visibile
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Ripristina la posizione di scroll dopo che le piante dalla cache sono renderizzate
+    useLayoutEffect(() => {
+        if (restoringScroll && cachedRef.current && plants.length > 0) {
+            // Nascondi subito la pagina
+            if (containerRef.current) containerRef.current.style.visibility = 'hidden';
+
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: cachedRef.current!.scrollY, behavior: 'instant' as ScrollBehavior });
+                // Mostra la pagina solo dopo aver scrollato
+                if (containerRef.current) containerRef.current.style.visibility = '';
+                setRestoringScroll(false);
+                cachedRef.current = null;
+            });
+        }
+    }, [restoringScroll, plants]);
+
     // Azzera tutto quando scrivi qualcosa di nuovo nella barra di ricerca
     useEffect(() => {
         if (type === 'plants') {
+            // Se abbiamo ripristinato dalla cache, non azzerare
+            if (restoringScroll) return;
             setPlants([]);
             setPage(0);
             setHasMore(true);
@@ -70,6 +117,9 @@ export function SearchPage() {
 
     // Fa partire la richiesta quando cambia la query, il tab o scendi di pagina
     useEffect(() => {
+        // Se abbiamo ripristinato dalla cache, non ri-fetchare
+        if (restoringScroll) return;
+
         const token = localStorage.getItem('phytosend_token');
         setLoading(true);
         if (type === 'users') {
@@ -116,7 +166,7 @@ export function SearchPage() {
     }, [query, type, page]);
 
     return (
-        <div className="search-page">
+        <div ref={containerRef} className="search-page">
             <div className="search-page-header">
                 <h2>
                     {type === 'users' ? <Users size={28} /> : <Leaf size={28} />}
@@ -152,7 +202,7 @@ export function SearchPage() {
                     </ul>
                 )
             ) : (
-                /* ─── RENDER RISULTATI PIANTE AGGIORNATO ─── */
+                /* ─── RENDER RISULTATI PIANTE ─── */
                 plants.length === 0 ? (
                     <p className="no-results">Nessuna pianta trovata nel catalogo.</p>
                 ) : (
@@ -163,10 +213,14 @@ export function SearchPage() {
                             return (
                                 <div
                                     key={`${plant.id}-${index}`}
-                                    ref={isLastElement ? lastElementRef : null} // AGGIUNTO IL SENSORE QUI
+                                    ref={isLastElement ? lastElementRef : null}
                                     className="plant-card"
                                     style={{ position: 'relative', cursor: 'pointer' }}
-                                    onClick={() => navigate(`/plant/${plant.id}`)}
+                                    onClick={() => {
+                                        // Salva stato corrente nella cache in memoria prima di navigare
+                                        moduleCache = { query, type, plants, page, hasMore, scrollY: window.scrollY };
+                                        navigate(`/plant/${plant.id}`);
+                                    }}
                                 >
                                     <div className="plant-card-img"
                                         style={{

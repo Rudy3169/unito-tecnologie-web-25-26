@@ -4,6 +4,7 @@ import { Fence, Plus, Sprout, Skull, Loader, ArrowLeft } from 'lucide-react';
 import type { PostProps } from '../Feed/PostCard';
 import { apiFetch } from '../../utils/apiFetch';
 import '../Profile/Profile.css';
+import { WarningModal } from '../Common/WarningModal';
 import './MyGarden.css';
 
 import { PlantCard } from './PlantCard';
@@ -58,6 +59,10 @@ export function MyGarden() {
     const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
     const [plantPostCards, setPlantPostCards] = useState<PostProps[]>([]);
     const [postToDelete, setPostToDelete] = useState<number | null>(null);
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
+        isOpen: false,
+        message: '',
+    });
     const modalScrollRef = useRef<HTMLDivElement>(null);
 
     // Effetto per il caricamento iniziale del giardino
@@ -253,7 +258,12 @@ export function MyGarden() {
                 setPlantPosts(prev => prev.filter(p => p.id !== postId));
                 setSelectedPostIndex(null);
             } else {
-                alert("Errore: Impossibile eliminare il post.");
+                setWarningModal({
+                    isOpen: true,
+                    title: 'Errore eliminazione',
+                    message: 'Impossibile eliminare il post. Riprova più tardi.',
+                    type: 'error'
+                });
             }
         } catch (error) {
             console.error("Errore eliminazione post", error);
@@ -281,7 +291,15 @@ export function MyGarden() {
 
     // Funzione per aggiungere una nuova pianta al giardino
     const handleAddNewPlant = async () => {
-        if (!newPlantCardId) return alert("Seleziona una specie botanica valida dalla tendina!");
+        if (!newPlantCardId) {
+            setWarningModal({
+                isOpen: true,
+                title: 'Specie non valida!',
+                message: 'Seleziona una specie valida dal catalogo botanico!',
+                type: 'warning'
+            });
+            return;
+        }
 
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
@@ -311,7 +329,12 @@ export function MyGarden() {
                 handleCloseModal(); // Chiude e pulisce tutto
             } else {
                 const errText = await response.text();
-                alert("Errore dal Server: " + errText);
+                setWarningModal({
+                    isOpen: true,
+                    title: 'Errore durante il salvataggio',
+                    message: `Non è stato possibile aggiungere la pianta: ${errText}`,
+                    type: 'error'
+                });
             }
         } catch (error) {
             console.error("Errore durante l'aggiunta", error);
@@ -340,6 +363,30 @@ export function MyGarden() {
             }
         } catch (error) {
             console.error("Errore modifica nome", error);
+        }
+    };
+
+    // Funzione per rimuovere il soprannome
+    const handleRemoveNickname = async (e: React.MouseEvent, plantId: number) => {
+        e.stopPropagation();
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        try {
+            const response = await apiFetch(`/api/utenti/${userId}/piante/${plantId}/name`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newName: "" })
+            });
+
+            if (response.ok) {
+                setMyPlants(prev => prev.map(p => p.id === plantId ? { ...p, plantName: "" } : p));
+                if (selectedPlant?.id === plantId) {
+                    setSelectedPlant(prev => prev ? { ...prev, plantName: "" } : null);
+                }
+            }
+        } catch (error) {
+            console.error("Errore rimozione soprannome", error);
         }
     };
 
@@ -439,6 +486,7 @@ export function MyGarden() {
                                                 setEditingPlantId={setEditingPlantId}
                                                 setEditNameValue={setEditNameValue}
                                                 handleSaveName={handleSaveName}
+                                                handleRemoveNickname={handleRemoveNickname}
                                                 setDeletePrompt={setDeletePrompt}
                                                 setSelectedPlant={setSelectedPlant}
                                             />
@@ -462,6 +510,7 @@ export function MyGarden() {
                                                 setEditingPlantId={setEditingPlantId}
                                                 setEditNameValue={setEditNameValue}
                                                 handleSaveName={handleSaveName}
+                                                handleRemoveNickname={handleRemoveNickname}
                                                 setDeletePrompt={setDeletePrompt}
                                                 setSelectedPlant={setSelectedPlant}
                                             />
@@ -528,13 +577,13 @@ export function MyGarden() {
                         <p style={{ marginBottom: '20px', color: 'var(--color-text-main)' }}>Sei sicuro di voler eliminare definitivamente questo post?</p>
 
                         <div className="delete-modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                            <button 
+                            <button
                                 onClick={() => setPostToDelete(null)}
                                 style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'transparent', cursor: 'pointer', color: 'var(--color-text-main)' }}
                             >
                                 Annulla
                             </button>
-                            <button 
+                            <button
                                 onClick={handleDeletePost}
                                 style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: 'var(--color-error)', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
                             >
@@ -544,6 +593,13 @@ export function MyGarden() {
                     </div>
                 </div>
             )}
+            <WarningModal
+                isOpen={warningModal.isOpen}
+                onClose={() => setWarningModal(prev => ({ ...prev, isOpen: false }))}
+                title={warningModal.title}
+                message={warningModal.message}
+                type={warningModal.type}
+            />
         </>
     );
 }

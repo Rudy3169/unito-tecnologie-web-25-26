@@ -82,13 +82,13 @@ export function NotificationItem({ notification, onMarkAsRead, onCompleteCareEve
         switch (notification.type) {
             case 'LIKE_POST':
                 if (notification.referenceId && notification.postAuthorId) {
-                    navigate(`/profile/${notification.postAuthorId}?openPost=${notification.referenceId}`);
+                    navigate(`/profile/${notification.postAuthorId}?openPost=${notification.referenceId}&openLikes=true&likeUserId=${notification.actorId}`);
                 }
                 break;
 
             case 'COMMENT':
                 if (notification.referenceId && notification.postAuthorId) {
-                    navigate(`/profile/${notification.postAuthorId}?openPost=${notification.referenceId}&openComments=true`);
+                    navigate(`/profile/${notification.postAuthorId}?openPost=${notification.referenceId}&openComments=true&commentId=${notification.secondaryReferenceId}`);
                 }
                 break;
 

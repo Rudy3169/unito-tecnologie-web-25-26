@@ -20,7 +20,7 @@ interface CommentSectionProps {
     postAuthorId: number;
     isOpen: boolean;
     onClose: () => void;
-    onCommentsUpdated?: () => void;
+    onCommentsUpdated?: (newCount?: number) => void;
     highlightCommentId?: number;
 }
 
@@ -179,7 +179,6 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
     const handleReply = (authorName: string, parentId: number) => {
         setNewComment(`@${authorName} `);
         setReplyingTo({ authorName, parentId });
-        if (onCommentsUpdated) onCommentsUpdated();
     };
 
     // Funzione per espandere o comprimere le risposte
@@ -240,6 +239,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
 
                 setNewComment('');
                 setReplyingTo(null);
+                if (onCommentsUpdated) onCommentsUpdated(comments.length + 1);
             } else {
                 setErrorMsg('Errore nell\'invio del commento.');
             }
@@ -263,8 +263,9 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
 
             if (response.ok) {
                 // Rimuoviamo il commento (e a cascata le sue risposte visivamente)
-                setComments(comments.filter(c => c.id !== commentToDelete && c.parentId !== commentToDelete));
-                if (onCommentsUpdated) onCommentsUpdated();
+                const remainingComments = comments.filter(c => c.id !== commentToDelete && c.parentId !== commentToDelete);
+                setComments(remainingComments);
+                if (onCommentsUpdated) onCommentsUpdated(remainingComments.length);
             } else {
                 alert("Errore o permessi insufficienti per eliminare il commento.");
             }

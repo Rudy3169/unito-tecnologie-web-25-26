@@ -6,10 +6,12 @@ interface PostListProps {
     onDeletePost: (id: number) => void;
     onCommentUpdate: () => void;
     onToggleSave?: (id: number) => void;
+    defaultOpenLikes?: boolean;
+    highlightLikeUserId?: number;
     lastPostRef?: (node: HTMLDivElement | null) => void;
 }
 
-export function PostList({ posts, onToggleLike, onDeletePost, onCommentUpdate, onToggleSave, lastPostRef }: PostListProps) {
+export function PostList({ posts, onToggleLike, onDeletePost, onCommentUpdate, onToggleSave, defaultOpenLikes, highlightLikeUserId, lastPostRef }: PostListProps) {
     if (posts.length === 0) {
         return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Nessun post da mostrare. <br />Inizia tu piantando un seme!</p>;
     }
@@ -36,6 +38,8 @@ export function PostList({ posts, onToggleLike, onDeletePost, onCommentUpdate, o
                             onDelete={onDeletePost}
                             onSave={onToggleSave}
                             onCommentUpdate={onCommentUpdate}
+                            defaultOpenLikes={defaultOpenLikes}
+                            highlightLikeUserId={highlightLikeUserId}
                         />
                     </div>
                 );

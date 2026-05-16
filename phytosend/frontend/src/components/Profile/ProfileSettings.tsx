@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { X, Save } from 'lucide-react';
 import { apiFetch } from '../../utils/apiFetch';
+import { WarningModal } from '../Common/WarningModal';
 
 interface UserProfile {
     id: number;
@@ -27,18 +28,25 @@ export function ProfileSettings({ user, onClose, onSaved }: ProfileSettingsProps
     const [city, setCity] = useState(user.city || '');
     const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || '');
     const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
+        isOpen: false,
+        message: '',
+    });
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!name.trim() || !surname.trim()) {
-            setError('Il nome e il cognome sono campi obbligatori.');
+            setWarningModal({
+                isOpen: true,
+                title: 'Campi obbligatori',
+                message: 'Nome e Cognome non possono essere vuoti. Inserisci i tuoi dati per continuare.',
+                type: 'warning'
+            });
             return;
         }
 
         setSaving(true);
-        setError('');
 
         const token = localStorage.getItem('phytosend_token');
 
@@ -55,10 +63,20 @@ export function ProfileSettings({ user, onClose, onSaved }: ProfileSettingsProps
             if (response.ok) {
                 onSaved();
             } else {
-                setError('Errore durante il salvataggio.');
+                setWarningModal({
+                    isOpen: true,
+                    title: 'Errore salvataggio',
+                    message: 'Non è stato possibile salvare le modifiche. Riprova più tardi.',
+                    type: 'error'
+                });
             }
         } catch {
-            setError('Impossibile contattare il server.');
+            setWarningModal({
+                isOpen: true,
+                title: 'Errore di rete',
+                message: 'Impossibile contattare il server. Controlla la tua connessione.',
+                type: 'error'
+            });
         } finally {
             setSaving(false);
         }
@@ -127,7 +145,6 @@ export function ProfileSettings({ user, onClose, onSaved }: ProfileSettingsProps
                         />
                     </div>
 
-                    {error && <p className="settings-error">{error}</p>}
 
                     <button type="submit" className="settings-save-btn" disabled={saving}>
                         <Save size={16} />
@@ -135,6 +152,13 @@ export function ProfileSettings({ user, onClose, onSaved }: ProfileSettingsProps
                     </button>
                 </form>
             </div>
+            <WarningModal
+                isOpen={warningModal.isOpen}
+                onClose={() => setWarningModal(prev => ({ ...prev, isOpen: false }))}
+                title={warningModal.title}
+                message={warningModal.message}
+                type={warningModal.type}
+            />
         </div>
     );
 }

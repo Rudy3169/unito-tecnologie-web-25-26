@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { ImagePlus, X, Check, Loader, Sprout, Fence, Plus } from 'lucide-react';
 import { apiFetch } from '../../utils/apiFetch';
+import { WarningModal } from '../Common/WarningModal';
 import './CreatePostForm.css';
 
 interface CreatePostFormProps {
@@ -21,10 +22,13 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
     const [title, setTitle] = useState('');
     const [caption, setCaption] = useState('');
     const [imageUrl, setImageUrl] = useState('');
-    const [errorMsg, setErrorMsg] = useState('');
     const [previewUrl, setPreviewUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [plantNickname, setPlantNickname] = useState('');
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
+        isOpen: false,
+        message: '',
+    });
 
     // State per gestire la selezione tra pianta nuova o pianta dal giardino
     const [postMode, setPostMode] = useState<'new' | 'garden'>('new');
@@ -90,7 +94,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                 .catch(err => console.error("Errore recupero post utente:", err));
         } else {
             setTitle(''); setCaption(''); setImageUrl(''); setPreviewUrl('');
-            setErrorMsg(''); setSuggestions([]); setShowSuggestions(false);
+            setSuggestions([]); setShowSuggestions(false);
             setSelectedPlantId(null); setSelectedBotanicalCardId(null); setPostMode('new');
             setAddToGarden(false); setPlantNickname(''); setGardenSearchQuery(''); setShowGardenDropdown(false);
             setPlantPhotoMap({});
@@ -184,20 +188,34 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
     // Gestione Invio Form
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setErrorMsg('');
 
         if (!imageUrl) {
-            setErrorMsg("L'immagine è obbligatoria per creare un post!");
+            setWarningModal({
+                isOpen: true,
+                title: 'Foto mancante',
+                message: "L'immagine è obbligatoria per creare un post!",
+                type: 'warning'
+            });
             return;
         }
 
         if (postMode === 'new' && !selectedBotanicalCardId) {
-            setErrorMsg("La pianta inserita non esiste nel catalogo botanico. \n Selezionane una dai suggerimenti.");
+            setWarningModal({
+                isOpen: true,
+                title: 'Specie non valida',
+                message: "La pianta inserita non esiste nel catalogo botanico. Selezionane una dai suggerimenti.",
+                type: 'warning'
+            });
             return;
         }
 
         if (postMode === 'garden' && !selectedPlantId) {
-            setErrorMsg("La pianta inserita non esiste nel tuo giardino.");
+            setWarningModal({
+                isOpen: true,
+                title: 'Pianta non valida',
+                message: "La pianta inserita non esiste nel tuo giardino o non è stata selezionata correttamente.",
+                type: 'warning'
+            });
             return;
         }
 
@@ -226,10 +244,20 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                 onPostCreated();
                 onClose();
             } else {
-                setErrorMsg(`Errore: controlla di aver selezionato una pianta valida. (${response.status})`);
+                setWarningModal({
+                    isOpen: true,
+                    title: 'Errore pubblicazione',
+                    message: `Controlla di aver selezionato una pianta valida. (Errore: ${response.status})`,
+                    type: 'error'
+                });
             }
         } catch (err) {
-            setErrorMsg("Errore di rete. Controlla la connessione.");
+            setWarningModal({
+                isOpen: true,
+                title: 'Errore di rete',
+                message: "Controlla la tua connessione internet e riprova.",
+                type: 'error'
+            });
         } finally {
             setIsLoading(false);
         }
@@ -399,7 +427,6 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                             </div>
 
                             <div className="form-actions-split">
-                                {errorMsg && <p className="error-message">{errorMsg}</p>}
                                 <button type="submit" className="submit-post-btn" disabled={isLoading}>
                                     {isLoading ? <Loader size={18} className="spin" /> : <><Check size={18} /> Pubblica Post</>}
                                 </button>
@@ -408,6 +435,13 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
                     </form>
                 )}
             </div>
+            <WarningModal
+                isOpen={warningModal.isOpen}
+                onClose={() => setWarningModal(prev => ({ ...prev, isOpen: false }))}
+                title={warningModal.title}
+                message={warningModal.message}
+                type={warningModal.type}
+            />
         </div>
     );
 }

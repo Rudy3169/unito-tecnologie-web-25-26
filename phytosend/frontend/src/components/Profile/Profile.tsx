@@ -5,6 +5,7 @@ import { PostCard } from '../Feed/PostCard';
 import { ProfileSettings } from './ProfileSettings';
 import type { PostProps } from '../Feed/PostCard';
 import { apiFetch } from '../../utils/apiFetch';
+import { WarningModal } from '../Common/WarningModal';
 import './Profile.css';
 
 interface UserProfile {
@@ -43,6 +44,10 @@ export function Profile() {
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [showPhotoMenu, setShowPhotoMenu] = useState(false);
     const [postToDelete, setPostToDelete] = useState<number | null>(null);
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
+        isOpen: false,
+        message: '',
+    });
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -173,7 +178,12 @@ export function Profile() {
                 setPosts(posts.filter(post => post.id !== postId));
                 setSelectedPostIndex(null); // Chiudiamo la modale del post se eravamo lì
             } else {
-                alert("Errore: Impossibile eliminare il post.");
+                setWarningModal({
+                    isOpen: true,
+                    title: 'Errore eliminazione',
+                    message: 'Impossibile eliminare il post. Riprova più tardi.',
+                    type: 'error'
+                });
             }
         } catch (err) {
             console.error("Errore cancellazione:", err);
@@ -209,6 +219,11 @@ export function Profile() {
             }
         }
     }, [loading, posts, location.search]);
+
+    // Estraiamo i parametri per i like se presenti
+    const searchParams = new URLSearchParams(location.search);
+    const openLikes = searchParams.get('openLikes') === 'true';
+    const highlightLikeUserId = searchParams.get('likeUserId') ? Number(searchParams.get('likeUserId')) : undefined;
 
     if (loading) {
         return (
@@ -488,7 +503,9 @@ export function Profile() {
                                     onDelete={setPostToDelete}
                                     onCommentUpdate={loadProfile}
                                     defaultOpenComments={new URLSearchParams(location.search).get('openPost') === String(post.id) && new URLSearchParams(location.search).get('openComments') === 'true'}
+                                    defaultOpenLikes={new URLSearchParams(location.search).get('openPost') === String(post.id) && openLikes}
                                     highlightCommentId={new URLSearchParams(location.search).get('openPost') === String(post.id) ? (new URLSearchParams(location.search).get('commentId') ? Number(new URLSearchParams(location.search).get('commentId')) : undefined) : undefined}
+                                    highlightLikeUserId={new URLSearchParams(location.search).get('openPost') === String(post.id) ? highlightLikeUserId : undefined}
                                 />
                             </div>
                         ))}
@@ -526,6 +543,13 @@ export function Profile() {
                     </div>
                 </div>
             )}
+            <WarningModal
+                isOpen={warningModal.isOpen}
+                onClose={() => setWarningModal(prev => ({ ...prev, isOpen: false }))}
+                title={warningModal.title}
+                message={warningModal.message}
+                type={warningModal.type}
+            />
         </div>
     );
 }

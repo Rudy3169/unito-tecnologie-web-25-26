@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Eye, EyeOff } from 'lucide-react'; // <-- Importate le due icone!
+import { WarningModal } from '../Common/WarningModal';
 import './LoginPage.css';
 
 // Il tuo fantastico logo
@@ -14,6 +15,10 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     const [password, setPassword] = useState('');
     // Nuovo stato: Mostrare o nascondere la password?
     const [showPassword, setShowPassword] = useState(false);
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
+        isOpen: false,
+        message: '',
+    });
 
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
@@ -43,12 +48,21 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
                 onLoginSuccess(mappedRole);
             } else {
-                // Se la risposta è 401 Unauthorized o 403 o 404
-                alert("Errore: Credenziali errate o account non trovato!");
+                setWarningModal({
+                    isOpen: true,
+                    title: 'Accesso negato',
+                    message: 'Credenziali errate o account non trovato. Verifica i dati e riprova!',
+                    type: 'error'
+                });
             }
         } catch (error) {
             console.error("Errore di connessione al server:", error);
-            alert("Il server Java Spring Boot è spento o irraggiungibile!");
+            setWarningModal({
+                isOpen: true,
+                title: 'Server non raggiungibile',
+                message: 'Il server PhytoSend sembra essere spento o irraggiungibile. Riprova più tardi.',
+                type: 'error'
+            });
         }
     };
 
@@ -109,13 +123,20 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     {/* Finto invito alla registrazione (come da indicazioni del Prof) */}
                     <div className="register-link">
                         Non hai ancora un account?
-                        <a onClick={() => alert("Accedi con un record predefinito!")}>
+                        <a onClick={() => setWarningModal({ isOpen: true, title: 'Registrazione', message: 'Le registrazioni sono temporaneamente chiuse. Accedi con uno degli utenti predefiniti forniti dal team!', type: 'warning' })}>
                             Unisciti ora
                         </a>
                     </div>
 
                 </div>
             </div>
+            <WarningModal
+                isOpen={warningModal.isOpen}
+                onClose={() => setWarningModal(prev => ({ ...prev, isOpen: false }))}
+                title={warningModal.title}
+                message={warningModal.message}
+                type={warningModal.type}
+            />
         </div>
     );
 }

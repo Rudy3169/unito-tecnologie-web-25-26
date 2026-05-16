@@ -345,3 +345,34 @@
     font-weight: 500;
     color: var(--color-text-main);
 }
+
+/* ---- HIGHLIGHT LIKE ---- */
+.like-user-item.highlight-like {
+    animation: blinkHighlight 2s ease-in-out forwards;
+}
+
+.like-item-heart {
+    margin-left: auto;
+    opacity: 1;
+}
+
+.like-indicator-anim {
+    animation: heartPop 2s ease-in-out forwards;
+}
+
+@keyframes blinkHighlight {
+    0% { background-color: transparent; }
+    25% { background-color: rgba(239, 68, 68, 0.18); }
+    50% { background-color: transparent; }
+    75% { background-color: rgba(239, 68, 68, 0.18); }
+    100% { background-color: transparent; }
+}
+
+@keyframes heartPop {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.4); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.2); }
+    60% { transform: scale(1); }
+    100% { transform: scale(1); }
+}

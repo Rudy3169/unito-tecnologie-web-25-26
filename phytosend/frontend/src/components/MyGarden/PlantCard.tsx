@@ -11,6 +11,7 @@ interface PlantCardProps {
     setEditingPlantId: (id: number | null) => void;
     setEditNameValue: (val: string) => void;
     handleSaveName: (e: React.MouseEvent, id: number) => void;
+    handleRemoveNickname: (e: React.MouseEvent, id: number) => void;
     setDeletePrompt: (id: number) => void;
     setSelectedPlant: (plant: PlantItem) => void;
 }
@@ -24,6 +25,7 @@ export function PlantCard({
     setEditingPlantId,
     setEditNameValue,
     handleSaveName,
+    handleRemoveNickname,
     setDeletePrompt,
     setSelectedPlant
 }: PlantCardProps) {
@@ -41,7 +43,7 @@ export function PlantCard({
                     <div className="garden-card-header">
                         <span className="garden-card-species">{displayName}</span>
                         {isOwnGarden && (
-                            <button className="btn-icon-delete" onClick={(e) => { e.stopPropagation(); setDeletePrompt(plant.id); }}>
+                            <button className="btn-icon-delete" onClick={(e) => { e.stopPropagation(); setDeletePrompt(plant.id); }} title="Elimina pianta">
                                 <Trash2 size={16} />
                             </button>
                         )}
@@ -51,30 +53,43 @@ export function PlantCard({
                         <div className="edit-name-inline" onClick={e => e.stopPropagation()}>
                             <input
                                 autoFocus
+                                className="edit-name-input"
                                 value={editNameValue}
                                 onChange={e => setEditNameValue(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && handleSaveName(e as any, plant.id)}
+                                placeholder="Soprannome..."
                             />
-                            <button className="btn-icon-save" onClick={e => handleSaveName(e, plant.id)}><Check size={16} /></button>
-                            <button className="btn-icon-cancel" onClick={() => setEditingPlantId(null)}><X size={16} /></button>
+                            <div className="edit-actions-group">
+                                <button className="btn-save-nick" onClick={e => handleSaveName(e, plant.id)} title="Salva">
+                                    <Check size={16} />
+                                </button>
+                                <button className="btn-cancel-nick" onClick={() => setEditingPlantId(null)} title="Annulla">
+                                    <X size={16} />
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <>
                             {(hasNickname || isOwnGarden) && (
                                 <div className="garden-card-nickname-row">
                                     {hasNickname ? (
-                                        <>
+                                        <div className="nickname-display">
                                             <span className="garden-card-nickname">{plant.plantName}</span>
                                             {isOwnGarden && (
-                                                <button className="btn-icon-edit" onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setEditNameValue(plant.plantName || "");
-                                                    setEditingPlantId(plant.id);
-                                                }}>
-                                                    <Pencil size={14} />
-                                                </button>
+                                                <div className="nickname-actions">
+                                                    <button className="btn-mini-edit" onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditNameValue(plant.plantName || "");
+                                                        setEditingPlantId(plant.id);
+                                                    }} title="Modifica soprannome">
+                                                        <Pencil size={12} />
+                                                    </button>
+                                                    <button className="btn-mini-remove" onClick={(e) => handleRemoveNickname(e, plant.id)} title="Rimuovi soprannome">
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                </div>
                                             )}
-                                        </>
+                                        </div>
                                     ) : (
                                         <button className="add-nickname-btn" onClick={(e) => {
                                             e.stopPropagation();

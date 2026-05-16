@@ -327,3 +327,17 @@
     color: var(--color-text-muted);
     font-weight: 400;
 }
+
+/* ---- HIGHLIGHT COMMENT ---- */
+.comment-highlight {
+    animation: blinkHighlightComment 2s ease-in-out forwards;
+    border-radius: 4px;
+}
+
+@keyframes blinkHighlightComment {
+    0% { background-color: transparent; }
+    25% { background-color: rgba(var(--color-primary-rgb), 0.15); }
+    50% { background-color: transparent; }
+    75% { background-color: rgba(var(--color-primary-rgb), 0.15); }
+    100% { background-color: transparent; }
+}

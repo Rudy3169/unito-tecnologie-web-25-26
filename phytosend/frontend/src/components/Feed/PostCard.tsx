@@ -1,6 +1,6 @@
 import { Heart, MessageCircle, Bookmark, Trash2, X, Loader, User } from 'lucide-react';
 import { CommentSection } from './CommentSection';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../utils/apiFetch';
 import './PostCard.css';
@@ -11,6 +11,7 @@ export interface AuthorDto {
     surname: string;
     email: string;
     role: string;
+    profilePhotoUrl?: string;
 }
 
 export interface PostProps {
@@ -41,16 +42,19 @@ interface PostCardLayoutProps extends PostProps {
     onSave?: (id: number) => void;
     onCommentUpdate: () => void;
     defaultOpenComments?: boolean;
+    defaultOpenLikes?: boolean;
     highlightCommentId?: number;
+    highlightLikeUserId?: number;
 }
 
 export function PostCard({
-    id, title, description, urlphoto, creationDate, author, plant, likesCount, isLikedByMe, isSavedByMe, commentsCount, onLike, onDelete, onSave, onCommentUpdate, defaultOpenComments, highlightCommentId
+    id, title, description, urlphoto, creationDate, author, plant, likesCount, isLikedByMe, isSavedByMe, commentsCount, onLike, onDelete, onSave, onCommentUpdate, defaultOpenComments, defaultOpenLikes, highlightCommentId, highlightLikeUserId
 }: PostCardLayoutProps) {
     const [showComments, setShowComments] = useState(defaultOpenComments || false);
-    const [showLikes, setShowLikes] = useState(false);
+    const [showLikes, setShowLikes] = useState(defaultOpenLikes || false);
     const [likesList, setLikesList] = useState<AuthorDto[]>([]);
     const [loadingLikes, setLoadingLikes] = useState(false);
+    const [localCommentsCount, setLocalCommentsCount] = useState(commentsCount || 0);
     const navigate = useNavigate();
 
     // Controllo di sicurezza Frontend: Questo post è mio?
@@ -61,6 +65,11 @@ export function PostCard({
 
     // Ora facciamo un confronto tra numeri puri e perfetti
     const isMyPost = cleanUserId != null && Number(cleanUserId) === Number(author?.id);
+
+    // Sincronizziamo il conteggio locale se la prop cambia dall'esterno (es. refresh globale)
+    useEffect(() => {
+        setLocalCommentsCount(commentsCount || 0);
+    }, [commentsCount]);
 
     // Funzione per formattare la data in tempo relativo ("2 ore fa", "1 mese fa", ecc.)
     const getRelativeTime = (dateStr: string) => {
@@ -90,9 +99,12 @@ export function PostCard({
         return `${diffYears} ${diffYears === 1 ? 'anno' : 'anni'} fa`;
     };
 
-    const handleOpenLikesList = async () => {
-        if (!likesCount || likesCount === 0) return;
+    const handleOpenLikesList = async (force = false) => {
+        if (!likesCount || likesCount === 0) {
+            if (!force) return;
+        }
         setShowLikes(true);
+        if (likesList.length > 0 && !force) return; // Se già caricati e non forzato, non rifare la chiamata
         setLoadingLikes(true);
         try {
             const token = localStorage.getItem('phytosend_token');
@@ -110,6 +122,20 @@ export function PostCard({
         }
     };
 
+    // Effetto per aprire i like se richiesto (es. da notifiche)
+    useEffect(() => {
+        if (defaultOpenLikes) {
+            handleOpenLikesList();
+        }
+    }, [defaultOpenLikes]);
+
+    // Effetto per aggiornare la lista dei like se cambia lo stato del mio like e la modale è aperta
+    useEffect(() => {
+        if (showLikes) {
+            handleOpenLikesList(true);
+        }
+    }, [isLikedByMe]);
+
     return (
         <article className="post-card">
             <header className="post-header">
@@ -117,8 +143,12 @@ export function PostCard({
                 <div className="header-user-section">
                     <div className="user-avatar"
                         onClick={() => author?.id && navigate(`/profile/${author.id}`)}
-                        style={{ cursor: 'pointer' }}>
-                        {author?.name?.charAt(0)?.toUpperCase() ?? '?'}
+                        style={{ cursor: 'pointer', overflow: 'hidden' }}>
+                        {author?.profilePhotoUrl ? (
+                            <img src={author.profilePhotoUrl} alt={author.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            author?.name?.charAt(0)?.toUpperCase() ?? '?'
+                        )}
                     </div>
                     <div className="user-info">
                         <span className="username"
@@ -156,7 +186,7 @@ export function PostCard({
                     </button>
                     <button className="action-btn" onClick={() => setShowComments(true)}>
                         <MessageCircle size={24} />
-                        {(commentsCount ?? 0) > 0 && <span className="action-count">{commentsCount}</span>}
+                        {(localCommentsCount ?? 0) > 0 && <span className="action-count">{localCommentsCount}</span>}
                     </button>
                 </div>
 
@@ -167,7 +197,7 @@ export function PostCard({
             </div>
 
             <div className="post-content">
-                <span className="likes" onClick={handleOpenLikesList} style={{ cursor: (likesCount ?? 0) > 0 ? 'pointer' : 'default' }}>
+                <span className="likes" onClick={() => handleOpenLikesList()} style={{ cursor: (likesCount ?? 0) > 0 ? 'pointer' : 'default' }}>
                     {likesCount} like per Madre Natura
                 </span>
                 <p className="post-caption">
@@ -188,7 +218,12 @@ export function PostCard({
                 postAuthorId={author?.id || 0}
                 isOpen={showComments}
                 onClose={() => setShowComments(false)}
-                onCommentsUpdated={onCommentUpdate}
+                onCommentsUpdated={(newCount?: number) => {
+                    if (newCount !== undefined) {
+                        setLocalCommentsCount(newCount);
+                    }
+                    onCommentUpdate();
+                }}
                 highlightCommentId={highlightCommentId}
             />
 
@@ -208,11 +243,27 @@ export function PostCard({
                             ) : (
                                 <ul className="likes-list">
                                     {likesList.map(user => (
-                                        <li key={user.id} className="like-user-item" onClick={() => navigate(`/profile/${user.id}`)}>
-                                            <div className="like-user-avatar">
-                                                <User size={20} />
+                                        <li 
+                                            key={user.id} 
+                                            className={`like-user-item ${highlightLikeUserId === user.id ? 'highlight-like' : ''}`} 
+                                            onClick={() => navigate(`/profile/${user.id}`)}
+                                        >
+                                            <div className="like-user-avatar" style={{ overflow: 'hidden' }}>
+                                                {user.profilePhotoUrl ? (
+                                                    <img src={user.profilePhotoUrl} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    user.name.charAt(0).toUpperCase()
+                                                )}
                                             </div>
                                             <span className="like-user-name">{user.name} {user.surname}</span>
+                                            
+                                            {/* Cuore fisso a destra per tutti */}
+                                            <Heart 
+                                                size={14} 
+                                                fill="var(--color-error)" 
+                                                color="var(--color-error)" 
+                                                className={`like-item-heart ${highlightLikeUserId === user.id ? 'like-indicator-anim' : ''}`} 
+                                            />
                                         </li>
                                     ))}
                                 </ul>

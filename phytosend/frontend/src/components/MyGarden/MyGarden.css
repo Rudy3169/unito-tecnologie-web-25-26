@@ -182,9 +182,57 @@
 }
 
 .garden-card-nickname {
-    margin-top: 8px;
-    font-size: 0.95rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+}
+
+.nickname-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.nickname-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.garden-list-card:hover .nickname-actions {
+    opacity: 1;
+}
+
+.btn-mini-edit, .btn-mini-remove {
+    background: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     color: var(--color-text-muted);
+    transition: all 0.2s ease;
+}
+
+.btn-mini-edit:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.05);
+}
+
+.btn-mini-remove:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
 }
 
 .add-nickname-btn {
@@ -199,14 +247,86 @@
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     margin-top: 4px;
     opacity: 0.8;
 }
 
 .add-nickname-btn:hover {
     background: rgba(var(--color-primary-rgb), 0.1);
+    border-style: solid;
     opacity: 1;
+}
+
+/* --- Inline Edit Nickname --- */
+.edit-name-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    animation: fadeIn 0.2s ease;
+}
+
+.edit-name-input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: var(--color-bg-main);
+    color: var(--color-text-main);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.edit-name-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.15);
+}
+
+.edit-actions-group {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-save-nick, .btn-cancel-nick {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-save-nick {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+}
+
+.btn-save-nick:hover {
+    background: #059669;
+    transform: scale(1.05);
+}
+
+.btn-cancel-nick {
+    background: var(--color-bg-main);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+}
+
+.btn-cancel-nick:hover {
+    background: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+[data-theme='dark'] .btn-cancel-nick:hover {
+    background: #374151;
+    color: #f3f4f6;
 }
 
 .view-inline {
