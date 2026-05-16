@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Bookmark, Trash2, X, Loader, User } from 'lucide-react';
+import { Heart, MessageCircle, Bookmark, Trash2, X, Loader } from 'lucide-react';
 import { CommentSection } from './CommentSection';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';

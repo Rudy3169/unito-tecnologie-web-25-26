@@ -1,4 +1,4 @@
-import { useState, type FormEvent, useEffect, useRef } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import { MessageCircle, X, Send, AlertCircle, Heart, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../utils/apiFetch';
@@ -30,7 +30,6 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
     const [errorMsg, setErrorMsg] = useState('');
     const navigate = useNavigate();
     const [highlightedId, setHighlightedId] = useState<number | null>(null);
-    const commentListRef = useRef<HTMLDivElement>(null);
 
     // Stato per tracciare a CHI stiamo rispondendo e sotto quale COMMENTO GENITORE
     const [replyingTo, setReplyingTo] = useState<{ authorName: string, parentId: number } | null>(null);
