@@ -32,6 +32,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/phytosend_db
       - SPRING_DATASOURCE_USERNAME=phytouser
       - SPRING_DATASOURCE_PASSWORD=phytopassword
+      - APP_UPLOAD_DIR=/app/uploads
     depends_on:
       - db
     networks:
