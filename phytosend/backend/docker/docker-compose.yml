@@ -26,6 +26,8 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    volumes:
+      - ../uploads:/app/uploads
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/phytosend_db
       - SPRING_DATASOURCE_USERNAME=phytouser

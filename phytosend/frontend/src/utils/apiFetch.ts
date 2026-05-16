@@ -10,7 +10,7 @@
 export async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
     const response = await fetch(url, options);
 
-    if (response.status === 401 || response.status === 403 || response.status === 500) {
+    if ([401, 403, 500, 502, 504].includes(response.status)) {
         console.warn(`[apiFetch] Ricevuto status ${response.status} da ${url} — logout automatico.`);
         localStorage.clear();
         window.location.href = '/';
