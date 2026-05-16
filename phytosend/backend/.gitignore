@@ -32,4 +32,3 @@ build/
 .vscode/
 
 docker/postgre/
-uploads/
