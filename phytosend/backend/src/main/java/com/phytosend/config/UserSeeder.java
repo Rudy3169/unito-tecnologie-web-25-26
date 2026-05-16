@@ -40,6 +40,7 @@ public class UserSeeder implements CommandLineRunner {
             admin.setCity("Torino");
             admin.setBio(
                     "Amministratore della piattaforma PhytoSend. Appassionato di piante tropicali e giardini zen.");
+            admin.setProfilePhotoUrl("/uploads/profile-photos/SalvatoreRudisi.png");
             userService.registerUser(admin);
 
             // User 1
@@ -51,6 +52,7 @@ public class UserSeeder implements CommandLineRunner {
             miriam.setRole(UserRole.BASE);
             miriam.setCity("Trapani");
             miriam.setBio("Appassionata di giardinaggio da balcone. Mi piacciono i colori vivaci! 🌺");
+            miriam.setProfilePhotoUrl("/uploads/profile-photos/MiriamZito.png");
             userService.registerUser(miriam);
 
             // User 2
@@ -62,6 +64,7 @@ public class UserSeeder implements CommandLineRunner {
             marco.setRole(UserRole.BASE);
             marco.setCity("Milano");
             marco.setBio("Le piante grasse sono la mia passione. Poca acqua, tanta resa. 🌵");
+            marco.setProfilePhotoUrl("/uploads/profile-photos/MarcoVerdi.png");
             userService.registerUser(marco);
 
             // User 3
@@ -73,6 +76,7 @@ public class UserSeeder implements CommandLineRunner {
             federica.setRole(UserRole.BASE);
             federica.setCity("Firenze");
             federica.setBio("Trasformo la mia casa in una giungla urbana. Adoro le grandi foglie! 🌿");
+            federica.setProfilePhotoUrl("/uploads/profile-photos/FedericaGallo.png");
             userService.registerUser(federica);
 
             // User 4
@@ -84,6 +88,7 @@ public class UserSeeder implements CommandLineRunner {
             alessandro.setRole(UserRole.BASE);
             alessandro.setCity("Napoli");
             alessandro.setBio("Innamorato del profumo delle piante aromatiche e del mare. 🍋");
+            alessandro.setProfilePhotoUrl("/uploads/profile-photos/AlessandroCosta.png");
             userService.registerUser(alessandro);
 
             // User 5
@@ -95,7 +100,20 @@ public class UserSeeder implements CommandLineRunner {
             elena.setRole(UserRole.BASE);
             elena.setCity("Roma");
             elena.setBio("Esperta di orchidee e fiori delicati. Il verde è il mio colore felice! 🌸");
+            elena.setProfilePhotoUrl("/uploads/profile-photos/ElenaRomano.png");
             userService.registerUser(elena);
+
+            // User 6
+            User matteo = new User();
+            matteo.setName("Matteo");
+            matteo.setSurname("Bianchi");
+            matteo.setEmail("matteo@phytosend.com");
+            matteo.setPassword("password");
+            matteo.setRole(UserRole.BASE);
+            matteo.setCity("Bologna");
+            matteo.setBio("Appassionato di alberi in vaso e bonsai. Creo piccole foreste sul mio balcone! 🌳");
+            matteo.setProfilePhotoUrl("/uploads/profile-photos/MatteoBianchi.png");
+            userService.registerUser(matteo);
 
             log.info("✔️ Autoseed completato! Creati 1 admin e 5 utenti con pwd 'password'.");
         } else {

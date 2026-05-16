@@ -191,11 +191,11 @@ public class SocialService {
     public List<com.phytosend.dto.UserDto> getPostLikes(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post non trovato"));
-        
+
         if (post.getLikedBy() == null) {
             return java.util.Collections.emptyList();
         }
-        
+
         return post.getLikedBy().stream()
                 .map(dtoConverter::toUserDto)
                 .collect(java.util.stream.Collectors.toList());
@@ -242,11 +242,11 @@ public class SocialService {
                         com.phytosend.entity.NotificationType.REPLY,
                         post.getId(),
                         saved.getId(),
-                        author.getName() + " ha risposto al tuo commento"
-                );
+                        author.getName() + " ha risposto al tuo commento");
             }
 
-            // Notifica COMMENT all'autore del post (se diverso dall'autore del commento padre)
+            // Notifica COMMENT all'autore del post (se diverso dall'autore del commento
+            // padre)
             if (parentComment != null && !post.getAuthor().getId().equals(parentComment.getAuthor().getId())) {
                 notificationService.createNotification(
                         post.getAuthor(),
@@ -254,8 +254,7 @@ public class SocialService {
                         com.phytosend.entity.NotificationType.COMMENT,
                         post.getId(),
                         saved.getId(),
-                        author.getName() + " ha commentato il tuo post"
-                );
+                        author.getName() + " ha commentato il tuo post");
             }
 
             return saved;
@@ -271,8 +270,7 @@ public class SocialService {
                 com.phytosend.entity.NotificationType.COMMENT,
                 post.getId(),
                 saved.getId(),
-                author.getName() + " ha commentato il tuo post"
-        );
+                author.getName() + " ha commentato il tuo post");
 
         return saved;
     }
@@ -347,8 +345,7 @@ public class SocialService {
                     user,
                     com.phytosend.entity.NotificationType.LIKE_POST,
                     post.getId(),
-                    user.getName() + " ha messo mi piace al tuo post"
-            );
+                    user.getName() + " ha messo mi piace al tuo post");
 
             return true;
         }
@@ -393,8 +390,7 @@ public class SocialService {
                     com.phytosend.entity.NotificationType.LIKE_COMMENT,
                     postId,
                     comment.getId(),
-                    user.getName() + " ha messo mi piace al tuo commento"
-            );
+                    user.getName() + " ha messo mi piace al tuo commento");
 
             return true; // Like aggiunto
         }

@@ -52,9 +52,10 @@ public class GardenSeeder implements CommandLineRunner {
         User federica = userRepository.findByEmail("federica@phytosend.com").orElse(null);
         User alessandro = userRepository.findByEmail("alessandro@phytosend.com").orElse(null);
         User elena = userRepository.findByEmail("elena@phytosend.com").orElse(null);
+        User matteo = userRepository.findByEmail("matteo@phytosend.com").orElse(null);
 
         if (admin == null || miriam == null || marco == null || federica == null || alessandro == null
-                || elena == null) {
+                || elena == null || matteo == null) {
             log.warn("Utenti mancanti. Impossibile popolare i giardini.");
             return;
         }
@@ -84,6 +85,9 @@ public class GardenSeeder implements CommandLineRunner {
         BotanicalCard cardSalvia = findCard("Salvia");
         BotanicalCard cardPrezzemolo = findCard("Prezzemolo");
         BotanicalCard cardMargarita = findCard("Margherita");
+        BotanicalCard cardBambu = findCard("Bambù");
+        BotanicalCard cardAcero = findCard("Acero giapponese");
+        BotanicalCard cardLimone = findCard("Limone");
 
         // ═══ GIARDINO SALVATORE (ADMIN) ═══
         Garden gardenAdmin = getOrCreateGarden(admin, "Oasi Botanica di Salvatore");
@@ -126,6 +130,12 @@ public class GardenSeeder implements CommandLineRunner {
         createPlant(gardenElena, cardPrezzemolo, null, LocalDate.now().minusDays(95));
         createPlant(gardenElena, cardRosa, null, LocalDate.now().minusDays(10));
         createPlant(gardenElena, cardTimo, null, LocalDate.now().minusDays(10));
+
+        // ═══ GIARDINO MATTEO ═══
+        Garden gardenMatteo = getOrCreateGarden(matteo, "La Foresta di Matteo");
+        createPlant(gardenMatteo, cardBambu, null, LocalDate.now().minusDays(300));
+        createPlant(gardenMatteo, cardAcero, null, LocalDate.now().minusDays(150));
+        createPlant(gardenMatteo, cardLimone, null, LocalDate.now().minusDays(60));
 
         log.info("✔️ Giardini popolati! Piante inserite per tutti gli utenti.");
     }

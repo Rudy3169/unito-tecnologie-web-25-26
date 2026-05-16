@@ -10,6 +10,7 @@ interface UserResult {
     surname: string;
     email: string;
     role: string;
+    profilePhotoUrl?: string;
 }
 
 interface PlantResult {
@@ -75,7 +76,19 @@ export function SearchPage() {
             apiFetch('/api/utenti', { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(res => res.json())
                 .then(data => {
-                    const allUsers = data.content ?? [];
+                    const currentUserId = Number(localStorage.getItem('phytosend_userId'));
+                    let allUsers = data.content ?? [];
+
+                    // Rimuovi l'utente loggato
+                    allUsers = allUsers.filter((u: UserResult) => u.id !== currentUserId);
+
+                    // Ordina in ordine alfabetico
+                    allUsers.sort((a: UserResult, b: UserResult) => {
+                        const nameA = `${a.name} ${a.surname}`.toLowerCase();
+                        const nameB = `${b.name} ${b.surname}`.toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    });
+
                     const filtered = query
                         ? allUsers.filter((u: UserResult) =>
                             `${u.name} ${u.surname}`.toLowerCase().includes(query.toLowerCase())
@@ -124,10 +137,15 @@ export function SearchPage() {
                     <ul className="user-list">
                         {users.map(user => (
                             <li key={user.id} className="user-card" onClick={() => navigate(`/profile/${user.id}`)} style={{ cursor: 'pointer' }}>
-                                <div className="user-card-avatar">{user.name.charAt(0).toUpperCase()}</div>
+                                <div className="user-card-avatar">
+                                    {user.profilePhotoUrl ? (
+                                        <img src={user.profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                    ) : (
+                                        user.name.charAt(0).toUpperCase()
+                                    )}
+                                </div>
                                 <div className="user-card-info">
                                     <div className="user-card-name">{user.name} {user.surname}</div>
-                                    <div className="user-card-email">{user.email}</div>
                                 </div>
                             </li>
                         ))}

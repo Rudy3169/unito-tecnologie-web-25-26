@@ -45,6 +45,20 @@ export function Sidebar({ userRole }: SidebarProps) {
             .catch(() => { });
     }, [location.pathname]);
 
+    // Sincronizza lo stato della barra di ricerca con i parametri dell'URL
+    useEffect(() => {
+        if (location.pathname === '/search') {
+            const searchParams = new URLSearchParams(location.search);
+            const q = searchParams.get('q') || '';
+            const type = searchParams.get('type') || 'plants';
+            setQuery(q);
+            setSearchType(type);
+        } else {
+            // Se usciamo dalla pagina di ricerca, possiamo anche resettare la query
+            setQuery('');
+        }
+    }, [location.pathname, location.search]);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node) &&
@@ -60,9 +74,18 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (query.trim() || searchType === 'users' || searchType === 'plants') {
-            navigate(`/search?q=${encodeURIComponent(query.trim())}&type=${searchType}`);
-        }
+        navigate(`/search?q=${encodeURIComponent(query.trim())}&type=${searchType}`);
+    };
+
+    const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setQuery(val);
+        navigate(`/search?q=${encodeURIComponent(val)}&type=${searchType}`);
+    };
+
+    const handleSearchTypeChange = () => {
+        const newType = searchType === 'plants' ? 'users' : 'plants';
+        setSearchType(newType);
     };
 
     const handleLogout = () => {
@@ -106,7 +129,7 @@ export function Sidebar({ userRole }: SidebarProps) {
                         <button
                             type="button"
                             className={`search-switcher-btn ${searchType}`}
-                            onClick={() => setSearchType(searchType === 'plants' ? 'users' : 'plants')}
+                            onClick={handleSearchTypeChange}
                             title={searchType === 'plants' ? "Cerca Utenti" : "Cerca Piante"}
                         >
                             <span className="switcher-content" key={searchType}>
@@ -120,7 +143,7 @@ export function Sidebar({ userRole }: SidebarProps) {
                             className="navbar-search-input"
                             placeholder={searchType === 'plants' ? "Cerca piante..." : "Cerca utenti..."}
                             value={query}
-                            onChange={e => setQuery(e.target.value)}
+                            onChange={handleQueryChange}
                         />
                     </div>
                 </form>
@@ -191,7 +214,7 @@ export function Sidebar({ userRole }: SidebarProps) {
                         className="navbar-search-input"
                         placeholder="Cerca piante..."
                         value={query}
-                        onChange={e => setQuery(e.target.value)}
+                        onChange={handleQueryChange}
                     />
                 </form>
             </header>

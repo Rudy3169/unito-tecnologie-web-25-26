@@ -48,6 +48,7 @@ public class CommentAndLikeSeeder implements CommandLineRunner {
         User federica = userRepository.findByEmail("federica@phytosend.com").orElse(null);
         User alessandro = userRepository.findByEmail("alessandro@phytosend.com").orElse(null);
         User elena = userRepository.findByEmail("elena@phytosend.com").orElse(null);
+        User matteo = userRepository.findByEmail("matteo@phytosend.com").orElse(null);
 
         // Recupera tutti i post (ordinati per data crescente, così l'indice è stabile)
         List<Post> allPosts = postRepository.findAll();
@@ -143,6 +144,17 @@ public class CommentAndLikeSeeder implements CommandLineRunner {
                     "Mettici appena un po' di stallatico pellettato in superficie, ma senza esagerare. Altrimenti perde profumo!",
                     8);
             addCommentLike(c5, admin);
+        }
+
+        Post rosmarinoAdmin = findPostByDescription(allPosts, "terreni poveri");
+        if (rosmarinoAdmin != null && matteo != null) {
+            addLike(rosmarinoAdmin, matteo);
+            Comment cMatteo4 = addComment(rosmarinoAdmin, matteo,
+                    "Il rosmarino ha un legno fantastico, io ne sto educando uno a stile bonsai! Per il concime usa qualcosa a lenta cessione, le aromatiche si offendono facilmente se esageri.",
+                    6);
+            addCommentLike(cMatteo4, admin);
+            addReply(rosmarinoAdmin, cMatteo4, admin,
+                    "Wow, un bonsai di rosmarino deve essere stupendo! Seguirò il tuo consiglio per il concime.", 5);
         }
 
         // ════════════════════════════════════════════════════════════════════
@@ -273,6 +285,17 @@ public class CommentAndLikeSeeder implements CommandLineRunner {
             addReply(sansevieriaVaso, c11, marco, "Allora aspetto la primavera prossima, grazie!", 2);
         }
 
+        Post sansevieriaMarco = findPostByDescription(allPosts, "spaccare il vaso");
+        if (sansevieriaMarco != null && matteo != null) {
+            addLike(sansevieriaMarco, matteo);
+            Comment cMatteo5 = addComment(sansevieriaMarco, matteo,
+                    "Attento Marco, quando le radici riempiono tutto il vaso la terra non riesce più a trattenere l'acqua e scivola via. Ti conviene agire presto! 🪴",
+                    2);
+            addReply(sansevieriaMarco, cMatteo5, marco,
+                    "Ottima osservazione, non ci avevo pensato! Questo weekend mi armo di terriccio nuovo e procedo.",
+                    1);
+        }
+
         // ════════════════════════════════════════════════════════════════════
         // POST DI FEDERICA
         // ════════════════════════════════════════════════════════════════════
@@ -292,6 +315,17 @@ public class CommentAndLikeSeeder implements CommandLineRunner {
                     "Se sono le foglie più basse e vecchie è normalissimo ricambio. L'importante è che la cima continui a buttarne di nuove!",
                     10);
             addCommentLike(c12, federica);
+        }
+
+        Post ficusFederica = findPostByDescription(allPosts, "perdendo un paio di foglie");
+        if (ficusFederica != null && matteo != null) {
+            addLike(ficusFederica, matteo);
+            Comment cMatteo3 = addComment(ficusFederica, matteo,
+                    "I Ficus sono alberi molto sensibili agli sbalzi e alle correnti d'aria. L'hai spostato di recente per caso? 🌳",
+                    8);
+            addReply(ficusFederica, cMatteo3, federica,
+                    "Sì Matteo! L'ho allontanato dalla finestra per via del termosifone acceso. Sarà stato quello!", 7);
+            addCommentLike(cMatteo3, federica);
         }
 
         Post ranuncoloBoccioli = findPostByDescription(allPosts, "carta velina");
@@ -460,6 +494,39 @@ public class CommentAndLikeSeeder implements CommandLineRunner {
             addReply(timoSecco, c19, elena,
                     "In effetti ha piovuto tantissimo e il sottovaso era pieno d'acqua... l'ho svuotato e spostata al coperto, spero si salvi la parte esterna!",
                     3);
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // POST DI MATTEO
+        // ════════════════════════════════════════════════════════════════════
+
+        Post bambuRadici = findPostByDescription(allPosts, "contenerne le radici");
+        if (bambuRadici != null) {
+            addLike(bambuRadici, admin);
+            addLike(bambuRadici, federica);
+            Comment cMatteo1 = addComment(bambuRadici, admin,
+                    "Il bambù è molto invadente! Ti consiglio di usare dei vasi in resina molto resistenti o delle barriere anti-rizoma interne.",
+                    5);
+            addReply(bambuRadici, cMatteo1, matteo,
+                    "Grazie mille Salvatore! Provvederò a mettere la barriera al prossimo rinvaso.", 4);
+        }
+
+        Post aceroRosso = findPostByDescription(allPosts, "rosso infuocato");
+        if (aceroRosso != null) {
+            addLike(aceroRosso, miriam);
+            addLike(aceroRosso, elena);
+            addLike(aceroRosso, alessandro);
+            addComment(aceroRosso, elena, "Che meraviglia assoluta! L'acero è nella mia wishlist da tantissimo tempo.",
+                    10);
+        }
+
+        Post limoneFiori = findPostByDescription(allPosts, "Prima fioritura");
+        if (limoneFiori != null) {
+            addLike(limoneFiori, alessandro);
+            addLike(limoneFiori, marco);
+            Comment cMatteo2 = addComment(limoneFiori, alessandro,
+                    "Il profumo dei fiori di limone è pazzesco. Ricordati di concimare con i lupini macinati!", 3);
+            addCommentLike(cMatteo2, matteo);
         }
 
         log.info("✔️ Autoseed commenti e like completato!");

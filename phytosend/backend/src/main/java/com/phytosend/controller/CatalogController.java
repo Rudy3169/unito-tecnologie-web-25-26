@@ -42,11 +42,10 @@ public class CatalogController {
 
         // Creiamo la richiesta di paginazione
         Pageable pageable = PageRequest.of(page, size);
-        // Se la query non è vuota, cerca le schede botaniche
+        // Se la query non è vuota, cerca le schede botaniche (per nome, nome scientifico o famiglia)
         if (q != null && !q.trim().isEmpty()) {
             return ResponseEntity
-                    .ok(botanicalCardRepository.findByCommonNameStartingWithIgnoreCaseOrderByCommonNameAsc(q,
-                            pageable));
+                    .ok(botanicalCardRepository.searchCatalog(q, pageable));
         }
         // Altrimenti, restituisce tutte le schede botaniche
         return ResponseEntity.ok(botanicalCardRepository.findAllByOrderByCommonNameAsc(pageable));

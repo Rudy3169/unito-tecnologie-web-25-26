@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Interfaccia repository per BotanicalCard
@@ -75,6 +77,20 @@ public interface BotanicalCardRepository extends JpaRepository<BotanicalCard, Lo
      * @return Page di BotanicalCard ordinate
      */
     Page<BotanicalCard> findByCommonNameStartingWithIgnoreCaseOrderByCommonNameAsc(String prefix, Pageable pageable);
+
+    /**
+     * Cerca schede in base al nome comune, nome scientifico o famiglia, paginate.
+     * 
+     * @param query    La stringa da cercare
+     * @param pageable Oggetto Pageable
+     * @return Page di BotanicalCard corrispondenti
+     */
+    @Query("SELECT b FROM BotanicalCard b WHERE " +
+           "LOWER(b.commonName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(b.scientificName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(b.family) LIKE LOWER(CONCAT('%', :query, '%')) " +
+           "ORDER BY b.commonName ASC")
+    Page<BotanicalCard> searchCatalog(@Param("query") String query, Pageable pageable);
 
     /**
      * Metodo per verificare l'esistenza di una scheda botanica tramite il nome

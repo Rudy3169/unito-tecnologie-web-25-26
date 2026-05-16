@@ -319,7 +319,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                         data-comment-id={parent.id}
                                     >
                                         <div className="comment-header-row">
-                                            <strong onClick={() => navigate(`/profile/${parent.authorId}`)} style={{cursor: 'pointer'}}>{parent.authorName}</strong>
+                                            <strong onClick={() => navigate(`/profile/${parent.authorId}`)} style={{ cursor: 'pointer' }}>{parent.authorName}</strong>
                                             <span className="comment-time">{getRelativeTime(parent.creationDate)}</span>
 
                                             {/* Il cestino ora è sulla riga del nome */}
@@ -337,7 +337,9 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                 {parent.likesCount || ''}
                                             </button>
                                             {/* RISPONDI */}
-                                            <button onClick={() => handleReply(parent.authorName, parent.id)}>Rispondi</button>
+                                            {!isParentAuthor && (
+                                                <button onClick={() => handleReply(parent.authorName, parent.id)}>Rispondi</button>
+                                            )}
                                         </div>
                                     </div>
 
@@ -362,7 +364,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                                     data-comment-id={reply.id}
                                                                 >
                                                                     <div className="comment-header-row">
-                                                                        <strong onClick={() => navigate(`/profile/${reply.authorId}`)} style={{cursor: 'pointer'}}>{reply.authorName}</strong>
+                                                                        <strong onClick={() => navigate(`/profile/${reply.authorId}`)} style={{ cursor: 'pointer' }}>{reply.authorName}</strong>
                                                                         <span className="comment-time">{getRelativeTime(reply.creationDate)}</span>
                                                                     </div>
                                                                     <p>{reply.text}</p>
@@ -373,7 +375,9 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                                             {reply.likesCount || ''}
                                                                         </button>
                                                                         {/* RISPONDI */}
-                                                                        <button onClick={() => handleReply(reply.authorName, parent.id)}>Rispondi</button>
+                                                                        {!isReplyAuthor && (
+                                                                            <button onClick={() => handleReply(reply.authorName, parent.id)}>Rispondi</button>
+                                                                        )}
 
                                                                         {/* ELIMINA */}
                                                                         {canDeleteReply && (
@@ -410,7 +414,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                 <div className="comment-input-area">
                     {replyingTo && (
                         <div className="reply-badge">
-                            Rispondi a <strong>{replyingTo.authorName}</strong>
+                            <span>Rispondi a <strong>{replyingTo.authorName}</strong></span>
                             <button onClick={() => { setReplyingTo(null); setNewComment(''); }}><X size={12} /></button>
                         </div>
                     )}
