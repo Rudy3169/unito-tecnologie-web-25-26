@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import { useNavigate, useNavigationType } from 'react-router-dom';
 import { PenLine, AlertTriangle } from 'lucide-react';
 import { PostList } from './PostList';
 import { CreatePostForm } from './CreatePostForm';
@@ -6,10 +7,33 @@ import type { PostProps } from './PostCard';
 import { apiFetch } from '../../utils/apiFetch';
 import './HomeFeed.css';
 
+interface HomeFeedCache {
+    posts: PostProps[];
+    page: number;
+    hasMore: boolean;
+    scrollY: number;
+}
+
+// Cache in memoria (si perde al reload della pagina, perfetto per conservare lo scroll tornando indietro)
+let moduleCache: HomeFeedCache | null = null;
+
 export function HomeFeed() {
+    const navigationType = useNavigationType();
+
+    // Ripristina dalla cache solo se stiamo tornando indietro (POP)
+    const cachedRef = useRef<HomeFeedCache | null>(null);
+    const restoredRef = useRef(false);
+
+    if (!restoredRef.current) {
+        if (navigationType === 'POP' && moduleCache) {
+            cachedRef.current = moduleCache;
+        }
+        moduleCache = null; // pulisci sempre
+        restoredRef.current = true;
+    }
 
     // Funzione per caricare i post
-    const [posts, setPosts] = useState<PostProps[]>([]);
+    const [posts, setPosts] = useState<PostProps[]>(cachedRef.current?.posts ?? []);
 
     // Funzione per aggiungere un post
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -18,10 +42,70 @@ export function HomeFeed() {
     const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
     // Pagination state
-    const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
+    const [page, setPage] = useState(cachedRef.current?.page ?? 0);
+    const [hasMore, setHasMore] = useState(cachedRef.current?.hasMore ?? true);
     const [loading, setLoading] = useState(false);
+    const [restoringScroll, setRestoringScroll] = useState(!!cachedRef.current);
     const observerRef = useRef<IntersectionObserver | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Refs per conservare lo stato aggiornato nella funzione di cleanup di unmount
+    const postsRef = useRef(posts);
+    const pageRef = useRef(page);
+    const hasMoreRef = useRef(hasMore);
+
+    useEffect(() => {
+        postsRef.current = posts;
+    }, [posts]);
+
+    useEffect(() => {
+        pageRef.current = page;
+    }, [page]);
+
+    useEffect(() => {
+        hasMoreRef.current = hasMore;
+    }, [hasMore]);
+
+    const lastScrollY = useRef(0);
+
+    // Monitora la posizione dello scroll in tempo reale per bypassare i reset automatici del router
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 0) {
+                lastScrollY.current = window.scrollY;
+            }
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
+    // Salva lo stato del feed in cache al momento dell'unmount (navigazione verso altra pagina)
+    useEffect(() => {
+        return () => {
+            moduleCache = {
+                posts: postsRef.current,
+                page: pageRef.current,
+                hasMore: hasMoreRef.current,
+                scrollY: lastScrollY.current
+            };
+        };
+    }, []);
+
+    // Ripristina la posizione di scroll all'altezza precedente prima che la pagina appaia
+    useLayoutEffect(() => {
+        if (restoringScroll && cachedRef.current && posts.length > 0) {
+            if (containerRef.current) containerRef.current.style.visibility = 'hidden';
+
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: cachedRef.current!.scrollY, behavior: 'instant' as ScrollBehavior });
+                if (containerRef.current) containerRef.current.style.visibility = '';
+                setRestoringScroll(false);
+                cachedRef.current = null;
+            });
+        }
+    }, [restoringScroll, posts]);
 
     // Sensore per l'infinite scroll
     const lastElementRef = useCallback((node: HTMLDivElement | null) => {
@@ -65,6 +149,7 @@ export function HomeFeed() {
     };
 
     useEffect(() => {
+        if (restoringScroll) return;
         caricaPosts(page);
     }, [page]);
 
@@ -161,7 +246,7 @@ export function HomeFeed() {
     };
 
     return (
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div ref={containerRef} style={{ maxWidth: '600px', margin: '0 auto' }}>
             {/* Trigger */}
             <div className="new-post-trigger" onClick={() => setShowCreateForm(true)}>
                 <div className="new-post-avatar"><PenLine size={20} /></div>

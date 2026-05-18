@@ -76,7 +76,7 @@ export function PlantDetail() {
         <div className="plant-detail-container">
             {/* Bottone indietro */}
             <button className="plant-back-btn" onClick={() => navigate(-1)}>
-                <ArrowLeft size={18} /> Catalogo
+                <ArrowLeft size={18} /> Indietro
             </button>
 
             {/* Hero con immagine */}

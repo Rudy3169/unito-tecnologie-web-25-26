@@ -5,6 +5,8 @@ import { NotificationBell } from '../Notifications/NotificationBell';
 import { apiFetch } from '../../utils/apiFetch';
 import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
 import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
+import logoMobileLight from '../../assets/logo/PhytoSend/logo/verde.png';
+import logoMobileDark from '../../assets/logo/PhytoSend/logo/bianco.png';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -87,6 +89,13 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     const isActive = (path: string) => location.pathname === path ? 'active' : '';
 
+    const handleHomeClick = (e: React.MouseEvent) => {
+        if (location.pathname === '/') {
+            e.preventDefault();
+            window.location.reload();
+        }
+    };
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         navigate(`/search?q=${encodeURIComponent(query.trim())}&type=${searchType}`);
@@ -132,10 +141,12 @@ export function Sidebar({ userRole }: SidebarProps) {
         <>
             {/* ── DESKTOP: Top Navbar ── */}
             <header className="navbar">
-                <Link to="/" className="navbar-logo">
+                {/* Logo */}
+                <Link to="/" className="navbar-logo" onClick={handleHomeClick}>
                     <img src={isDarkMode ? logoDark : logoLight} alt="PhytoSend" className="navbar-logo-img" />
                 </Link>
 
+                {/* Barra di ricerca */}
                 <form className="navbar-search" onSubmit={handleSearch}>
                     <div className="search-wrapper">
                         <button
@@ -162,7 +173,7 @@ export function Sidebar({ userRole }: SidebarProps) {
 
                 <nav className="navbar-nav">
                     {/* Home */}
-                    <Link to="/" className={`navbar-icon-btn ${isActive('/')}`} title="Home">
+                    <Link to="/" className={`navbar-icon-btn ${isActive('/')}`} title="Home" onClick={handleHomeClick}>
                         <Home size={22} />
                         <span className="icon-label">Home</span>
                     </Link>
@@ -213,48 +224,64 @@ export function Sidebar({ userRole }: SidebarProps) {
 
             {/* ── MOBILE: Header ── */}
             <header className="mobile-header">
-                <Link to="/" className="navbar-logo">
-                    <img src={isDarkMode ? logoDark : logoLight} alt="PhytoSend" className="navbar-logo-img" />
+                {/*Logo */}
+                <Link to="/" className="navbar-logo" onClick={handleHomeClick}>
+                    <img src={isDarkMode ? logoMobileDark : logoMobileLight} alt="PhytoSend" className="navbar-logo-img navbar-logo-mobile" />
                 </Link>
+
+                {/*Barra di ricerca */}
                 <form className="navbar-search" onSubmit={handleSearch}>
-                    <Search size={15} className="navbar-search-icon" />
-                    <input
-                        type="text"
-                        className="navbar-search-input"
-                        placeholder="Cerca piante..."
-                        value={query}
-                        onChange={handleQueryChange}
-                    />
+                    <div className="search-wrapper">
+                        <button
+                            type="button"
+                            className={`search-switcher-btn ${searchType}`}
+                            onClick={handleSearchTypeChange}
+                            title={searchType === 'plants' ? "Cerca Utenti" : "Cerca Piante"}
+                        >
+                            <span className="switcher-content" key={searchType}>
+                                {searchType === 'plants' ? <User size={18} className="switcher-icon" /> : <Leaf size={18} className="switcher-icon" />}
+                            </span>
+                        </button>
+                        <div className="search-divider"></div>
+                        <Search size={15} className="navbar-search-icon" style={{ marginLeft: 0 }} />
+                        <input
+                            type="text"
+                            className="navbar-search-input"
+                            placeholder="Cerca piante..."
+                            value={query}
+                            onChange={handleQueryChange}
+                        />
+                    </div>
                 </form>
+
+                {/* Notifiche */}
+                <NotificationBell />
             </header>
 
             {/* ── MOBILE: Bottom Tab Bar ── */}
             <nav className="bottom-nav">
                 {/* Home */}
-                <Link to="/" className={`bottom-nav-item ${isActive('/')}`}>
+                <Link to="/" className={`navbar-icon-btn ${isActive('/')}`} title="Home" onClick={handleHomeClick}>
                     <Home size={22} />
                     <span className="icon-label">Home</span>
                 </Link>
 
+                {/* Il mio Giardino */}
+                <Link to="/my-garden" className={`navbar-icon-btn ${isActive('/my-garden')}`} title="MyGarden">
+                    <Fence size={22} />
+                    <span className="icon-label">MyGarden</span>
+                </Link>
+
                 {/* Admin */}
                 {userRole === 'ADMIN' && (
-                    <Link to="/admin" className={`bottom-nav-item ${isActive('/admin')}`}>
+                    <Link to="/admin" className={`navbar-icon-btn ${isActive('/admin')}`} title="Admin">
                         <Settings size={22} />
                         <span className="icon-label">Admin</span>
                     </Link>
                 )}
 
-                {/* Il mio Giardino */}
-                <Link to="/my-garden" className={`bottom-nav-item ${isActive('/my-garden')}`}>
-                    <Fence size={22} />
-                    <span className="icon-label">MyGarden</span>
-                </Link>
-
-                {/* Notifiche */}
-                <NotificationBell />
-
                 {/* Profilo */}
-                <Link to="/profile" className={`bottom-nav-item ${isActive('/profile')}`}>
+                <Link to="/profile" className={`navbar-icon-btn ${isActive('/profile')}`} title="Profilo">
                     <div className="navbar-avatar-mini">
                         {profilePhotoUrl ? (
                             <img src={profilePhotoUrl} alt="Profilo" className="navbar-avatar-photo" />
@@ -267,12 +294,17 @@ export function Sidebar({ userRole }: SidebarProps) {
 
                 {/* Bottone Menu Mobile */}
                 <div style={{ position: 'relative' }} ref={mobileMenuRef}>
-                    <button className="bottom-nav-item" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                    <button
+                        className={`navbar-icon-btn ${isMenuOpen ? 'active' : ''}`}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        title="Altro"
+                    >
                         <Menu size={22} />
                         <span className="icon-label">Altro</span>
                     </button>
                     {isMenuOpen && renderDropdownMenu("mobile-dropdown-menu")}
                 </div>
+
             </nav>
         </>
     );

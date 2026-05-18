@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { NotificationData } from './NotificationItem';
 import { NotificationDropdown } from './NotificationDropdown';
 import { NotificationSidebar } from './NotificationSidebar';
@@ -19,6 +20,8 @@ export function NotificationBell() {
 
     const userId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
+    const navigate = useNavigate();
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
     // Fetch contatore non lette
     const fetchUnreadCount = useCallback(async () => {
@@ -149,14 +152,11 @@ export function NotificationBell() {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
-    // Determina se siamo su mobile
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-
     // Apri sidebar (desktop) o naviga (mobile)
     const handleOpenSidebar = () => {
         if (isMobile) {
-            // Su mobile si naviga alla pagina
-            window.location.href = '/notifiche';
+            // Su mobile si naviga alla pagina tramite react-router-dom
+            navigate('/notifiche');
         } else {
             setIsSidebarOpen(true);
         }

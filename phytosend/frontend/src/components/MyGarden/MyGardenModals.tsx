@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { X, Loader, Plus, Skull, Trash2, Sprout, Info, CalendarHeart, Droplets, Image as ImageIcon, Heart, MessageCircle } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import type { PostProps } from '../Feed/PostCard';
@@ -190,7 +191,17 @@ export function PlantDetailModal({
                 </div>
                 <div className="detail-body">
                     <div className="detail-section">
-                        <h4><Info size={16} /> Scheda Botanica</h4>
+                        <h4>
+                            {selectedPlant.card?.id ? (
+                                <Link to={`/plant/${selectedPlant.card.id}`} className="scheda-botanica-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                    <Info size={16} /> Scheda Botanica
+                                </Link>
+                            ) : (
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                    <Info size={16} /> Scheda Botanica
+                                </span>
+                            )}
+                        </h4>
                         <ul>
                             <li><strong>Famiglia:</strong> {selectedPlant.card?.family}</li>
                             <li><strong>Esposizione:</strong> {selectedPlant.card?.exposure}</li>

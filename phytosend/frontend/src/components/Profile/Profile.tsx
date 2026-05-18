@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle } from 'lucide-react';
+import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle, ArrowLeft, ChevronUp } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import { ProfileSettings } from './ProfileSettings';
 import type { PostProps } from '../Feed/PostCard';
@@ -50,8 +50,26 @@ export function Profile() {
     });
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-
     const modalScrollRef = useRef<HTMLDivElement>(null);
+
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 300) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     // Funzione per caricare i dati del profilo
     const loadProfile = () => {
@@ -243,6 +261,14 @@ export function Profile() {
 
     return (
         <div className="profile-container">
+            {!isOwnProfile && (
+                <button
+                    className="back-to-profile-btn"
+                    onClick={() => navigate(-1)}
+                >
+                    <ArrowLeft size={18} /> Indietro
+                </button>
+            )}
             {/* ═══ HEADER PROFILO ═══ */}
             <div className="profile-header-card">
                 <div className="profile-avatar-wrapper">
@@ -550,6 +576,12 @@ export function Profile() {
                 message={warningModal.message}
                 type={warningModal.type}
             />
+
+            {showScrollTop && (
+                <button className="scroll-to-top-btn" onClick={scrollToTop} aria-label="Torna in cima">
+                    <ChevronUp size={24} />
+                </button>
+            )}
         </div>
     );
 }

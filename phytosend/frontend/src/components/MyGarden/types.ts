@@ -5,6 +5,7 @@ export interface PlantItem {
     purchaseDate: string;
     deathDate?: string;
     card: {
+        id?: number;
         commonName: string;
         scientificName: string;
         family: string;

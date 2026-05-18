@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Fence, Plus, Sprout, Skull, Loader, ArrowLeft } from 'lucide-react';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { Fence, Plus, Sprout, Skull, Loader, ArrowLeft, ChevronUp } from 'lucide-react';
 import type { PostProps } from '../Feed/PostCard';
 import { apiFetch } from '../../utils/apiFetch';
 import '../Profile/Profile.css';
@@ -24,6 +24,25 @@ export function MyGarden() {
 
     // Nome del proprietario del giardino (per quando visitiamo il giardino di un altro utente)
     const [ownerName, setOwnerName] = useState<string>('');
+
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 300) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     // Stati per la gestione delle piante nel giardino
     const [myPlants, setMyPlants] = useState<PlantItem[]>([]);
@@ -427,20 +446,31 @@ export function MyGarden() {
                 {!isOwnGarden && (
                     <button
                         className="back-to-profile-btn"
-                        onClick={() => navigate(`/profile/${gardenUserId}`)}
+                        onClick={() => navigate(-1)}
                     >
-                        <ArrowLeft size={18} /> Vai al Profilo di {ownerName || 'Utente'}
+                        <ArrowLeft size={18} /> Indietro
                     </button>
                 )}
 
                 {/* Header della pagina del giardino */}
                 <header className="garden-header">
                     <div className="header-title">
-                        <Fence size={36} className="header-icon" />
-                        <h1>{isOwnGarden ? 'Il mio Giardino' : `Giardino di ${ownerName || '...'}`}</h1>
+                        <div className="header-icon-wrapper">
+                            <Fence size={28} />
+                        </div>
+                        {isOwnGarden ? (
+                            <h1>Il mio Giardino</h1>
+                        ) : (
+                            <h1>
+                                Giardino di{' '}
+                                <Link to={`/profile/${gardenUserId}`} className="garden-owner-link">
+                                    {ownerName || 'Utente'}
+                                </Link>
+                            </h1>
+                        )}
                     </div>
                     {/* Descrizione */}
-                    <p>{isOwnGarden ? 'La tua collezione personale di piante certificate Phytosend.' : `Esplora le piante di ${ownerName || 'questo utente'}.`}</p>
+                    <p className="garden-subtitle">{isOwnGarden ? 'La tua collezione personale di piante certificate Phytosend.' : `Esplora le piante di ${ownerName || 'questo utente'}.`}</p>
                 </header>
 
                 {/* Contenuto del giardino */}
@@ -600,6 +630,12 @@ export function MyGarden() {
                 message={warningModal.message}
                 type={warningModal.type}
             />
+
+            {showScrollTop && (
+                <button className="scroll-to-top-btn" onClick={scrollToTop} aria-label="Torna in cima">
+                    <ChevronUp size={24} />
+                </button>
+            )}
         </>
     );
 }

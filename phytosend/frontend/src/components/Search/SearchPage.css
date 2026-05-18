@@ -1,6 +1,7 @@
 .search-page {
     max-width: 680px;
     margin: 0 auto;
+    padding-top: var(--spacing-xl);
 }
 
 .search-page-header {
@@ -148,4 +149,13 @@
 
 .plant-card:hover {
     transform: translateY(-4px);
+}
+
+@media (max-width: 768px) {
+    .search-page-header h2 {
+        justify-content: center;
+    }
+    .search-page-header p {
+        text-align: center;
+    }
 }

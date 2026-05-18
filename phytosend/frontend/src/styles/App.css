@@ -37,10 +37,60 @@
 @media (max-width: 768px) {
     .main-content {
         padding-top: 66px;
-        padding-bottom: 74px;
+        padding-bottom: 90px;
     }
 
     .copyright-badge {
         display: none;
+    }
+}
+
+.scroll-to-top-btn {
+    position: fixed;
+    bottom: 52px;
+    right: 24px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.35);
+    z-index: 999;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: scrollTopIn 0.3s ease forwards;
+}
+
+@keyframes scrollTopIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.scroll-to-top-btn:hover {
+    background: var(--color-primary-light);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.45);
+}
+
+.scroll-to-top-btn:active {
+    transform: translateY(-1px) scale(0.95);
+}
+
+/* Override responsive per il tasto di scroll, posizionato alla fine del file per corretta precedenza CSS */
+@media (max-width: 768px) {
+    .scroll-to-top-btn {
+        bottom: 80px !important;
+        right: 16px !important;
     }
 }

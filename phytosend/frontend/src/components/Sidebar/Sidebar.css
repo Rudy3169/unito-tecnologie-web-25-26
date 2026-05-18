@@ -225,12 +225,12 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 56px;
+        height: 60px; /* Incrementato a 60px per dare un respiro verticale premium */
         background: var(--color-bg-card);
         border-bottom: 1px solid var(--color-border);
         align-items: center;
-        padding: 0 var(--spacing-md);
-        gap: var(--spacing-md);
+        padding: 0 16px; /* Padding standard di 16px per allinearsi con i margini del sito */
+        gap: 12px;       /* Spazio equilibrato tra logo, barra ed icona notifiche */
         z-index: 200;
         box-shadow: var(--shadow-sm);
     }
@@ -241,8 +241,57 @@
         max-width: none;
     }
 
-    .mobile-header .navbar-logo-img {
-        height: 26px;
+    .mobile-header .search-wrapper {
+        height: 38px; /* Altezza definita per un aspetto robusto in stile app iOS/Android */
+        display: flex;
+        align-items: center;
+        border-radius: 999px;
+        background: var(--color-bg-main);
+        border: 1px solid var(--color-border);
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .mobile-header .search-switcher-btn {
+        height: 100%;
+        padding: 0 10px 0 14px; /* Padding interno perfettamente bilanciato */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+    }
+
+    .mobile-header .search-divider {
+        width: 1px;
+        height: 16px;
+        background-color: var(--color-border);
+        margin: 0 8px; /* Spazio per far respirare il divisore */
+        flex-shrink: 0;
+    }
+
+    .mobile-header .navbar-search-icon {
+        margin-left: 2px;
+        margin-right: 6px; /* Spaziatura tra la lente d'ingrandimento ed il testo */
+        color: var(--color-text-muted);
+        flex-shrink: 0;
+    }
+
+    .mobile-header .navbar-search-input {
+        height: 100%;
+        padding: 0 12px 0 0; /* Padding destro e azzeramento degli altri */
+        font-size: 0.88rem;   /* Testo leggibile ed elegante */
+        border: none;
+        background: transparent;
+        color: var(--color-text-main);
+        outline: none;
+        width: 100%;
+    }
+
+    .mobile-header .navbar-logo-img.navbar-logo-mobile {
+        height: 32px; /* Logo foglia a 32px, bilanciato e nitido rispetto ai 60px della testata */
+        width: 32px;
+        object-fit: contain;
+        flex-shrink: 0;
     }
 
     .mobile-dropdown-menu {
@@ -288,6 +337,9 @@
         z-index: 200;
         box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1);
         padding-bottom: env(safe-area-inset-bottom);
+        /* Forza il rendering hardware GPU per evitare lag o spostamenti durante lo scroll su mobile */
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
     }
 
     .bottom-nav-item {
@@ -321,6 +373,15 @@
         cursor: pointer;
         transition: color 0.15s, background 0.15s;
         position: relative;
+    }
+
+    .notification-bell-btn {
+        width: 52px !important;
+        min-width: 52px !important;
+        height: 56px !important;
+        border-radius: 14px !important;
+        gap: 4px !important;
+        padding: 0 !important;
     }
 }
 

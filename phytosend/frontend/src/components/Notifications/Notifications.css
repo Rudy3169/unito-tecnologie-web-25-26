@@ -234,6 +234,7 @@
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -489,9 +490,12 @@
 /* ── Responsive ── */
 @media (max-width: 768px) {
     .notification-dropdown {
-        width: calc(100vw - 32px);
-        right: -40px;
+        width: 320px;
+        max-width: calc(100vw - 32px);
+        right: -16px;
+        top: calc(100% + 12px);
         max-height: 400px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     }
 
     .notification-item {
@@ -509,8 +513,8 @@
         font-size: 0.82rem;
     }
 
-    /* Nascondi la campanella label su mobile */
+    /* Nascondi la campanella label su mobile per salvare spazio */
     .notification-bell-btn .icon-label {
-        display: none;
+        display: none !important;
     }
 }
