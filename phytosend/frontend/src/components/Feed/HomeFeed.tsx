@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
-import { useNavigate, useNavigationType } from 'react-router-dom';
+import { useNavigationType } from 'react-router-dom';
 import { PenLine, AlertTriangle } from 'lucide-react';
 import { PostList } from './PostList';
 import { CreatePostForm } from './CreatePostForm';

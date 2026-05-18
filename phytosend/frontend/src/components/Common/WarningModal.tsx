@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { X, AlertTriangle, AlertCircle } from 'lucide-react';
 import './WarningModal.css';
 
@@ -10,6 +11,17 @@ interface WarningModalProps {
 }
 
 export function WarningModal({ isOpen, onClose, title, message, type = 'warning' }: WarningModalProps) {
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add('warning-modal-open');
+        } else {
+            document.body.classList.remove('warning-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('warning-modal-open');
+        };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const Icon = type === 'error' ? AlertCircle : AlertTriangle;

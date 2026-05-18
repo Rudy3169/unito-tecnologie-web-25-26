@@ -83,7 +83,7 @@ export function ProfileSettings({ user, onClose, onSaved }: ProfileSettingsProps
     };
 
     return (
-        <div className="comment-overlay" onClick={onClose}>
+        <div className="profile-settings-overlay" onClick={onClose}>
             <div className="profile-settings-modal" onClick={e => e.stopPropagation()}>
                 <div className="settings-header">
                     <h3>Modifica Profilo</h3>

@@ -52,6 +52,7 @@
     max-width: 520px;
     max-height: 80vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     box-shadow: 0 20px 60px rgba(26, 32, 28, 0.25);
     animation: slideUp 0.2s ease;
     display: flex;
@@ -112,6 +113,7 @@
     padding: var(--spacing-md) var(--spacing-xl);
     flex: 1;
     overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .comment-empty {

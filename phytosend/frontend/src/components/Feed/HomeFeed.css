@@ -1,0 +1,6 @@
+/* ── Saved Posts Custom Styles ── */
+@media (max-width: 768px) {
+    .saved-posts-page-header {
+        display: none !important;
+    }
+}

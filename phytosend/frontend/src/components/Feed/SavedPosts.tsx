@@ -41,6 +41,48 @@ export function SavedPosts() {
         caricaPostSalvati();
     }, []);
 
+    // Sincronizzazione della visualizzazione tra la mobile header ed il componente
+    useEffect(() => {
+        const handleRequest = () => {
+            window.dispatchEvent(new CustomEvent('sync-saved-posts-view-mode', { detail: viewMode }));
+        };
+        const handleChange = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            if (customEvent.detail) {
+                setViewMode(customEvent.detail);
+            }
+        };
+        window.addEventListener('request-saved-posts-view-mode', handleRequest);
+        window.addEventListener('change-saved-posts-view-mode', handleChange);
+        
+        // Invia lo stato iniziale
+        window.dispatchEvent(new CustomEvent('sync-saved-posts-view-mode', { detail: viewMode }));
+        
+        return () => {
+            window.removeEventListener('request-saved-posts-view-mode', handleRequest);
+            window.removeEventListener('change-saved-posts-view-mode', handleChange);
+        };
+    }, [viewMode]);
+
+    // Gestione della classe body per la testata Instagram-style su mobile
+    useEffect(() => {
+        if (selectedPostIndex !== null) {
+            document.body.classList.add('post-modal-open');
+        } else {
+            document.body.classList.remove('post-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('post-modal-open');
+        };
+    }, [selectedPostIndex]);
+
+    // Ascolta l'evento di chiusura modale della header mobile
+    useEffect(() => {
+        const handleCloseModal = () => setSelectedPostIndex(null);
+        window.addEventListener('close-post-modal', handleCloseModal);
+        return () => window.removeEventListener('close-post-modal', handleCloseModal);
+    }, []);
+
     // Quando un post viene aperto in modale, scrolla alla posizione corretta
     useEffect(() => {
         if (selectedPostIndex !== null && modalScrollRef.current) {
@@ -111,7 +153,7 @@ export function SavedPosts() {
 
     return (
         <div style={{ maxWidth: viewMode === 'grid' ? '800px' : '600px', margin: '0 auto', transition: 'max-width 0.3s ease' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', padding: '0 16px', marginTop: '16px' }}>
+            <div className="saved-posts-page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', padding: '0 16px', marginTop: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Bookmark size={28} color="var(--color-primary)" />
                     <h1 style={{ margin: 0, color: 'var(--color-text-main)', fontSize: '1.8rem' }}>Post Salvati</h1>

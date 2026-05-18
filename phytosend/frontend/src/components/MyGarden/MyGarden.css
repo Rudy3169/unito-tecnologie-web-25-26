@@ -547,6 +547,7 @@
     max-height: 90vh;
     border-radius: var(--border-radius-hard);
     overflow-y: auto;
+    overscroll-behavior: contain;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -789,10 +790,10 @@
 
 .btn-delete-full {
     width: 100%;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
     border: 1px solid transparent;
@@ -801,6 +802,11 @@
     cursor: pointer;
     font-weight: 600;
     transition: 0.2s;
+}
+
+.btn-delete-full svg {
+    position: absolute;
+    left: 24px;
 }
 
 .btn-delete-full:hover {
@@ -1032,4 +1038,40 @@
     -webkit-text-fill-color: var(--color-primary-light) !important;
     text-decoration: none;
     transform: translateY(-2px);
+}
+
+/* Restringe le modali del giardino tra l'header superiore e la tab bar inferiore su mobile */
+.mobile-br {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .my-garden-page {
+        padding-top: 24px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .list-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .modal-overlay {
+        top: 60px;
+        bottom: calc(64px + env(safe-area-inset-bottom));
+        height: auto;
+        padding: 12px;
+    }
+
+    .plant-detail-modal {
+        max-height: 100%;
+    }
+
+    .mobile-br {
+        display: inline;
+    }
+
+    .btn-delete-full {
+        text-align: center;
+    }
 }

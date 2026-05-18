@@ -82,7 +82,8 @@
     background: transparent;
     border: none;
     color: var(--color-text-main);
-    padding: 9px 12px 9px 20px;
+    padding: 0 14px 0 24px;
+    height: 100%;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -155,7 +156,7 @@
     height: 56px;
     border-radius: 12px;
     color: var(--color-text-muted);
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
     border: none;
     background: none;
     cursor: pointer;
@@ -163,14 +164,21 @@
     gap: 4px;
 }
 
-.navbar-icon-btn:hover {
-    background: var(--color-border);
-    color: var(--color-text-main);
+.navbar-icon-btn:active {
+    transform: scale(0.94);
 }
 
+@media (hover: hover) {
+    .navbar-icon-btn:hover {
+        background: none;
+        color: var(--color-primary);
+    }
+}
+
+/* Rimuoviamo lo sfondo attivo per renderlo minimal come la campanella */
 .navbar-icon-btn.active {
     color: var(--color-primary);
-    background: rgba(var(--color-primary-rgb), 0.1);
+    background: none;
 }
 
 .icon-label {
@@ -231,7 +239,7 @@
         align-items: center;
         padding: 0 16px; /* Padding standard di 16px per allinearsi con i margini del sito */
         gap: 12px;       /* Spazio equilibrato tra logo, barra ed icona notifiche */
-        z-index: 200;
+        z-index: 1100;
         box-shadow: var(--shadow-sm);
     }
 
@@ -254,7 +262,7 @@
 
     .mobile-header .search-switcher-btn {
         height: 100%;
-        padding: 0 10px 0 14px; /* Padding interno perfettamente bilanciato */
+        padding: 0 10px 0 18px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -334,7 +342,7 @@
         border-top: 1px solid var(--color-border);
         align-items: center;
         justify-content: space-around;
-        z-index: 200;
+        z-index: 1100;
         box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1);
         padding-bottom: env(safe-area-inset-bottom);
         /* Forza il rendering hardware GPU per evitare lag o spostamenti durante lo scroll su mobile */
@@ -455,4 +463,124 @@
 
 .dropdown-item.text-danger:hover {
     background-color: rgba(231, 76, 60, 0.1);
+}
+
+/* --- MOBILE HEADER POST MODE (INSTAGRAM STYLE) --- */
+.mobile-header-back-container {
+    display: none;
+    align-items: center;
+    gap: 12px;
+}
+
+.mobile-header-back-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-main);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.mobile-header-back-btn:hover {
+    background-color: rgba(var(--color-primary-rgb), 0.08);
+}
+
+.mobile-header-back-btn:active {
+    transform: scale(0.92);
+}
+
+.mobile-header-title {
+    display: none;
+    font-weight: 700;
+    color: var(--color-text-main);
+    font-size: 1.15rem;
+}
+
+body.post-modal-open .mobile-header {
+    justify-content: space-between;
+}
+
+body.post-modal-open .mobile-header .navbar-logo {
+    display: none !important;
+}
+
+body.post-modal-open .mobile-header .navbar-search {
+    display: none !important;
+}
+
+body.post-modal-open .mobile-header .mobile-header-back-container {
+    display: flex !important;
+}
+
+body.post-modal-open .mobile-header .mobile-header-title {
+    display: block !important;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .modal-sticky-header {
+        display: none !important;
+    }
+
+    /* Menu a discesa nella mobile header in alto */
+    .mobile-dropdown-menu-top {
+        top: 60px !important;
+        bottom: auto !important;
+        right: 16px !important;
+        left: auto !important;
+        position: fixed !important;
+        z-index: 1200 !important;
+        transform: none !important;
+        animation: dropSlide 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    }
+
+    /* Stili per la Campanella delle notifiche spostata nella bottom-nav */
+    .bottom-nav .notification-bell-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .bottom-nav .notification-bell-btn {
+        width: 52px !important;
+        min-width: 52px !important;
+        height: 52px !important;
+        border-radius: 14px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 4px !important;
+        padding: 0 !important;
+        background: none !important;
+    }
+
+    .bottom-nav .notification-bell-btn .icon-label {
+        display: inline-block !important;
+        font-size: 0.70rem !important;
+        font-weight: 600 !important;
+        line-height: 1 !important;
+    }
+
+    /* Forza il pulsante Altro (Menu) all'estrema destra nella header mobile quando la ricerca è nascosta */
+    .mobile-header .navbar-menu-container {
+        margin-left: auto !important;
+    }
+
+    /* Nascondi gli elementi specifici di Saved Posts quando un post è aperto a schermo intero */
+    body.post-modal-open .mobile-header .mobile-saved-posts-switcher {
+        display: none !important;
+    }
+
+    body.post-modal-open .mobile-header .mobile-saved-posts-back-container {
+        display: none !important;
+    }
 }

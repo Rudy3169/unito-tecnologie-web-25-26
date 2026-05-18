@@ -71,6 +71,18 @@ export function PostCard({
         setLocalCommentsCount(commentsCount || 0);
     }, [commentsCount]);
 
+    // Blocco dello scroll del body quando la modale dei like è aperta
+    useEffect(() => {
+        if (showLikes) {
+            document.body.classList.add('likes-modal-open');
+        } else {
+            document.body.classList.remove('likes-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('likes-modal-open');
+        };
+    }, [showLikes]);
+
     // Funzione per formattare la data in tempo relativo ("2 ore fa", "1 mese fa", ecc.)
     const getRelativeTime = (dateStr: string) => {
         if (!dateStr) return '';

@@ -47,6 +47,18 @@ export function AdminPanel() {
         return () => clearInterval(dataInterval);
     }, []);
 
+    // Blocco dello scroll del body quando la modale dell'admin panel è aperta
+    useEffect(() => {
+        if (modalConfig.isOpen) {
+            document.body.classList.add('admin-modal-open');
+        } else {
+            document.body.classList.remove('admin-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('admin-modal-open');
+        };
+    }, [modalConfig.isOpen]);
+
     const handleAction = async (endpoint: string, setLoadingState: (val: boolean) => void, successMsg: string) => {
         const token = localStorage.getItem('phytosend_token');
         setLoadingState(true);

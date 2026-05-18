@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Loader, Plus, Skull, Trash2, Sprout, Info, CalendarHeart, Droplets, Image as ImageIcon, Heart, MessageCircle } from 'lucide-react';
+import { X, Loader, Plus, Skull, Trash2, Sprout, Info, CalendarHeart, Droplets, Image as ImageIcon, Heart, MessageCircle, ArrowLeft } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import type { PostProps } from '../Feed/PostCard';
 import type { PlantItem, PlantSuggestion, PostItem } from './types';
@@ -26,6 +26,17 @@ export function AddPlantModal({
     isOpen, searchQuery, setSearchQuery, setNewPlantCardId, newPlantName, setNewPlantName,
     showSuggestions, setShowSuggestions, suggestions, isSearching, handleSelectSuggestion, handleCloseModal, handleAddNewPlant
 }: AddPlantModalProps) {
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add('add-plant-modal-open');
+        } else {
+            document.body.classList.remove('add-plant-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('add-plant-modal-open');
+        };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     return (
@@ -109,6 +120,18 @@ export function DeletePlantModal({ deletePrompt, myPlants, setDeletePrompt, hand
         }
     }, [deletePrompt]);
 
+    // Blocco dello scroll del body quando la modale di eliminazione pianta è aperta
+    useEffect(() => {
+        if (deletePrompt !== null) {
+            document.body.classList.add('delete-plant-modal-open');
+        } else {
+            document.body.classList.remove('delete-plant-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('delete-plant-modal-open');
+        };
+    }, [deletePrompt]);
+
     if (deletePrompt === null) return null;
     const plantToDelete = myPlants.find(p => p.id === deletePrompt);
 
@@ -174,6 +197,17 @@ export function PlantDetailModal({
     selectedPlant, setSelectedPlant, plantPosts, loadingPosts,
     setPlantPostCards, setSelectedPostIndex, isOwnGarden, setDeletePrompt
 }: PlantDetailModalProps) {
+    useEffect(() => {
+        if (selectedPlant !== null) {
+            document.body.classList.add('plant-detail-modal-open');
+        } else {
+            document.body.classList.remove('plant-detail-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('plant-detail-modal-open');
+        };
+    }, [selectedPlant]);
+
     if (!selectedPlant) return null;
 
     return (
@@ -278,7 +312,18 @@ export function PlantDetailModal({
 
                 {isOwnGarden && (
                     <div className="detail-footer">
-                        <button className="btn-delete-full" onClick={() => { setDeletePrompt(selectedPlant.id); setSelectedPlant(null); }}><Trash2 size={18} /> {selectedPlant.deathDate ? 'Elimina definitivamente' : 'Rimuovi o segna come morta'}</button>
+                        <button className="btn-delete-full" onClick={() => { setDeletePrompt(selectedPlant.id); setSelectedPlant(null); }}>
+                            <Trash2 size={18} />
+                            <span>
+                                {selectedPlant.deathDate ? (
+                                    'Elimina definitivamente'
+                                ) : (
+                                    <>
+                                        Rimuovi o <br className="mobile-br" /> segna come morta
+                                    </>
+                                )}
+                            </span>
+                        </button>
                     </div>
                 )}
             </div>
@@ -312,6 +357,17 @@ export function PostsScrollModal({
         }
     }, [selectedPostIndex]);
 
+    useEffect(() => {
+        if (selectedPostIndex === null) return;
+        document.body.classList.add('post-modal-open');
+        const handleCloseModal = () => setSelectedPostIndex(null);
+        window.addEventListener('close-post-modal', handleCloseModal);
+        return () => {
+            document.body.classList.remove('post-modal-open');
+            window.removeEventListener('close-post-modal', handleCloseModal);
+        };
+    }, [selectedPostIndex, setSelectedPostIndex]);
+
     if (selectedPostIndex === null) return null;
 
     return (
@@ -321,6 +377,15 @@ export function PostsScrollModal({
                 ref={modalScrollRef}
                 onClick={e => e.stopPropagation()}
             >
+                {/* Sticky Header Bar in stile Instagram Mobile */}
+                <div className="modal-sticky-header">
+                    <button className="modal-back-btn" onClick={() => setSelectedPostIndex(null)} aria-label="Indietro">
+                        <ArrowLeft size={22} />
+                    </button>
+                    <span className="modal-header-title">Post</span>
+                    <div style={{ width: '34px' }} /> {/* Spacer per allineamento simmetrico */}
+                </div>
+
                 {plantPostCards.map((post) => (
                     <div key={post.id} className="profile-modal-post">
                         <PostCard

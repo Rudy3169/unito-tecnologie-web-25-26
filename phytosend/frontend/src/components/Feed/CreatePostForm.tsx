@@ -18,6 +18,18 @@ interface PlantSuggestion {
 }
 
 export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFormProps) {
+    // Blocco dello scroll del body quando la modale di creazione post è aperta
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add('create-post-modal-open');
+        } else {
+            document.body.classList.remove('create-post-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('create-post-modal-open');
+        };
+    }, [isOpen]);
+
     // State per gestire l'input del titolo/nome della pianta
     const [title, setTitle] = useState('');
     const [caption, setCaption] = useState('');

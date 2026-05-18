@@ -52,12 +52,18 @@
     padding: 0;
 }
 
+html {
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--color-bg-main);
     color: var(--color-text-main);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
 }
 
 a {
@@ -114,4 +120,19 @@ textarea:focus {
 
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* --- SCROLL LOCK SYSTEM --- */
+body.post-modal-open,
+body.settings-modal-open,
+body.comments-modal-open,
+body.likes-modal-open,
+body.warning-modal-open,
+body.create-post-modal-open,
+body.add-plant-modal-open,
+body.delete-plant-modal-open,
+body.plant-detail-modal-open,
+body.admin-modal-open,
+body.large-photo-modal-open {
+    overflow: hidden !important;
 }

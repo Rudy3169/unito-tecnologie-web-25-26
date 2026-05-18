@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { NotificationData } from './NotificationItem';
 import { NotificationDropdown } from './NotificationDropdown';
 import { NotificationSidebar } from './NotificationSidebar';
@@ -21,7 +21,9 @@ export function NotificationBell() {
     const userId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
     const navigate = useNavigate();
+    const location = useLocation();
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const isActive = location.pathname === '/notifiche';
 
     // Fetch contatore non lette
     const fetchUnreadCount = useCallback(async () => {
@@ -76,6 +78,12 @@ export function NotificationBell() {
         fetchUnreadCount();
         const interval = setInterval(fetchUnreadCount, 30000);
         return () => clearInterval(interval);
+    }, [fetchUnreadCount]);
+
+    // Ascolta gli aggiornamenti delle notifiche in tempo reale da altre pagine per aggiornare il contatore
+    useEffect(() => {
+        window.addEventListener('notifications-updated', fetchUnreadCount);
+        return () => window.removeEventListener('notifications-updated', fetchUnreadCount);
     }, [fetchUnreadCount]);
 
     // Quando si apre il dropdown, fetch le notifiche recenti
@@ -148,8 +156,12 @@ export function NotificationBell() {
 
     // Toggle dropdown
     const handleBellClick = () => {
-        if (isSidebarOpen) return;
-        setIsDropdownOpen(!isDropdownOpen);
+        if (isMobile) {
+            navigate('/notifiche');
+        } else {
+            if (isSidebarOpen) return;
+            setIsDropdownOpen(!isDropdownOpen);
+        }
     };
 
     // Apri sidebar (desktop) o naviga (mobile)
@@ -166,7 +178,7 @@ export function NotificationBell() {
         <>
             <div className="notification-bell-container" ref={bellRef}>
                 <button
-                    className={`navbar-icon-btn notification-bell-btn ${isDropdownOpen ? 'active' : ''}`}
+                    className={`navbar-icon-btn notification-bell-btn ${isDropdownOpen || isActive ? 'active' : ''}`}
                     onClick={handleBellClick}
                     title="Notifiche"
                 >

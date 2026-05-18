@@ -19,6 +19,8 @@ export function NotificationPage() {
     const userId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
 
+    const hasUnread = notifications.some(n => !n.read);
+
     const fetchNotifications = useCallback(async (pageNum: number, reset = false) => {
         if (!userId || !token) return;
         setLoading(true);
@@ -61,6 +63,7 @@ export function NotificationPage() {
             setNotifications(prev =>
                 prev.map(n => n.id === id ? { ...n, read: true } : n)
             );
+            window.dispatchEvent(new Event('notifications-updated'));
         } catch { /* silenzioso */ }
     };
 
@@ -72,6 +75,7 @@ export function NotificationPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            window.dispatchEvent(new Event('notifications-updated'));
         } catch { /* silenzioso */ }
     };
 
@@ -102,16 +106,27 @@ export function NotificationPage() {
                     <ArrowLeft size={22} />
                 </button>
                 <h2>Notifiche</h2>
-                <button
-                    className="notification-page-mark-all"
-                    onClick={handleMarkAllAsRead}
-                    title="Segna tutte come lette"
-                >
-                    <CheckCheck size={20} />
-                </button>
+                {hasUnread && (
+                    <button
+                        className="notification-page-mark-all"
+                        onClick={handleMarkAllAsRead}
+                        title="Segna tutte come lette"
+                    >
+                        <CheckCheck size={20} />
+                    </button>
+                )}
             </div>
 
             <div className="notification-page-list">
+                {hasUnread && (
+                    <div className="notification-mobile-actions">
+                        <button onClick={handleMarkAllAsRead} className="notification-mobile-mark-all">
+                            <CheckCheck size={16} />
+                            <span>Segna tutte come lette</span>
+                        </button>
+                    </div>
+                )}
+
                 {notifications.length === 0 && !loading ? (
                     <div className="notification-empty notification-empty-page">
                         <span className="notification-empty-icon">🔔</span>

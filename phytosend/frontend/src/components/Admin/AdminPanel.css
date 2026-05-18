@@ -224,3 +224,11 @@
         opacity: 1;
     }
 }
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding-top: 36px;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}

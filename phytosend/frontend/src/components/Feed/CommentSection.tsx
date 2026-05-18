@@ -32,6 +32,18 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
     const navigate = useNavigate();
     const [highlightedId, setHighlightedId] = useState<number | null>(null);
 
+    // Blocco dello scroll del body quando la modale dei commenti è aperta
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add('comments-modal-open');
+        } else {
+            document.body.classList.remove('comments-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('comments-modal-open');
+        };
+    }, [isOpen]);
+
     // Stato per tracciare a CHI stiamo rispondendo e sotto quale COMMENTO GENITORE
     const [replyingTo, setReplyingTo] = useState<{ authorName: string, parentId: number } | null>(null);
 

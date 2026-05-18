@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle, ArrowLeft, ChevronUp } from 'lucide-react';
+import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle, ArrowLeft, ChevronUp, Eye } from 'lucide-react';
 import { PostCard } from '../Feed/PostCard';
 import { ProfileSettings } from './ProfileSettings';
 import type { PostProps } from '../Feed/PostCard';
@@ -43,6 +43,9 @@ export function Profile() {
     const [loading, setLoading] = useState(true);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+    const [showLargePhoto, setShowLargePhoto] = useState(false);
+    const [isLargePhotoVisible, setIsLargePhotoVisible] = useState(false);
+    const [avatarTransform, setAvatarTransform] = useState<{ x: number; y: number; scale: number } | null>(null);
     const [postToDelete, setPostToDelete] = useState<number | null>(null);
     const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
         isOpen: false,
@@ -51,6 +54,7 @@ export function Profile() {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const modalScrollRef = useRef<HTMLDivElement>(null);
+    const avatarRef = useRef<HTMLDivElement>(null);
 
     const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -127,6 +131,43 @@ export function Profile() {
         loadProfile();
     }, [profileUserId]);
 
+    const openLargePhoto = () => {
+        if (!avatarRef.current) return;
+        const rect = avatarRef.current.getBoundingClientRect();
+        
+        const screenX = window.innerWidth / 2;
+        const screenY = window.innerHeight / 2;
+        
+        const avatarX = rect.left + rect.width / 2;
+        const avatarY = rect.top + rect.height / 2;
+        
+        const deltaX = avatarX - screenX;
+        const deltaY = avatarY - screenY;
+        
+        const targetSize = Math.min(window.innerWidth * 0.8, 400);
+        const scale = rect.width / targetSize;
+        
+        setAvatarTransform({
+            x: deltaX,
+            y: deltaY,
+            scale: scale
+        });
+        
+        setShowLargePhoto(true);
+        
+        setTimeout(() => {
+            setIsLargePhotoVisible(true);
+        }, 15);
+    };
+
+    const closeLargePhoto = () => {
+        setIsLargePhotoVisible(false);
+        setTimeout(() => {
+            setShowLargePhoto(false);
+            setAvatarTransform(null);
+        }, 300);
+    };
+
     // Chiude il menu foto quando si clicca fuori
     useEffect(() => {
         if (!showPhotoMenu) return;
@@ -138,6 +179,51 @@ export function Profile() {
             document.removeEventListener('click', handleClick);
         };
     }, [showPhotoMenu]);
+
+    // Gestione della classe body per la visualizzazione della modale del post su mobile
+    useEffect(() => {
+        if (selectedPostIndex !== null) {
+            document.body.classList.add('post-modal-open');
+        } else {
+            document.body.classList.remove('post-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('post-modal-open');
+        };
+    }, [selectedPostIndex]);
+
+    // Gestione della classe body per la visualizzazione della modale impostazioni
+    useEffect(() => {
+        if (showSettings) {
+            document.body.classList.add('settings-modal-open');
+        } else {
+            document.body.classList.remove('settings-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('settings-modal-open');
+        };
+    }, [showSettings]);
+
+    // Gestione della classe body per la visualizzazione della foto profilo grande
+    useEffect(() => {
+        if (showLargePhoto) {
+            document.body.classList.add('large-photo-modal-open');
+        } else {
+            document.body.classList.remove('large-photo-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('large-photo-modal-open');
+        };
+    }, [showLargePhoto]);
+
+    // Ascolta l'evento globale per chiudere la modale (es. dal pulsante indietro dell'header mobile)
+    useEffect(() => {
+        const handleCloseModal = () => setSelectedPostIndex(null);
+        window.addEventListener('close-post-modal', handleCloseModal);
+        return () => {
+            window.removeEventListener('close-post-modal', handleCloseModal);
+        };
+    }, []);
 
     // Gestione like dai post in modale
     const handleToggleLike = (postId: number) => {
@@ -273,14 +359,17 @@ export function Profile() {
             <div className="profile-header-card">
                 <div className="profile-avatar-wrapper">
                     <div
-                        className={`profile-avatar ${isOwnProfile ? 'editable' : ''}`}
+                        ref={avatarRef}
+                        className={`profile-avatar ${user?.profilePhotoUrl ? 'editable' : (isOwnProfile ? 'editable' : '')}`}
                         onClick={() => {
-                            if (!isOwnProfile) return;
+                            if (!user) return;
                             if (user.profilePhotoUrl) {
-                                // Se ha già una foto, mostra il menu modifica/elimina
-                                setShowPhotoMenu(!showPhotoMenu);
-                            } else {
-                                // Se non ha foto, apri direttamente la galleria
+                                if (isOwnProfile) {
+                                    setShowPhotoMenu(!showPhotoMenu);
+                                } else {
+                                    openLargePhoto();
+                                }
+                            } else if (isOwnProfile) {
                                 fileInputRef.current?.click();
                             }
                         }}
@@ -368,6 +457,16 @@ export function Profile() {
                     {/* Menu modifica/elimina foto */}
                     {showPhotoMenu && (
                         <div className="photo-action-menu">
+                            <button
+                                className="photo-action-item"
+                                onClick={() => {
+                                    setShowPhotoMenu(false);
+                                    openLargePhoto();
+                                }}
+                            >
+                                <Eye size={16} />
+                                <span>Visualizza foto</span>
+                            </button>
                             <button
                                 className="photo-action-item"
                                 onClick={() => {
@@ -510,6 +609,15 @@ export function Profile() {
                         ref={modalScrollRef}
                         onClick={e => e.stopPropagation()}
                     >
+                        {/* Sticky Header Bar in stile Instagram Mobile */}
+                        <div className="modal-sticky-header">
+                            <button className="modal-back-btn" onClick={() => setSelectedPostIndex(null)} aria-label="Indietro">
+                                <ArrowLeft size={22} />
+                            </button>
+                            <span className="modal-header-title">Post</span>
+                            <div style={{ width: '34px' }} /> {/* Spacer per allineamento simmetrico */}
+                        </div>
+
                         {posts.map((post, _index) => (
                             <div key={post.id} className="profile-modal-post">
                                 <PostCard
@@ -581,6 +689,43 @@ export function Profile() {
                 <button className="scroll-to-top-btn" onClick={scrollToTop} aria-label="Torna in cima">
                     <ChevronUp size={24} />
                 </button>
+            )}
+
+            {/* Pop-up per visualizzare la foto profilo grande */}
+            {showLargePhoto && user?.profilePhotoUrl && (
+                <div 
+                    className={`large-photo-overlay ${isLargePhotoVisible ? 'visible' : ''}`} 
+                    onClick={closeLargePhoto}
+                >
+                    <div 
+                        className="large-photo-container" 
+                        onClick={(e) => e.stopPropagation()}
+                        style={
+                            !isLargePhotoVisible && avatarTransform
+                                ? {
+                                      transform: `translate(${avatarTransform.x}px, ${avatarTransform.y}px) scale(${avatarTransform.scale})`,
+                                      opacity: 0,
+                                  }
+                                : {
+                                      transform: 'translate(0, 0) scale(1)',
+                                      opacity: 1,
+                                  }
+                        }
+                    >
+                        <img 
+                            src={user.profilePhotoUrl} 
+                            alt="Foto profilo grande" 
+                            className="large-photo-img" 
+                        />
+                        <button 
+                            className="close-large-photo-btn"
+                            onClick={closeLargePhoto}
+                            aria-label="Chiudi"
+                        >
+                            &times;
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
