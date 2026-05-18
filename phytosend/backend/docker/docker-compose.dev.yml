@@ -4,7 +4,6 @@ services:
   # DATABASE
   db:
     image: postgres:17.6
-    restart: always
     environment:
       POSTGRES_DB: phytosend_db
       POSTGRES_USER: phytouser
