@@ -18,7 +18,22 @@ export function Sidebar({ userRole }: SidebarProps) {
     const [searchType, setSearchType] = useState('plants');
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        console.log("[PhytoSend Theme Debug] Initialized isDarkMode state. documentElement 'data-theme':", initialTheme);
+        return initialTheme === 'dark';
+    });
+
+    const toggleTheme = () => {
+        console.log("[PhytoSend Theme Debug] toggleTheme triggered! Current isDarkMode state:", isDarkMode);
+        const newTheme = !isDarkMode ? 'dark' : 'light';
+        console.log("[PhytoSend Theme Debug] Selected new theme value:", newTheme);
+        setIsDarkMode(!isDarkMode);
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('phytosend_theme', newTheme);
+        console.log("[PhytoSend Theme Debug] documentElement 'data-theme' set to:", document.documentElement.getAttribute('data-theme'));
+        console.log("[PhytoSend Theme Debug] localStorage 'phytosend_theme' set to:", localStorage.getItem('phytosend_theme'));
+    };
 
     const menuRef = useRef<HTMLDivElement>(null);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -101,8 +116,8 @@ export function Sidebar({ userRole }: SidebarProps) {
                 <Bookmark size={18} />
                 <span>Post Salvati</span>
             </Link>
-            <button className="dropdown-item" onClick={() => setIsDarkMode(!isDarkMode)}>
-                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            <button type="button" className="dropdown-item" onClick={toggleTheme}>
+                {isDarkMode ? <Moon size={18} /> : <Sun size={18} />}
                 <span>Cambia Aspetto</span>
             </button>
             <div className="dropdown-divider"></div>
@@ -118,10 +133,7 @@ export function Sidebar({ userRole }: SidebarProps) {
             {/* ── DESKTOP: Top Navbar ── */}
             <header className="navbar">
                 <Link to="/" className="navbar-logo">
-                    <picture>
-                        <source srcSet={logoDark} media="(prefers-color-scheme: dark)" />
-                        <img src={logoLight} alt="PhytoSend" className="navbar-logo-img" />
-                    </picture>
+                    <img src={isDarkMode ? logoDark : logoLight} alt="PhytoSend" className="navbar-logo-img" />
                 </Link>
 
                 <form className="navbar-search" onSubmit={handleSearch}>
@@ -202,10 +214,7 @@ export function Sidebar({ userRole }: SidebarProps) {
             {/* ── MOBILE: Header ── */}
             <header className="mobile-header">
                 <Link to="/" className="navbar-logo">
-                    <picture>
-                        <source srcSet={logoDark} media="(prefers-color-scheme: dark)" />
-                        <img src={logoLight} alt="PhytoSend" className="navbar-logo-img" />
-                    </picture>
+                    <img src={isDarkMode ? logoDark : logoLight} alt="PhytoSend" className="navbar-logo-img" />
                 </Link>
                 <form className="navbar-search" onSubmit={handleSearch}>
                     <Search size={15} className="navbar-search-icon" />

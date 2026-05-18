@@ -93,27 +93,25 @@ textarea:focus {
 }
 
 /* ========== DARK MODE ========== */
-@media (prefers-color-scheme: dark) {
-    :root {
-        color-scheme: dark;
-        --color-bg-main: #0c1412;
-        --color-bg-card: #132019;
+:root[data-theme='dark'] {
+    color-scheme: dark;
+    --color-bg-main: #0c1412;
+    --color-bg-card: #132019;
 
-        --color-primary: #4aab8a;
-        --color-primary-light: #6ac4a4;
-        --color-primary-accent: #2a4f45;
-        --color-primary-rgb: 74, 171, 138;
+    --color-primary: #4aab8a;
+    --color-primary-light: #6ac4a4;
+    --color-primary-accent: #2a4f45;
+    --color-primary-rgb: 74, 171, 138;
 
-        --color-earth: #a07856;
+    --color-earth: #a07856;
 
-        --color-text-main: #e2eeea;
-        --color-text-muted: #7aaa9e;
+    --color-text-main: #e2eeea;
+    --color-text-muted: #7aaa9e;
 
-        --color-border: #1f3d37;
+    --color-border: #1f3d37;
 
-        --color-error: #e06a5e;
+    --color-error: #e06a5e;
 
-        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-    }
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
 }

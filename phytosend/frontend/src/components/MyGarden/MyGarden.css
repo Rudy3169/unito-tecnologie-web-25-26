@@ -922,3 +922,47 @@
         transform: rotate(360deg);
     }
 }
+
+/* --- AZIONI DI CONFERMA POP-UP ELIMINAZIONE/MORTE --- */
+.delete-actions-horizontal {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.delete-actions-horizontal .btn-cancel {
+    flex: 1;
+    padding: 12px;
+    background: var(--color-bg-main);
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-actions-horizontal .btn-cancel:hover {
+    background: var(--color-border);
+    color: var(--color-text-main);
+}
+
+.delete-actions-horizontal .btn-dead,
+.delete-actions-horizontal .btn-delete {
+    flex: 1;
+    padding: 12px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.delete-actions-horizontal .btn-dead:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.delete-actions-horizontal .btn-delete:hover {
+    background: #ef4444;
+    color: white;
+    transform: translateY(-1px);
+}

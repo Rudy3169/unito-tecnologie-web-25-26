@@ -13,6 +13,7 @@ interface Comment {
     isLikedByMe?: boolean;
     parentId?: number | null;
     creationDate?: string;
+    profilePhotoUrl?: string | null;
 }
 
 interface CommentSectionProps {
@@ -39,6 +40,80 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
 
     // Stato per tracciare quale commento stiamo eliminando
     const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
+
+    // Stato per tutti gli utenti per risolvere le menzioni (@Nome)
+    const [allUsers, setAllUsers] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const token = localStorage.getItem('phytosend_token');
+        apiFetch('/api/utenti', { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data) {
+                    setAllUsers(data.content ?? []);
+                }
+            })
+            .catch(err => console.error("Errore caricamento utenti:", err));
+    }, [isOpen]);
+
+    const renderCommentText = (text: string) => {
+        if (!text) return '';
+        const mentionRegex = /@([A-Za-zÀ-ÖØ-öø-ÿ0-9._-]+)/g;
+        const parts = [];
+        let lastIndex = 0;
+        let match;
+
+        while ((match = mentionRegex.exec(text)) !== null) {
+            const matchIndex = match.index;
+            const fullMatch = match[0];
+            const name = match[1];
+
+            if (matchIndex > lastIndex) {
+                parts.push(text.substring(lastIndex, matchIndex));
+            }
+
+            const matchedUser = allUsers.find(
+                u => u.name.toLowerCase() === name.toLowerCase()
+            );
+
+            if (matchedUser) {
+                parts.push(
+                    <span
+                        key={matchIndex}
+                        onClick={() => {
+                            onClose();
+                            navigate(`/profile/${matchedUser.id}`);
+                        }}
+                        style={{
+                            color: 'var(--color-primary)',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            textDecoration: 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                            (e.target as HTMLElement).style.color = 'var(--color-primary-light)';
+                        }}
+                        onMouseLeave={(e) => {
+                            (e.target as HTMLElement).style.color = 'var(--color-primary)';
+                        }}
+                    >
+                        {fullMatch}
+                    </span>
+                );
+            } else {
+                parts.push(fullMatch);
+            }
+
+            lastIndex = mentionRegex.lastIndex;
+        }
+
+        if (lastIndex < text.length) {
+            parts.push(text.substring(lastIndex));
+        }
+
+        return parts.length > 0 ? parts : text;
+    };
 
     // Funzione per caricare i commenti
     const getRelativeTime = (dateString?: string) => {
@@ -96,7 +171,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                     likesCount: c.likesCount ?? 0,
                     isLikedByMe: c.likedByMe ?? false,
                     parentId: c.parentId || null,
-                    creationDate: c.creationDate || new Date().toISOString()
+                    creationDate: c.creationDate || new Date().toISOString(),
+                    profilePhotoUrl: c.author?.profilePhotoUrl ?? null
                 })));
             })
             .catch(err => console.error("Errore caricamento commenti:", err));
@@ -168,15 +244,20 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                         likesCount: c.likesCount ?? 0,
                         isLikedByMe: c.likedByMe ?? false,
                         parentId: c.parentId || null,
-                        creationDate: c.creationDate || new Date().toISOString()
+                        creationDate: c.creationDate || new Date().toISOString(),
+                        profilePhotoUrl: c.author?.profilePhotoUrl ?? null
                     })));
                 });
         });
     };
 
     // Funzione per rispondere a un commento
-    const handleReply = (authorName: string, parentId: number) => {
-        setNewComment(`@${authorName} `);
+    const handleReply = (authorName: string, parentId: number, isNestedReply: boolean) => {
+        if (isNestedReply) {
+            setNewComment(`@${authorName} `);
+        } else {
+            setNewComment('');
+        }
         setReplyingTo({ authorName, parentId });
     };
 
@@ -219,6 +300,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
             if (response.ok) {
                 const created = await response.json();
 
+                const currentUserPhoto = allUsers.find(u => u.id === Number(userId))?.profilePhotoUrl ?? null;
+
                 // Aggiungiamo il commento (o la risposta) all'interfaccia
                 setComments([...comments, {
                     id: created.id || Date.now(),
@@ -228,7 +311,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                     likesCount: 0,
                     isLikedByMe: false,
                     parentId: replyingTo?.parentId || null,
-                    creationDate: new Date().toISOString()
+                    creationDate: new Date().toISOString(),
+                    profilePhotoUrl: currentUserPhoto
                 }]);
 
                 // Se abbiamo appena risposto, espandiamo in automatico le risposte di quel genitore
@@ -318,7 +402,32 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                         className={`comment-item-content ${highlightedId === parent.id ? 'comment-highlight' : ''}`}
                                         data-comment-id={parent.id}
                                     >
-                                        <div className="comment-header-row">
+                                        <div className="comment-header-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div 
+                                                className="comment-avatar" 
+                                                onClick={() => navigate(`/profile/${parent.authorId}`)}
+                                                style={{
+                                                    width: '24px',
+                                                    height: '24px',
+                                                    borderRadius: '50%',
+                                                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
+                                                    color: 'white',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '0.72rem',
+                                                    fontWeight: 'bold',
+                                                    cursor: 'pointer',
+                                                    overflow: 'hidden',
+                                                    flexShrink: 0
+                                                }}
+                                            >
+                                                {parent.profilePhotoUrl ? (
+                                                    <img src={parent.profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    parent.authorName.charAt(0).toUpperCase()
+                                                )}
+                                            </div>
                                             <strong onClick={() => navigate(`/profile/${parent.authorId}`)} style={{ cursor: 'pointer' }}>{parent.authorName}</strong>
                                             <span className="comment-time">{getRelativeTime(parent.creationDate)}</span>
 
@@ -329,7 +438,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                 </button>
                                             )}
                                         </div>
-                                        <p>{parent.text}</p>
+                                        <p>{renderCommentText(parent.text)}</p>
                                         <div className="comment-mini-actions">
                                             {/* MI PIACE */}
                                             <button onClick={() => handleLikeComment(parent.id)}>
@@ -338,8 +447,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                             </button>
                                             {/* RISPONDI */}
                                             {!isParentAuthor && (
-                                                <button onClick={() => handleReply(parent.authorName, parent.id)}>Rispondi</button>
-                                            )}
+                                                 <button onClick={() => handleReply(parent.authorName, parent.id, false)}>Rispondi</button>
+                                             )}
                                         </div>
                                     </div>
 
@@ -363,21 +472,46 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                                     className={`comment-item-content ${highlightedId === reply.id ? 'comment-highlight' : ''}`}
                                                                     data-comment-id={reply.id}
                                                                 >
-                                                                    <div className="comment-header-row">
+                                                                    <div className="comment-header-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                        <div 
+                                                                            className="comment-avatar" 
+                                                                            onClick={() => navigate(`/profile/${reply.authorId}`)}
+                                                                            style={{
+                                                                                width: '20px',
+                                                                                height: '20px',
+                                                                                borderRadius: '50%',
+                                                                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
+                                                                                color: 'white',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center',
+                                                                                fontSize: '0.64rem',
+                                                                                fontWeight: 'bold',
+                                                                                cursor: 'pointer',
+                                                                                overflow: 'hidden',
+                                                                                flexShrink: 0
+                                                                            }}
+                                                                        >
+                                                                            {reply.profilePhotoUrl ? (
+                                                                                <img src={reply.profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                            ) : (
+                                                                                reply.authorName.charAt(0).toUpperCase()
+                                                                            )}
+                                                                        </div>
                                                                         <strong onClick={() => navigate(`/profile/${reply.authorId}`)} style={{ cursor: 'pointer' }}>{reply.authorName}</strong>
                                                                         <span className="comment-time">{getRelativeTime(reply.creationDate)}</span>
                                                                     </div>
-                                                                    <p>{reply.text}</p>
+                                                                    <p>{renderCommentText(reply.text)}</p>
                                                                     <div className="comment-mini-actions">
                                                                         {/* MI PIACE */}
                                                                         <button onClick={() => handleLikeComment(reply.id)}>
                                                                             <Heart size={12} fill={reply.isLikedByMe ? "var(--color-error)" : "none"} color={reply.isLikedByMe ? "var(--color-error)" : "currentColor"} />
                                                                             {reply.likesCount || ''}
                                                                         </button>
-                                                                        {/* RISPONDI */}
-                                                                        {!isReplyAuthor && (
-                                                                            <button onClick={() => handleReply(reply.authorName, parent.id)}>Rispondi</button>
-                                                                        )}
+                                                                         {/* RISPONDI */}
+                                                                         {!isReplyAuthor && (
+                                                                             <button onClick={() => handleReply(reply.authorName, parent.id, true)}>Rispondi</button>
+                                                                         )}
 
                                                                         {/* ELIMINA */}
                                                                         {canDeleteReply && (

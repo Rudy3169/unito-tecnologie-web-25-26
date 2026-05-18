@@ -105,9 +105,11 @@ export function PlantCard({
                     )}
                 </div>
             </div>
-            <div className="garden-card-events">
-                <Droplets size={14} /> Prossima irrigazione: tra {plant.card?.waterFrequencyDays || 'Regolare'} giorni
-            </div>
+            {!plant.deathDate && (
+                <div className="garden-card-events">
+                    <Droplets size={14} /> Prossima irrigazione: tra {plant.card?.waterFrequencyDays || 'Regolare'} giorni
+                </div>
+            )}
         </div>
     );
 }

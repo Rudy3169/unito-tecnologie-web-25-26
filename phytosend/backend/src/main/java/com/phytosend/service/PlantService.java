@@ -129,6 +129,11 @@ public class PlantService {
         event.setCompletedDate(LocalDate.now());
         careEventRepository.save(event);
 
+        // Se la pianta è morta, non creiamo il prossimo evento
+        if (event.getPlant() != null && event.getPlant().getDeathDate() != null) {
+            return event;
+        }
+
         // Crea il prossimo evento dello stesso tipo
         CareEvent nextEvent = new CareEvent();
         nextEvent.setPlant(event.getPlant());

@@ -4,7 +4,8 @@ import { WarningModal } from '../Common/WarningModal';
 import './LoginPage.css';
 
 // Il tuo fantastico logo
-import logoImage from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
+import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
+import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
 
 interface LoginPageProps {
     onLoginSuccess: (role: 'USER' | 'ADMIN') => void;
@@ -15,6 +16,9 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     const [password, setPassword] = useState('');
     // Nuovo stato: Mostrare o nascondere la password?
     const [showPassword, setShowPassword] = useState(false);
+    const [isDarkMode] = useState(() => {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
+    });
     const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
         isOpen: false,
         message: '',
@@ -78,7 +82,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
             <div className="login-form-side">
                 <div className="login-box">
-                    <img src={logoImage} alt="PhytoSend" className="login-logo" />
+                    <img src={isDarkMode ? logoDark : logoLight} alt="PhytoSend" className="login-logo" />
                     <h1>Bentornato</h1>
                     <p>Inserisci le tue credenziali per accedere al tuo giardino.</p>
 
@@ -123,7 +127,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     {/* Finto invito alla registrazione (come da indicazioni del Prof) */}
                     <div className="register-link">
                         Non hai ancora un account?
-                        <a onClick={() => setWarningModal({ isOpen: true, title: 'Registrazione', message: 'Le registrazioni sono temporaneamente chiuse. Accedi con uno degli utenti predefiniti forniti dal team!', type: 'warning' })}>
+                        <a onClick={() => setWarningModal({ isOpen: true, title: 'Registrazione', message: 'Le registrazioni sono disabilitate.\nAccedi con uno degli utenti predefiniti forniti dal team!', type: 'warning' })}>
                             Unisciti ora
                         </a>
                     </div>

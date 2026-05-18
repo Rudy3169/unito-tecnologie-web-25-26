@@ -57,6 +57,11 @@ public class CareEventScheduler {
                 continue;
             }
 
+            // Se la pianta è morta, non inviamo notifiche di cura
+            if (plant.getDeathDate() != null) {
+                continue;
+            }
+
             User owner = plant.getGarden().getOwner();
             String plantName = plant.getName() != null ? plant.getName()
                     : (plant.getCard() != null ? plant.getCard().getCommonName() : "la tua pianta");

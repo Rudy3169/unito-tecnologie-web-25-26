@@ -39,4 +39,11 @@ public interface CareEventRepository extends JpaRepository<CareEvent, Long> {
      * @return l'evento pendente, se esiste
      */
     Optional<CareEvent> findByPlantIdAndTypeAndCompletedFalse(Long plantId, String type);
+
+    /**
+     * Rimuove tutti gli eventi di cura pendenti (non completati) associati alla pianta.
+     *
+     * @param plantId ID della pianta
+     */
+    void deleteByPlantIdAndCompletedFalse(Long plantId);
 }

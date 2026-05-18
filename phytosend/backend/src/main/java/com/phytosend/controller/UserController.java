@@ -6,6 +6,7 @@ import com.phytosend.entity.User;
 import com.phytosend.repository.PlantRepository;
 import com.phytosend.repository.PostRepository;
 import com.phytosend.repository.BotanicalCardRepository;
+import com.phytosend.repository.CareEventRepository;
 import com.phytosend.service.DtoConverter;
 import com.phytosend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,10 @@ public class UserController {
     // Repository per le schede botaniche
     @Autowired
     private BotanicalCardRepository botanicalCardRepository;
+
+    // Repository per gli eventi di cura
+    @Autowired
+    private CareEventRepository careEventRepository;
 
     /**
      * Recupera l'elenco di tutti gli utenti attualmente iscritti alla piattaforma
@@ -209,6 +214,7 @@ public class UserController {
      * @return ResponseEntity con codice 200 OK se l'operazione è andata a buon fine
      */
     @PutMapping("/{userId}/piante/{plantId}/dead")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> markPlantAsDead(@PathVariable Long userId, @PathVariable Long plantId) {
         // Cerca la pianta
         Plant plant = plantRepository.findById(plantId)
@@ -217,6 +223,9 @@ public class UserController {
         // Cambia lo stato in "morta"
         plant.setDeathDate(LocalDate.now());
         plantRepository.save(plant);
+
+        // Rimuove tutti gli eventi di cura pendenti (non completati) associati alla pianta
+        careEventRepository.deleteByPlantIdAndCompletedFalse(plantId);
 
         return ResponseEntity.ok().build();
     }

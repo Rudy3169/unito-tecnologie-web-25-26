@@ -189,42 +189,38 @@
 }
 
 /* ========== LOGIN DARK MODE ========== */
-@media (prefers-color-scheme: dark) {
+:root[data-theme='dark'] .login-form-side {
+    background: linear-gradient(160deg, #1c3028 0%, #0c1412 100%);
+}
 
-    /* Pannello form: gradiente caldo invece di nero piatto */
-    .login-form-side {
-        background: linear-gradient(160deg, #1c3028 0%, #0c1412 100%);
-    }
+/* Overlay sull'immagine: più leggero */
+:root[data-theme='dark'] .login-image-side::after {
+    background: linear-gradient(135deg,
+            rgba(30, 94, 75, 0.25) 0%,
+            rgba(12, 20, 18, 0.55) 100%);
+}
 
-    /* Overlay sull'immagine: più leggero */
-    .login-image-side::after {
-        background: linear-gradient(135deg,
-                rgba(30, 94, 75, 0.25) 0%,
-                rgba(12, 20, 18, 0.55) 100%);
-    }
+/* Titolo con gradient text — effetto premium */
+:root[data-theme='dark'] .login-box h1 {
+    background: linear-gradient(135deg,
+            var(--color-text-main) 30%,
+            var(--color-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
 
-    /* Titolo con gradient text — effetto premium */
-    .login-box h1 {
-        background: linear-gradient(135deg,
-                var(--color-text-main) 30%,
-                var(--color-primary));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
+/* Input semitrasparenti */
+:root[data-theme='dark'] .input-group input {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-border);
+}
 
-    /* Input semitrasparenti */
-    .input-group input {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-color: var(--color-border);
-    }
+:root[data-theme='dark'] .input-group input:focus {
+    background-color: rgba(255, 255, 255, 0.08);
+}
 
-    .input-group input:focus {
-        background-color: rgba(255, 255, 255, 0.08);
-    }
-
-    /* Quote più visibile sull'immagine */
-    .login-quote h2 {
-        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
-    }
+/* Quote più visibile sull'immagine */
+:root[data-theme='dark'] .login-quote h2 {
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
 }

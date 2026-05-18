@@ -336,7 +336,7 @@ INSERT INTO botanical_cards (common_name, scientific_name, family, exposure, irr
 ('Violetta', 'Viola odorata', 'Violaceae', 'Luce diffusa', 'Abbondante', 4, 'Organico', 'Umido', 'https://upload.wikimedia.org/wikipedia/commons/0/03/Viola_odorata_Maarts_viooltje.JPG'),
 ('Vite', 'Vitis vinifera', 'Vitaceae', 'Pieno sole', 'Moderata', 7, 'Bilanciato', 'Acido', 'https://upload.wikimedia.org/wikipedia/commons/d/dd/Cabernet_Sauvignon_Gaillac.jpg'),
 ('Ylang-Ylang', 'Cananga odorata', 'Annonaceae', 'Pieno sole', 'Moderata', 7, 'Organico', 'Terriccio ricco', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Cananga_odorata_01.JPG/960px-Cananga_odorata_01.JPG'),
-('Yucca', 'Yucca aloifolia', 'Asparagaceae', 'Pieno sole', 'Scarsa', 10, 'Organico', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/6/60/Yucca_gloriosa-01.jpg'),
+('Yucca', 'Yucca aloifolia', 'Asparagaceae', 'Pieno sole', 'Scarsa', 10, 'Organico', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/2/2c/Starr_030523-0144_Yucca_gigantea_%28cropped%29.jpg'),
 ('Zamioculcas', 'Zamioculcas zamiifolia', 'Araceae', 'Luce diffusa', 'Scarsa', 10, 'Nessuna', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Zamioculcas_zamiifolia_1.jpg/960px-Zamioculcas_zamiifolia_1.jpg'),
 ('Zampa di Canguro', 'Anigozanthos spp.', 'Haemodoraceae', 'Pieno sole', 'Scarsa', 10, 'Bilanciato', 'Sabbioso', 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Starr_980528-4130_Anigozanthos_flavidus.jpg'),
 ('Zinnia', 'Zinnia elegans', 'Asteraceae', 'Pieno sole', 'Moderata', 7, 'Bilanciato', 'Ben drenato', 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Zinnia_elegans_with_Bombus_01.JPG'),
