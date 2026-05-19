@@ -31,7 +31,7 @@ interface SearchCache {
     scrollY: number;
 }
 
-// Cache in memoria (si perde al reload della pagina, perfetto per il nostro caso)
+// Cache in memoria
 let moduleCache: SearchCache | null = null;
 
 export function SearchPage() {
