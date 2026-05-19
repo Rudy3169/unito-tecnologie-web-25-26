@@ -10,10 +10,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.core.annotation.Order;
 
-/**
- * Seeder utile a popolare il database all'avvio nel caso in cui la raccolta
- * degli utenti fosse completamente vuota. Inserisce 1 admin e 5 utenti di test.
- */
+/* Seeder utile a popolare il database all'avvio.
+ * Inserisce 1 admin e 6 utenti di test. */
 @Component
 @Order(1)
 @Slf4j
@@ -115,9 +113,9 @@ public class UserSeeder implements CommandLineRunner {
             matteo.setProfilePhotoUrl("/uploads/profile-photos/MatteoBianchi.png");
             userService.registerUser(matteo);
 
-            log.info("✔️ Autoseed completato! Creati 1 admin e 5 utenti con pwd 'password'.");
+            log.info("Autoseed utenti completato! Creati 1 admin e 6 utenti base.");
         } else {
-            log.info("Gli utenti di test sono già presenti per via di un seeding precedente.");
+            log.info("Gli utenti sono già presenti per via di un seeding precedente.");
         }
     }
 }

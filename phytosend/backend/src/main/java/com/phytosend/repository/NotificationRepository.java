@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Interfaccia repository per Notification
+ * Interfaccia Repository per le Notifiche
  */
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {

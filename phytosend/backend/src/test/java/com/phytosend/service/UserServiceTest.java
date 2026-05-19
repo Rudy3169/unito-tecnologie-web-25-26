@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({ "null", "unchecked" })
 class UserServiceTest {
 
     @Mock
@@ -47,12 +48,11 @@ class UserServiceTest {
     // ─── registerUser ─────────────────────────────────────────────────────────
 
     /**
-     * Caso felice: utente nuovo → password hashata, ruolo BASE assegnato di
-     * default,
-     * giardino creato e associato automaticamente.
+     * Verifica che un utente nuovo sia registrato con successo, che la password sia
+     * hashata, che venga assegnato il ruolo BASE e che venga creato e associato
+     * il giardino.
      */
     @Test
-    @SuppressWarnings("null")
     void registerUser_NewUser_AssignsDefaultRoleAndCreatesGarden() {
         // Arrange
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
@@ -72,8 +72,8 @@ class UserServiceTest {
     }
 
     /**
-     * Se il ruolo è già impostato (es. ADMIN da seeder), deve essere preservato e
-     * non sovrascritto con BASE.
+     * Verifica che se il ruolo è già impostato (es. ADMIN da seeder), questo venga
+     * preservato e non sovrascritto con BASE.
      */
     @Test
     void registerUser_WithPresetRole_PreservesGivenRole() {
@@ -91,8 +91,8 @@ class UserServiceTest {
     }
 
     /**
-     * Email già registrata → deve essere lanciata RuntimeException senza salvare
-     * nulla.
+     * Verifica che venga lanciata RuntimeException se l'email è già registrata,
+     * senza salvare nulla.
      */
     @Test
     void registerUser_DuplicateEmail_ThrowsExceptionWithoutSaving() {
@@ -107,7 +107,8 @@ class UserServiceTest {
     // ─── login ────────────────────────────────────────────────────────────────
 
     /**
-     * Credenziali corrette → login restituisce l'utente corrispondente.
+     * Verifica il login con credenziali corrette, restituendo l'utente
+     * corrispondente.
      */
     @Test
     void login_CorrectCredentials_ReturnsUser() {
@@ -125,7 +126,7 @@ class UserServiceTest {
     }
 
     /**
-     * Password sbagliata → RuntimeException, l'utente non viene restituito.
+     * Verifica il login con password errata, lanciando RuntimeException.
      */
     @Test
     void login_WrongPassword_ThrowsRuntimeException() {
@@ -139,7 +140,7 @@ class UserServiceTest {
     }
 
     /**
-     * Email non registrata → RuntimeException perché l'Optional è vuoto.
+     * Verifica il login con email non registrata, lanciando RuntimeException.
      */
     @Test
     void login_UnknownEmail_ThrowsRuntimeException() {
@@ -153,7 +154,8 @@ class UserServiceTest {
     // ─── findById ────────────────────────────────────────────────────────────
 
     /**
-     * ID esistente → restituisce l'utente corretto.
+     * Verifica la ricerca di un utente tramite ID esistente, restituendo l'utente
+     * corretto.
      */
     @Test
     void findById_ExistingId_ReturnsUser() {
@@ -170,7 +172,7 @@ class UserServiceTest {
     }
 
     /**
-     * ID non esistente → ResourceNotFoundException.
+     * Verifica che venga lanciata ResourceNotFoundException se l'ID non esiste.
      */
     @Test
     void findById_NonExistingId_ThrowsResourceNotFoundException() {
@@ -184,8 +186,8 @@ class UserServiceTest {
     // ─── aggiornaProfilo ──────────────────────────────────────────────────────
 
     /**
-     * Aggiornamento profilo: solo città e telefono vengono modificati,
-     * gli altri campi (nome, email) restano invariati.
+     * Verifica l'aggiornamento del profilo: solo città e telefono vengono
+     * modificati, gli altri campi (nome, email) restano invariati.
      */
     @Test
     void aggiornaProfilo_UpdatesCityAndPhoneOnly() {
@@ -211,7 +213,7 @@ class UserServiceTest {
     // ─── changeRole / Upgrade ─────────────────────────────────────────────────
 
     /**
-     * Cambio ruolo: il metodo deve aggiornare il ruolo dell'utente e salvare.
+     * Verifica che il ruolo venga aggiornato correttamente.
      */
     @Test
     void changeRole_ChangesUserRoleCorrectly() {
@@ -229,7 +231,7 @@ class UserServiceTest {
     }
 
     /**
-     * findAll() restituisce la lista completa degli utenti presenti nel DB.
+     * Verifica che venga restituita la lista completa degli utenti presenti nel DB.
      */
     @Test
     void findAll_ReturnsAllUsers() {
@@ -246,5 +248,91 @@ class UserServiceTest {
         assertEquals(2, users.size());
         assertTrue(users.contains(user));
         assertTrue(users.contains(user2));
+    }
+
+    // ─── loadUserByUsername ───────────────────────────────────────────────────
+
+    /**
+     * Verifica che l'utente venga caricato correttamente tramite email.
+     */
+    @Test
+    void loadUserByUsername_Success_ReturnsUserDetails() {
+        // Arrange
+        when(userRepository.findByEmail("mario.rossi@example.com")).thenReturn(Optional.of(user));
+
+        // Act
+        org.springframework.security.core.userdetails.UserDetails userDetails = userService
+                .loadUserByUsername("mario.rossi@example.com");
+
+        // Assert
+        assertNotNull(userDetails);
+        assertEquals("mario.rossi@example.com", userDetails.getUsername());
+        assertEquals("password123", userDetails.getPassword());
+    }
+
+    /**
+     * Verifica che venga lanciata UsernameNotFoundException se l'email non esiste.
+     */
+    @Test
+    void loadUserByUsername_NotFound_ThrowsUsernameNotFoundException() {
+        // Arrange
+        when(userRepository.findByEmail("ghost@example.com")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(org.springframework.security.core.userdetails.UsernameNotFoundException.class,
+                () -> userService.loadUserByUsername("ghost@example.com"));
+    }
+
+    // ─── findByEmail ──────────────────────────────────────────────────────────
+
+    /**
+     * Verifica che l'utente venga trovato tramite email.
+     */
+    @Test
+    void findByEmail_Success_ReturnsUser() {
+        // Arrange
+        when(userRepository.findByEmail("mario.rossi@example.com")).thenReturn(Optional.of(user));
+
+        // Act
+        User found = userService.findByEmail("mario.rossi@example.com");
+
+        // Assert
+        assertNotNull(found);
+        assertEquals("mario.rossi@example.com", found.getEmail());
+    }
+
+    /**
+     * Verifica che venga restituito null se l'email non esiste.
+     */
+    @Test
+    void findByEmail_NotFound_ReturnsNull() {
+        // Arrange
+        when(userRepository.findByEmail("ghost@example.com")).thenReturn(Optional.empty());
+
+        // Act
+        User found = userService.findByEmail("ghost@example.com");
+
+        // Assert
+        assertNull(found);
+    }
+
+    // ─── findAll Paginato ─────────────────────────────────────────────────────
+
+    /**
+     * Verifica che la lista degli utenti venga restituita in formato paginato.
+     */
+    @Test
+    void findAll_Paginated_ReturnsPageOfUsers() {
+        // Arrange
+        org.springframework.data.domain.Page<User> pageMock = mock(org.springframework.data.domain.Page.class);
+        when(userRepository.findAll(any(org.springframework.data.domain.PageRequest.class))).thenReturn(pageMock);
+
+        // Act
+        org.springframework.data.domain.Page<User> result = userService.findAll(0, 10);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(pageMock, result);
+        verify(userRepository).findAll(any(org.springframework.data.domain.PageRequest.class));
     }
 }

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 /**
- * Classe che rappresenta la scheda botanica di una pianta
+ * Classe che rappresenta la Scheda Botanica di una Pianta
  */
 @Data
 @Entity
@@ -34,10 +34,12 @@ public class BotanicalCard {
 
     // Data di inserimento nel database
     @Column(name = "created_at", updatable = false)
-    private java.time.LocalDate createdAt; // Data di creazione
+    private java.time.LocalDate createdAt;
 
-    // Metodo che imposta la data di creazione automaticamente al momento della
-    // creazione
+    /**
+     * Metodo che imposta la data di creazione automaticamente al momento della
+     * creazione
+     */
     @PrePersist
     protected void onCreate() {
         if (this.createdAt == null) {
@@ -45,7 +47,11 @@ public class BotanicalCard {
         }
     }
 
-    // Metodo che verifica se la scheda botanica è stata creata oggi
+    /**
+     * Metodo che verifica se la scheda botanica è stata creata oggi
+     * 
+     * @return true se la scheda botanica è stata creata oggi, false altrimenti
+     */
     public boolean isRecent() {
         if (this.createdAt == null)
             return false;

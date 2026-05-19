@@ -17,6 +17,14 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Classe responsabile del popolamento iniziale del database con i dati relativi
+ * ai giardini e alle piante.
+ * Esegue il seeding dei dati all'avvio dell'applicazione, garantendo che il
+ * database sia popolato
+ * con giardini, piante e relative associazioni ai proprietari e alle schede
+ * botaniche.
+ */
 @Component
 @Order(3)
 @Slf4j
@@ -137,9 +145,19 @@ public class GardenSeeder implements CommandLineRunner {
         createPlant(gardenMatteo, cardAcero, null, LocalDate.now().minusDays(150));
         createPlant(gardenMatteo, cardLimone, null, LocalDate.now().minusDays(60));
 
-        log.info("✔️ Giardini popolati! Piante inserite per tutti gli utenti.");
+        log.info("Autoseed giardini completato!");
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    // METODI DI SUPPORTO
+    // ════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Cerca una scheda botanica per nome comune.
+     * 
+     * @param commonName il nome comune da cercare
+     * @return la scheda botanica trovata o null se non esiste
+     */
     private BotanicalCard findCard(String commonName) {
         List<BotanicalCard> cards = botanicalCardRepository
                 .findByCommonNameContainingIgnoreCaseOrderByCommonNameAsc(commonName);
@@ -154,6 +172,13 @@ public class GardenSeeder implements CommandLineRunner {
         return null;
     }
 
+    /**
+     * Recupera un giardino esistente o ne crea uno nuovo per l'utente fornito.
+     * 
+     * @param user l'utente proprietario del giardino
+     * @param name il nome da assegnare al giardino se ne viene creato uno nuovo
+     * @return il giardino esistente o il nuovo giardino appena creato
+     */
     private Garden getOrCreateGarden(User user, String name) {
         List<Garden> gardens = gardenRepository.findByOwnerId(user.getId());
         if (!gardens.isEmpty()) {
@@ -165,6 +190,14 @@ public class GardenSeeder implements CommandLineRunner {
         return gardenRepository.save(garden);
     }
 
+    /**
+     * Crea una nuova pianta e la aggiunge al giardino fornito.
+     * 
+     * @param garden       il giardino a cui aggiungere la pianta
+     * @param card         la scheda botanica della pianta
+     * @param nickname     il soprannome della pianta
+     * @param purchaseDate la data di acquisto della pianta
+     */
     private void createPlant(Garden garden, BotanicalCard card, String nickname, LocalDate purchaseDate) {
         if (card == null)
             return;

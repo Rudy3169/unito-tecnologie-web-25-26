@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Interfaccia repository per CareEvent
+ * Interfaccia Repository per Eventi di Cura
  */
 @Repository
 public interface CareEventRepository extends JpaRepository<CareEvent, Long> {
@@ -23,7 +23,8 @@ public interface CareEventRepository extends JpaRepository<CareEvent, Long> {
     List<CareEvent> findByPlantId(Long plantId);
 
     /**
-     * Trova tutti gli eventi non completati con data programmata uguale o precedente
+     * Trova tutti gli eventi non completati con data programmata uguale o
+     * precedente
      * a quella indicata (per il cron job notturno).
      *
      * @param date la data limite (tipicamente oggi)
@@ -41,7 +42,8 @@ public interface CareEventRepository extends JpaRepository<CareEvent, Long> {
     Optional<CareEvent> findByPlantIdAndTypeAndCompletedFalse(Long plantId, String type);
 
     /**
-     * Rimuove tutti gli eventi di cura pendenti (non completati) associati alla pianta.
+     * Rimuove tutti gli eventi di cura pendenti (non completati) associati alla
+     * pianta.
      *
      * @param plantId ID della pianta
      */

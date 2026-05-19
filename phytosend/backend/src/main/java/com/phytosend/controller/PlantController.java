@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Controller per la gestione delle piante (sola lettura).
+ * Controller per la gestione delle Piante.
  * Le operazioni di modifica (POST, PUT, DELETE) sono gestite da UserController.
  */
 @RestController

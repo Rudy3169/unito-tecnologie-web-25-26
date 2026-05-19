@@ -23,15 +23,21 @@ public class CatalogSeeder implements CommandLineRunner {
     @Autowired
     private DataSource dataSource;
 
+    /**
+     * Metodo che viene eseguito all'avvio dell'applicazione
+     * 
+     * @param args Argomenti passati all'avvio
+     */
     @Override
     public void run(String... args) throws Exception {
-        // Ora controlliamo se il CATALOGO è vuoto, non gli utenti!
         if (botanicalCardRepository.count() == 0) {
-            log.info("🌱 Catalogo vuoto rilevato! Inizio importazione delle schede da data.sql...");
+            log.info("Catalogo vuoto rilevato! Inizio importazione delle schede da data.sql...");
 
             try (Connection connection = dataSource.getConnection()) {
-                ScriptUtils.executeSqlScript(connection, new ClassPathResource("data.sql"));
-                log.info("✔️ Importazione completata! Le schede botaniche sono state caricate.");
+                if (connection != null) {
+                    ScriptUtils.executeSqlScript(connection, new ClassPathResource("data.sql"));
+                }
+                log.info("Autoseed catalogo completato!");
             } catch (Exception e) {
                 log.error("Errore durante l'esecuzione del file data.sql: ", e);
             }

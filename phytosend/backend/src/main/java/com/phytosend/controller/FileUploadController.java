@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Controller per l'upload e la cancellazione di file (es. foto profilo).
- * I file vengono salvati nella cartella "uploads/profile-photos/" relativa alla
- * directory di lavoro del server e serviti come risorse statiche.
+ * Controller per l'upload e la cancellazione di foto profilo.
+ * I file vengono salvati nella cartella "uploads/profile-photos/" e serviti
+ * come risorse statiche.
  */
 @RestController
 @RequestMapping("/api/upload")
@@ -38,7 +38,7 @@ public class FileUploadController {
                         .body(Map.of("error", "Il file deve essere un'immagine"));
             }
 
-            // Validazione dimensione (max 5 MB)
+            // Validazione dimensione (massimo 5 MB)
             if (file.getSize() > 5 * 1024 * 1024) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Il file non può superare i 5 MB"));
@@ -75,7 +75,11 @@ public class FileUploadController {
      */
     @DeleteMapping("/profile-photo")
     public ResponseEntity<Void> deleteProfilePhoto(@RequestBody Map<String, String> payload) {
+
+        // Recupera l'url della foto profilo
         String url = payload.get("url");
+
+        // Controlla se l'url è valido
         if (url == null || !url.startsWith("/uploads/profile-photos/")) {
             return ResponseEntity.badRequest().build();
         }
@@ -83,7 +87,11 @@ public class FileUploadController {
         try {
             // Estrae il nome file dal percorso
             String filename = url.replace("/uploads/profile-photos/", "");
+
+            // Crea il percorso completo del file
             Path filePath = Paths.get(uploadDir, "profile-photos", filename);
+
+            // Elimina il file se esiste
             Files.deleteIfExists(filePath);
             return ResponseEntity.ok().build();
         } catch (IOException e) {
@@ -95,7 +103,9 @@ public class FileUploadController {
      * Estrae l'estensione dal nome file originale.
      */
     private String getExtension(String filename) {
-        if (filename == null) return ".jpg";
+        if (filename == null)
+            return ".jpg";
+
         int dot = filename.lastIndexOf('.');
         return dot >= 0 ? filename.substring(dot) : ".jpg";
     }

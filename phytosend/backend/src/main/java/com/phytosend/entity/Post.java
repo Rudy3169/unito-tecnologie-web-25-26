@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 /**
- * Classe che rappresenta un post
+ * Classe che rappresenta un Post
  */
 @Data
 @Entity

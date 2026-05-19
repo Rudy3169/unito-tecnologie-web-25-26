@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Gestore per le schede botaniche
+ * Gestore per le Schede Botaniche
  */
 @Service
 @Transactional(readOnly = true)

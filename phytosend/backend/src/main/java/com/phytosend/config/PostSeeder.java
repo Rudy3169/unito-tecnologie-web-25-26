@@ -17,6 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Classe responsabile del popolamento iniziale del database con i dati relativi
+ * ai post.
+ * Esegue il seeding dei post all'avvio dell'applicazione, garantendo che il
+ * database sia popolato con post creati da utenti registrati, associati alle
+ * loro piante.
+ */
 @Component
 @Order(4)
 @Slf4j
@@ -40,7 +47,7 @@ public class PostSeeder implements CommandLineRunner {
                         List<Post> testPosts = new ArrayList<>();
                         Random random = new Random();
 
-                        // Recupera alcuni utenti (puoi aggiungere gli altri)
+                        // Recupera alcuni utenti
                         User admin = userRepository.findByEmail("admin@phytosend.com").orElse(null);
                         User miriam = userRepository.findByEmail("miriam@phytosend.com").orElse(null);
                         User marco = userRepository.findByEmail("marco@phytosend.com").orElse(null);
@@ -482,9 +489,9 @@ public class PostSeeder implements CommandLineRunner {
                         }
 
                         postRepository.saveAll(testPosts);
-                        log.info("✔️ Autoseed completato! Inseriti {} post totali.", testPosts.size());
+                        log.info("Autoseed post completato! Inseriti {} post totali.", testPosts.size());
                 } else {
-                        log.info("I post di test sono già presenti per via di un seeding precedente.");
+                        log.info("I post sono già presenti per via di un seeding precedente.");
                 }
         }
 

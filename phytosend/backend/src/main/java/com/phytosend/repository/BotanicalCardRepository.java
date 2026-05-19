@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
- * Interfaccia repository per BotanicalCard
+ * Interfaccia Repository per le Schede Botaniche
  */
 public interface BotanicalCardRepository extends JpaRepository<BotanicalCard, Long> {
 
@@ -86,10 +86,10 @@ public interface BotanicalCardRepository extends JpaRepository<BotanicalCard, Lo
      * @return Page di BotanicalCard corrispondenti
      */
     @Query("SELECT b FROM BotanicalCard b WHERE " +
-           "LOWER(b.commonName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(b.scientificName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(b.family) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "ORDER BY b.commonName ASC")
+            "LOWER(b.commonName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(b.scientificName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(b.family) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "ORDER BY b.commonName ASC")
     Page<BotanicalCard> searchCatalog(@Param("query") String query, Pageable pageable);
 
     /**

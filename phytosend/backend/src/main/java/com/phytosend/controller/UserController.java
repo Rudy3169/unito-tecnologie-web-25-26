@@ -134,7 +134,7 @@ public class UserController {
      */
     @PostMapping("/{userId}/piante")
     public ResponseEntity<com.phytosend.dto.PlantDto> addPlantToGarden(
-            @PathVariable Long userId,
+            @PathVariable @NonNull Long userId,
             @RequestBody java.util.Map<String, String> payload) {
 
         // Trova l'utente
@@ -171,7 +171,7 @@ public class UserController {
      * @return ResponseEntity con codice 200 OK se l'operazione è andata a buon fine
      */
     @PutMapping("/{userId}/piante/{plantId}/name")
-    public ResponseEntity<?> renamePlant(@PathVariable Long userId, @PathVariable Long plantId,
+    public ResponseEntity<?> renamePlant(@PathVariable @NonNull Long userId, @PathVariable @NonNull Long plantId,
             @RequestBody java.util.Map<String, String> payload) {
 
         // Cerca la pianta nel database
@@ -180,7 +180,9 @@ public class UserController {
 
         // Aggiorna il nome estraendolo dal JSON inviato da React
         plant.setName(payload.get("newName"));
-        plantRepository.save(plant);
+        if (plant != null) {
+            plantRepository.save(plant);
+        }
 
         return ResponseEntity.ok().build();
     }
@@ -195,13 +197,16 @@ public class UserController {
      */
     @DeleteMapping("/{userId}/piante/{plantId}")
     @org.springframework.transaction.annotation.Transactional
-    public ResponseEntity<?> deletePlantPermanently(@PathVariable Long userId, @PathVariable Long plantId) {
+    public ResponseEntity<?> deletePlantPermanently(@PathVariable @NonNull Long userId,
+            @PathVariable @NonNull Long plantId) {
         // Cerca la pianta
         Plant plant = plantRepository.findById(plantId)
                 .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
 
         // La elimina fisicamente dal database (Hard Delete)
-        plantRepository.delete(plant);
+        if (plant != null) {
+            plantRepository.delete(plant);
+        }
 
         return ResponseEntity.noContent().build(); // Ritorna 204 No Content (Successo)
     }
@@ -215,16 +220,19 @@ public class UserController {
      */
     @PutMapping("/{userId}/piante/{plantId}/dead")
     @org.springframework.transaction.annotation.Transactional
-    public ResponseEntity<?> markPlantAsDead(@PathVariable Long userId, @PathVariable Long plantId) {
+    public ResponseEntity<?> markPlantAsDead(@PathVariable @NonNull Long userId, @PathVariable @NonNull Long plantId) {
         // Cerca la pianta
         Plant plant = plantRepository.findById(plantId)
                 .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
 
         // Cambia lo stato in "morta"
         plant.setDeathDate(LocalDate.now());
-        plantRepository.save(plant);
+        if (plant != null) {
+            plantRepository.save(plant);
+        }
 
-        // Rimuove tutti gli eventi di cura pendenti (non completati) associati alla pianta
+        // Rimuove tutti gli eventi di cura pendenti (non completati) associati alla
+        // pianta
         careEventRepository.deleteByPlantIdAndCompletedFalse(plantId);
 
         return ResponseEntity.ok().build();

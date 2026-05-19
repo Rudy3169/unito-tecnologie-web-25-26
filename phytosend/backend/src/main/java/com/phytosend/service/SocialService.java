@@ -24,8 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Gestore del social layer del sistema.
- * Include metodi per la gestione di post, commenti e interazioni.
+ * Gestore Social del sistema.
  */
 @Service
 public class SocialService {
@@ -83,11 +82,12 @@ public class SocialService {
         post.setCreationDate(LocalDateTime.now()); // Imposta la data di creazione
 
         // Gestione della pianta associata
-        if (postDto.getBotanicalCardId() != null) {
+        Long cardId = postDto.getBotanicalCardId();
+        if (cardId != null) {
             // Se si vuole aggiungere una pianta al giardino
             if (postDto.isAddToGarden()) {
                 // Trova la scheda botanica
-                BotanicalCard card = botanicalCardRepository.findById(postDto.getBotanicalCardId())
+                BotanicalCard card = botanicalCardRepository.findById(cardId)
                         .orElseThrow(() -> new RuntimeException("Scheda botanica non trovata"));
                 // Crea una nuova pianta associata al giardino e all'utente
                 Plant newPlant = plantService.addPlantToGarden(author, card);
@@ -101,16 +101,20 @@ public class SocialService {
                 post.setPlant(newPlant); // Associa la nuova pianta al post
             }
         } else {
-            // Se si vuole associare una pianta esistente al post
-            Plant existingPlant = plantRepository.findById(postDto.getPlantId())
-                    .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
+            Long plantId = postDto.getPlantId();
+            if (plantId != null) {
+                // Se si vuole associare una pianta esistente al post
+                Plant existingPlant = plantRepository.findById(plantId)
+                        .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
 
-            // Verifica che l'utente sia il proprietario della pianta
-            if (existingPlant.getGarden() == null || !existingPlant.getGarden().getOwner().getId().equals(userId)) {
-                throw new org.springframework.security.access.AccessDeniedException("Questa pianta non ti appartiene");
+                // Verifica che l'utente sia il proprietario della pianta
+                if (existingPlant.getGarden() == null || !existingPlant.getGarden().getOwner().getId().equals(userId)) {
+                    throw new org.springframework.security.access.AccessDeniedException(
+                            "Questa pianta non ti appartiene");
+                }
+                // Associa la pianta esistente al post
+                post.setPlant(existingPlant);
             }
-            // Associa la pianta esistente al post
-            post.setPlant(existingPlant);
         }
 
         return postRepository.save(post);
@@ -188,7 +192,7 @@ public class SocialService {
      * @param postId ID del post
      * @return lista di UserDto
      */
-    public List<com.phytosend.dto.UserDto> getPostLikes(Long postId) {
+    public List<com.phytosend.dto.UserDto> getPostLikes(@NonNull Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post non trovato"));
 
@@ -281,7 +285,7 @@ public class SocialService {
      * @param postId ID del post
      * @return Lista di CommentDto
      */
-    public List<CommentDto> getCommentiDelPost(Long postId, Long currentUserId) {
+    public List<CommentDto> getCommentiDelPost(@NonNull Long postId, Long currentUserId) {
         // Trova il post
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("Post non trovato: " + postId));
@@ -322,7 +326,7 @@ public class SocialService {
      * @param utenteId ID dell'utente
      * @return true se il like è stato aggiunto, false se è stato rimosso
      */
-    public boolean toggleLike(Long postId, Long utenteId) {
+    public boolean toggleLike(@NonNull Long postId, @NonNull Long utenteId) {
         // Trova il post
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post non trovato"));
@@ -358,7 +362,7 @@ public class SocialService {
      * @param utenteId  ID dell'utente
      * @return true se il like è stato aggiunto, false se è stato rimosso
      */
-    public boolean toggleCommentLike(Long commentId, Long utenteId) {
+    public boolean toggleCommentLike(@NonNull Long commentId, @NonNull Long utenteId) {
         // Trova il commento
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Commento non trovato"));
@@ -404,7 +408,7 @@ public class SocialService {
      * @param userId    ID dell'utente
      */
     @org.springframework.transaction.annotation.Transactional
-    public void deleteComment(Long postId, Long commentId, Long userId) {
+    public void deleteComment(@NonNull Long postId, @NonNull Long commentId, @NonNull Long userId) {
         // Trova il commento
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
@@ -473,7 +477,7 @@ public class SocialService {
      * @param utenteId ID dell'utente
      * @return true se il post è stato salvato, false se è stato rimosso
      */
-    public boolean toggleSavePost(Long postId, Long utenteId) {
+    public boolean toggleSavePost(@NonNull Long postId, @NonNull Long utenteId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("Post non trovato"));
         User user = userRepository.findById(utenteId)
@@ -496,7 +500,7 @@ public class SocialService {
      * @param utenteId ID dell'utente
      * @return lista di PostDto ordinati
      */
-    public List<PostDto> getSavedPosts(Long utenteId) {
+    public List<PostDto> getSavedPosts(@NonNull Long utenteId) {
         List<Post> savedPosts = postRepository.findBySavedByIdOrderByCreationDateDesc(utenteId);
 
         return savedPosts.stream().map(post -> {

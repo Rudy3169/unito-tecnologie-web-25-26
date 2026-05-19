@@ -8,6 +8,7 @@ import com.phytosend.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Gestore per la logica delle notifiche.
- * Crea, recupera e aggiorna lo stato delle notifiche.
+ * Gestore per le Notifiche.
  */
 @Service
 public class NotificationService {
@@ -31,16 +31,17 @@ public class NotificationService {
     /**
      * Crea e salva una nuova notifica.
      *
-     * @param recipient    l'utente che riceve la notifica
-     * @param actor        l'utente che ha compiuto l'azione (null per sistema)
-     * @param type         tipo di notifica
-     * @param referenceId  ID dell'entità principale di riferimento
+     * @param recipient            l'utente che riceve la notifica
+     * @param actor                l'utente che ha compiuto l'azione (null per
+     *                             sistema)
+     * @param type                 tipo di notifica
+     * @param referenceId          ID dell'entità principale di riferimento
      * @param secondaryReferenceId ID dell'entità secondaria (es. commentId)
-     * @param message      testo della notifica
+     * @param message              testo della notifica
      */
     @Transactional
     public void createNotification(User recipient, User actor, NotificationType type,
-                                   Long referenceId, Long secondaryReferenceId, String message) {
+            Long referenceId, Long secondaryReferenceId, String message) {
         // Non creare notifiche per se stessi
         if (actor != null && recipient.getId().equals(actor.getId())) {
             return;
@@ -64,7 +65,7 @@ public class NotificationService {
      */
     @Transactional
     public void createNotification(User recipient, User actor, NotificationType type,
-                                   Long referenceId, String message) {
+            Long referenceId, String message) {
         createNotification(recipient, actor, type, referenceId, null, message);
     }
 
@@ -74,7 +75,7 @@ public class NotificationService {
      * @param userId ID dell'utente
      * @return numero di notifiche non lette
      */
-    public long getUnreadCount(Long userId) {
+    public long getUnreadCount(@NonNull Long userId) {
         return notificationRepository.countByRecipientIdAndIsReadFalse(userId);
     }
 
@@ -84,7 +85,7 @@ public class NotificationService {
      * @param userId ID dell'utente
      * @return lista di NotificationDto
      */
-    public List<NotificationDto> getRecentNotifications(Long userId) {
+    public List<NotificationDto> getRecentNotifications(@NonNull Long userId) {
         return notificationRepository.findTop5ByRecipientIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(dtoConverter::toNotificationDto)
@@ -92,14 +93,15 @@ public class NotificationService {
     }
 
     /**
-     * Restituisce tutte le notifiche di un utente, paginate (per la sidebar/storico).
+     * Restituisce tutte le notifiche di un utente, paginate (per la
+     * sidebar/storico).
      *
      * @param userId ID dell'utente
      * @param page   pagina
      * @param size   dimensione pagina
      * @return pagina di NotificationDto
      */
-    public Page<NotificationDto> getAllNotifications(Long userId, int page, int size) {
+    public Page<NotificationDto> getAllNotifications(@NonNull Long userId, int page, int size) {
         return notificationRepository.findByRecipientIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size))
                 .map(dtoConverter::toNotificationDto);
     }
@@ -110,7 +112,7 @@ public class NotificationService {
      * @param notificationId ID della notifica
      */
     @Transactional
-    public void markAsRead(Long notificationId) {
+    public void markAsRead(@NonNull Long notificationId) {
         notificationRepository.findById(notificationId).ifPresent(notification -> {
             notification.setRead(true);
             notificationRepository.save(notification);
@@ -123,7 +125,7 @@ public class NotificationService {
      * @param userId ID dell'utente
      */
     @Transactional
-    public void markAllAsRead(Long userId) {
+    public void markAllAsRead(@NonNull Long userId) {
         List<Notification> unread = notificationRepository
                 .findByRecipientIdAndIsReadFalseOrderByCreatedAtDesc(userId);
         unread.forEach(n -> n.setRead(true));

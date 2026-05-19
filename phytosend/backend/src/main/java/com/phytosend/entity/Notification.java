@@ -5,8 +5,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * Classe che rappresenta una notifica nel sistema.
- * Gestisce sia notifiche social (like, commenti) che di sistema (eventi cura piante).
+ * Classe che rappresenta una Notifica nel sistema.
+ * Gestisce notifiche social (like, commenti) e di sistema (eventi cura piante).
  */
 @Data
 @Entity
@@ -35,7 +35,7 @@ public class Notification {
     // ID dell'entità di riferimento principale (post, pianta)
     private Long referenceId;
 
-    // ID dell'entità di riferimento secondaria (commento, per navigazione)
+    // ID dell'entità di riferimento secondaria (commento)
     private Long secondaryReferenceId;
 
     // Testo leggibile della notifica

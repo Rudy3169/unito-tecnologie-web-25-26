@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Gestore per la gestione del giardino dell'utente
+ * Gestore per la gestione del Giardino dell'Utente
  */
 @Service
 @Transactional(readOnly = true)

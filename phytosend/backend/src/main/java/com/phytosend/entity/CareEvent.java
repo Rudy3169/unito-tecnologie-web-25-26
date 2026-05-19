@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * Classe che rappresenta un evento di cura per una pianta
+ * Classe che rappresenta un Evento di Cura per una pianta
  */
 @Data
 @Entity

@@ -58,8 +58,7 @@ class PlantServiceTest {
     // ─── addPlantToGarden ──────────────────────────────────────────────────────
 
     /**
-     * Caso felice: verifica che la pianta venga salvata con giardino e scheda
-     * corretti,
+     * Verifica che la pianta venga salvata con giardino e scheda corretti,
      * e che venga creato il CareEvent iniziale.
      */
     @Test
@@ -89,6 +88,7 @@ class PlantServiceTest {
      * corrente.
      */
     @Test
+    @SuppressWarnings("null")
     void addPlantToGarden_SetsPurchaseDateToToday() {
         // Arrange
         when(plantRepository.save(any(Plant.class))).thenAnswer(i -> i.getArgument(0));
@@ -105,6 +105,7 @@ class PlantServiceTest {
      * e data programmata = oggi + waterFrequencyDays della scheda botanica.
      */
     @Test
+    @SuppressWarnings("null")
     void addPlantToGarden_CreatesWateringEventWithCorrectDateAndType() {
         // Arrange
         card.setWaterFrequencyDays("Ogni 14 giorni");
@@ -127,8 +128,8 @@ class PlantServiceTest {
     // ─── findPlant ────────────────────────────────────────────────────────────
 
     /**
-     * Giardino con una pianta: la lista restituita deve contenere esattamente
-     * quella pianta.
+     * Verifica che venga restituita la pianta corretta se il giardino contiene una
+     * pianta.
      */
     @Test
     void findPlant_SinglePlant_ReturnsSingleElementList() {
@@ -145,7 +146,7 @@ class PlantServiceTest {
     }
 
     /**
-     * Giardino vuoto: il service deve restituire una lista vuota senza eccezioni.
+     * Verifica che venga restituita una lista vuota se il giardino è vuoto.
      */
     @Test
     void findPlant_EmptyGarden_ReturnsEmptyList() {
@@ -161,7 +162,7 @@ class PlantServiceTest {
     }
 
     /**
-     * Giardino con più piante: verifica che vengano restituite tutte.
+     * Verifica che vengano restituite tutte le piante di un giardino.
      */
     @Test
     void findPlant_MultiplePlants_ReturnsAllPlants() {
@@ -184,7 +185,7 @@ class PlantServiceTest {
     // ─── rimuoviPianta ────────────────────────────────────────────────────────
 
     /**
-     * Caso felice: la pianta esiste → viene chiamato deleteById.
+     * Verifica che deleteById venga chiamato se la pianta esiste.
      */
     @Test
     void rimuoviPianta_ExistingPlant_CallsDeleteById() {
@@ -199,9 +200,8 @@ class PlantServiceTest {
     }
 
     /**
-     * Caso di errore: la pianta non esiste → deve essere lanciata
-     * ResourceNotFoundException
-     * e deleteById NON deve essere chiamato.
+     * Verifica che venga lanciata ResourceNotFoundException se la pianta non viene
+     * trovata e che venga evitato il deleteById.
      */
     @Test
     void rimuoviPianta_PlantNotFound_ThrowsResourceNotFoundExceptionAndSkipsDelete() {
@@ -210,6 +210,103 @@ class PlantServiceTest {
 
         // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> plantService.rimuoviPianta(999L));
-        verify(plantRepository, never()).deleteById(any());
+        verify(plantRepository, never()).deleteById(org.mockito.ArgumentMatchers.anyLong());
+    }
+
+    // ─── completeCareEvent ────────────────────────────────────────────────────
+
+    /**
+     * Verifica che venga lanciata ResourceNotFoundException se l'evento non viene
+     * trovato.
+     */
+    @Test
+    @SuppressWarnings("null")
+    void completeCareEvent_EventNotFound_ThrowsResourceNotFoundException() {
+        // Arrange
+        when(careEventRepository.findById(999L)).thenReturn(java.util.Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> plantService.completeCareEvent(999L));
+        verify(careEventRepository, never()).save(any(CareEvent.class));
+    }
+
+    /**
+     * Verifica che l'evento venga segnato come completato ma non venga creato il
+     * successivo evento se la pianta è morta.
+     */
+    @Test
+    @SuppressWarnings("null")
+    void completeCareEvent_PlantIsDead_MarksCompletedButDoesNotCreateNextEvent() {
+        // Arrange
+        CareEvent event = new CareEvent();
+        event.setId(500L);
+        event.setType("ACQUA");
+        event.setCompleted(false);
+
+        Plant deadPlant = new Plant();
+        deadPlant.setId(100L);
+        deadPlant.setDeathDate(LocalDate.now().minusDays(1)); // Pianta morta ieri
+        event.setPlant(deadPlant);
+
+        when(careEventRepository.findById(500L)).thenReturn(java.util.Optional.of(event));
+
+        // Act
+        CareEvent result = plantService.completeCareEvent(500L);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isCompleted());
+        assertEquals(LocalDate.now(), result.getCompletedDate());
+        verify(careEventRepository).save(event);
+        // Poiché la pianta è morta, save() viene chiamato solo una volta (per l'evento
+        // completato)
+        verify(careEventRepository, times(1)).save(any(CareEvent.class));
+    }
+
+    /**
+     * Verifica che l'evento sia segnato come completato e venga creato il
+     * successivo evento calcolando la data corretta basata sulla frequenza della
+     * scheda botanica.
+     */
+    @Test
+    @SuppressWarnings("null")
+    void completeCareEvent_PlantIsAlive_MarksCompletedAndCreatesNextEvent() {
+        // Arrange
+        CareEvent event = new CareEvent();
+        event.setId(500L);
+        event.setType("CONCIME");
+        event.setCompleted(false);
+
+        Plant alivePlant = new Plant();
+        alivePlant.setId(100L);
+        alivePlant.setDeathDate(null); // Pianta viva
+
+        BotanicalCard aliveCard = new BotanicalCard();
+        aliveCard.setWaterFrequencyDays("Ogni 10 giorni");
+        alivePlant.setCard(aliveCard);
+
+        event.setPlant(alivePlant);
+
+        when(careEventRepository.findById(500L)).thenReturn(java.util.Optional.of(event));
+
+        ArgumentCaptor<CareEvent> careEventCaptor = ArgumentCaptor.forClass(CareEvent.class);
+
+        // Act
+        CareEvent result = plantService.completeCareEvent(500L);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isCompleted());
+        assertEquals(LocalDate.now(), result.getCompletedDate());
+
+        // Verifica che siano stati salvati sia l'evento completato che il nuovo evento
+        // programmato
+        verify(careEventRepository, times(2)).save(careEventCaptor.capture());
+
+        CareEvent nextEvent = careEventCaptor.getAllValues().get(1); // Il secondo è il nuovo evento creato
+        assertFalse(nextEvent.isCompleted());
+        assertEquals("CONCIME", nextEvent.getType());
+        assertEquals(alivePlant, nextEvent.getPlant());
+        assertEquals(LocalDate.now().plusDays(10), nextEvent.getProgrammedDate());
     }
 }

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * DTO per la richiesta di creazione di un post
+ * DTO per la richiesta di Creazione di un Post
  */
 @Data
 public class PostCreateDto {

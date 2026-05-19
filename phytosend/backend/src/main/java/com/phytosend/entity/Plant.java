@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * Classe che rappresenta una pianta
+ * Classe che rappresenta una Pianta
  */
 @Data
 @Entity

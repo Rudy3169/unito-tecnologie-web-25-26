@@ -4,7 +4,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * DTO per la risposta del giardino
+ * DTO per la risposta del Giardino
  */
 @Data
 public class GardenDto {

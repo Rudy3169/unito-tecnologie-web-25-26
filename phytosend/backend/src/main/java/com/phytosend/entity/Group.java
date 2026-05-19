@@ -16,8 +16,8 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // ID gruppo
 
-    private String name; // Nome (es. "Scambio Talee")
-    private String description; // Descrizione
+    private String name; // Nome gruppo
+    private String description; // Descrizione gruppo
     private String country; // Paese
     private String city; // Città
 

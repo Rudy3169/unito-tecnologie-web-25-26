@@ -4,7 +4,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * DTO per la risposta della pianta
+ * DTO per la risposta della Pianta
  */
 @Data
 public class PlantDto {

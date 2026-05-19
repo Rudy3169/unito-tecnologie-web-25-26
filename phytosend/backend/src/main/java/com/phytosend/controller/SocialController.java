@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.List;
 
 /**
- * Controller per la gestione dei post e dei commenti
+ * Controller per la gestione dei Post e dei Commenti
  */
 @RestController
 @RequestMapping("/api/social")
@@ -98,7 +98,7 @@ public class SocialController {
      * @return lista di UserDto
      */
     @GetMapping("/posts/{postId}/likes")
-    public List<com.phytosend.dto.UserDto> getPostLikes(@PathVariable Long postId) {
+    public List<com.phytosend.dto.UserDto> getPostLikes(@PathVariable @NonNull Long postId) {
         return socialService.getPostLikes(postId);
     }
 
@@ -184,8 +184,8 @@ public class SocialController {
      */
     @PostMapping("/posts/{postId}/like")
     public ResponseEntity<Map<String, Object>> toggleLike(
-            @PathVariable Long postId,
-            @RequestParam Long utenteId) {
+            @PathVariable @NonNull Long postId,
+            @RequestParam @NonNull Long utenteId) {
         boolean isNowLiked = socialService.toggleLike(postId, utenteId);
         return ResponseEntity.ok(Map.of("isLikedByMe", isNowLiked));
     }
@@ -199,8 +199,8 @@ public class SocialController {
      */
     @PostMapping("/commenti/{commentId}/like")
     public ResponseEntity<Boolean> toggleCommentLike(
-            @PathVariable Long commentId,
-            @RequestParam Long utenteId) {
+            @PathVariable @NonNull Long commentId,
+            @RequestParam @NonNull Long utenteId) {
         return ResponseEntity.ok(socialService.toggleCommentLike(commentId, utenteId));
     }
 
@@ -214,9 +214,9 @@ public class SocialController {
      */
     @DeleteMapping("/posts/{postId}/commenti/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @PathVariable("postId") Long postId,
-            @PathVariable("commentId") Long commentId,
-            @RequestParam("utenteId") Long utenteId) {
+            @PathVariable("postId") @NonNull Long postId,
+            @PathVariable("commentId") @NonNull Long commentId,
+            @RequestParam("utenteId") @NonNull Long utenteId) {
 
         socialService.deleteComment(postId, commentId, utenteId);
         return ResponseEntity.noContent().build();
@@ -231,8 +231,8 @@ public class SocialController {
      */
     @PostMapping("/posts/{postId}/save")
     public ResponseEntity<Map<String, Object>> toggleSavePost(
-            @PathVariable Long postId,
-            @RequestParam Long utenteId) {
+            @PathVariable @NonNull Long postId,
+            @RequestParam @NonNull Long utenteId) {
         boolean isNowSaved = socialService.toggleSavePost(postId, utenteId);
         return ResponseEntity.ok(Map.of("isSavedByMe", isNowSaved));
     }
@@ -245,7 +245,7 @@ public class SocialController {
      */
     @GetMapping("/posts/saved")
     public List<PostDto> getSavedPosts(
-            @RequestParam Long utenteId) {
+            @RequestParam @NonNull Long utenteId) {
         return socialService.getSavedPosts(utenteId);
     }
 }

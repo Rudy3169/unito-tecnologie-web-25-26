@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 /*
- * Gestore principale dell'utente e dell'autenticazione
+ * Gestore principale dell'Utente e dell'Autenticazione
  */
 @Service
 @Transactional(readOnly = true)
@@ -126,14 +126,24 @@ public class UserService implements UserDetailsService {
 
     /**
      * Semplice lookup ad utente per ID.
+     * 
+     * @param id ID dell'utente
+     * @return Utente con l'ID specificato
+     * @throws ResourceNotFoundException se l'utente non viene trovato
      */
     public @NonNull User findById(@NonNull Long id) {
-        return userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utente con ID " + id + " non trovato"));
+        if (user != null) {
+            return user;
+        }
+        throw new ResourceNotFoundException("Utente con ID " + id + " non trovato");
     }
 
     /**
      * Retrieve completo della tabella.
+     * 
+     * @return Lista di utenti
      */
     public List<User> findAll() {
         return userRepository.findAll();
@@ -141,6 +151,10 @@ public class UserService implements UserDetailsService {
 
     /**
      * Retrieve della tabella in pagine.
+     * 
+     * @param page numero pagina
+     * @param size numero elementi per pagina
+     * @return Lista di utenti paginata
      */
     public org.springframework.data.domain.Page<User> findAll(int page, int size) {
         return userRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size));

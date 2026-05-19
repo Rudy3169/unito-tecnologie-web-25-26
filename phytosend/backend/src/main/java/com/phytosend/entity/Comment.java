@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Classe che rappresenta un commento
+ * Classe che rappresenta un Commento
  */
 @Data
 @Entity

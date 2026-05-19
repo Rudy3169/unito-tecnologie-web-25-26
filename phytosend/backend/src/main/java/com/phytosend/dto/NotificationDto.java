@@ -4,24 +4,23 @@ import com.phytosend.entity.NotificationType;
 import lombok.Data;
 
 /**
- * Data Transfer Object per le notifiche.
- * Contiene solo i dati necessari al frontend.
+ * DTO per la risposta della Notifica
  */
 @Data
 public class NotificationDto {
 
     private Long id;
 
-    // Info sull'attore (chi ha fatto l'azione)
+    // Info sull'attore
     private Long actorId;
     private String actorName;
     private String actorProfilePhotoUrl;
 
     // Tipo e riferimenti
     private NotificationType type;
-    private Long referenceId;
-    private Long secondaryReferenceId;
-    private Long postAuthorId; // Aggiunto per permettere al frontend di navigare al profilo corretto
+    private Long referenceId; // ID del post
+    private Long secondaryReferenceId; // ID del commento
+    private Long postAuthorId; // ID dell'autore del post commentato
 
     // Contenuto
     private String message;

@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import java.util.List;
 
 /**
- * Classe che rappresenta il giardino di un utente
+ * Classe che rappresenta il Giardino di un utente
  */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -29,6 +29,6 @@ public class Garden {
     private User owner;
 
     // Ogni giardino può contenere più piante
-    @OneToMany(mappedBy = "garden", cascade = CascadeType.ALL) // Nota: mappedBy="giardino"
-    private List<Plant> plants;
+    @OneToMany(mappedBy = "garden", cascade = CascadeType.ALL)
+    private List<Plant> plants; // Lista di piante associate al giardino
 }

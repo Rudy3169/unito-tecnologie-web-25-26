@@ -11,7 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Controller per la gestione del catalogo delle piante
+ * Controller per la gestione del Catalogo delle piante
  */
 @RestController
 @RequestMapping("/api/catalogo")
@@ -42,12 +42,13 @@ public class CatalogController {
 
         // Creiamo la richiesta di paginazione
         Pageable pageable = PageRequest.of(page, size);
-        // Se la query non è vuota, cerca le schede botaniche (per nome, nome scientifico o famiglia)
+        // Se la query non è vuota, cerca le schede botaniche (per nome, nome
+        // scientifico o famiglia)
         if (q != null && !q.trim().isEmpty()) {
             return ResponseEntity
                     .ok(botanicalCardRepository.searchCatalog(q, pageable));
         }
-        // Altrimenti, restituisce tutte le schede botaniche
+        // Altrimenti, restituisce tutte le schede botaniche ordinate per nome comune
         return ResponseEntity.ok(botanicalCardRepository.findAllByOrderByCommonNameAsc(pageable));
     }
 

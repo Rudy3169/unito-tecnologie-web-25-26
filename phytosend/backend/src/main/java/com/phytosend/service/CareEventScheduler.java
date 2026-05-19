@@ -16,8 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Componente schedulato che ogni notte a mezzanotte controlla
- * gli eventi di cura in scadenza e genera notifiche per i proprietari.
+ * Gestore per gli Eventi di Cura
  */
 @Component
 public class CareEventScheduler {
@@ -75,8 +74,7 @@ public class CareEventScheduler {
                     NotificationType.CARE_WATER,
                     plant.getId(),
                     event.getId(),
-                    message
-            );
+                    message);
             count++;
         }
 

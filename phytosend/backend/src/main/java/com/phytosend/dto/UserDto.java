@@ -4,7 +4,7 @@ import com.phytosend.entity.UserRole;
 import lombok.Data;
 
 /**
- * DTO per la risposta del profilo utente
+ * DTO per la risposta del Profilo Utente
  */
 @Data
 public class UserDto {

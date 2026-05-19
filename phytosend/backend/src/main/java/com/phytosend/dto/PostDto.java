@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * DTO per la risposta del post
+ * DTO per la risposta del Post
  */
 @Data
 public class PostDto {
@@ -27,12 +27,13 @@ public class PostDto {
     @JsonProperty("isSavedByMe")
     private boolean isSavedByMe;
 
-    // Getter e Setter per commentsCount
+    // Getter per commentsCount
     @JsonProperty("commentsCount")
     public Integer getCommentsCount() {
         return commentsCount;
     }
 
+    // Setter per commentsCount
     @JsonProperty("commentsCount")
     public void setCommentsCount(Integer commentsCount) {
         this.commentsCount = commentsCount;

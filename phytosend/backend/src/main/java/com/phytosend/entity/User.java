@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * Classe che rappresenta un utente
+ * Classe che rappresenta un Utente
  */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

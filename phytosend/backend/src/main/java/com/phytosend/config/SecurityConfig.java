@@ -54,14 +54,26 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    // Configurazione della catena di filtri di sicurezza
+    /**
+     * Configura la catena di filtri di sicurezza.
+     * Verranno usati i filtri JWT, verrà gestita la sessione tramite JWT e verranno
+     * configurate le regole CORS.
+     * Le uniche rotte pubbliche sono quelle relative all'autenticazione, allo
+     * Swagger, all'Actuator e ai file statici.
+     * Tutto il resto richiede un token valido.
+     *
+     * @param http l'httpSecurity da configurare
+     * @return l'httpSecurity configurato
+     * @throws Exception se si verifica un errore durante la configurazione
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/uploads/**", "/actuator/**")
+                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/uploads/**",
+                                "/actuator/**")
                         .permitAll() // Login, Register, Swagger, Actuator e file statici pubblici
                         .anyRequest().authenticated() // Tutto il resto richiede token
                 )

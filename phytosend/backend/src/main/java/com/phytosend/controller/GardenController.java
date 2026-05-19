@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller per la gestione del giardino degli utenti
+ * Controller per la gestione del Giardino degli utenti
  */
 @RestController
 @RequestMapping("/api/gardens")
@@ -43,7 +43,7 @@ public class GardenController {
      * Inizializza un giardino nuovo, assegnandolo subito in proprietà all'utente.
      *
      * @param userId l'ID del proprietario
-     * @param name   il nome descrittivo del giardino (es. "Mio Orto")
+     * @param name   il nome descrittivo del giardino
      * @return i dettagli del giardino creato in DTO
      */
     @PostMapping("/user/{userId}")

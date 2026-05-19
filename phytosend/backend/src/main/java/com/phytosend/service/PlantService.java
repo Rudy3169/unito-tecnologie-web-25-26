@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
 /**
- * Gestore per le piante
+ * Gestore per le Piante
  */
 @Service
 @Transactional(readOnly = true)
@@ -140,7 +140,8 @@ public class PlantService {
         nextEvent.setType(event.getType());
         nextEvent.setCompleted(false);
 
-        // Calcola la data del prossimo evento basata sulla frequenza della scheda botanica
+        // Calcola la data del prossimo evento basata sulla frequenza della scheda
+        // botanica
         long giorniDaAggiungere = 7; // Default
         if (event.getPlant().getCard() != null) {
             String frequenzaStr = event.getPlant().getCard().getWaterFrequencyDays();

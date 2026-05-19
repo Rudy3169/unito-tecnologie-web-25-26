@@ -3,7 +3,7 @@ package com.phytosend.dto;
 import lombok.Data;
 
 /**
- * DTO per la risposta del commento
+ * DTO per la risposta del Commento
  */
 @Data
 public class CommentDto {

@@ -1,7 +1,7 @@
 package com.phytosend.entity;
 
 /**
- * Enum che rappresenta il ruolo di un utente
+ * Enum che rappresenta il Ruolo di un Utente
  */
 public enum UserRole {
     ADMIN, // Amministratore

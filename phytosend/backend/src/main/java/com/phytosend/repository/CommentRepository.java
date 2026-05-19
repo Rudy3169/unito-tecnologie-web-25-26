@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Interfaccia repository per Comment
+ * Interfaccia Repository per i Commenti
  */
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {

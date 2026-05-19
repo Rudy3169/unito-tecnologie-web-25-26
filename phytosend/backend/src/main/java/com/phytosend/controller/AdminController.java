@@ -41,6 +41,10 @@ public class AdminController {
     @PostMapping("/reload-catalog")
     public ResponseEntity<?> reloadCatalog() {
         try (Connection connection = dataSource.getConnection()) {
+            if (connection == null) {
+                return ResponseEntity.status(500)
+                        .body("Errore durante la sincronizzazione: Impossibile stabilire una connessione al database");
+            }
             ScriptUtils.executeSqlScript(connection, new ClassPathResource("data.sql"));
             return ResponseEntity.ok("Sincronizzazione completata con successo!");
         } catch (Exception e) {

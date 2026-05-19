@@ -6,13 +6,15 @@ import com.phytosend.service.PlantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Controller per la gestione delle notifiche e delle azioni rapide sugli eventi di cura.
+ * Controller per la gestione delle Notifiche e delle Azioni rapide sugli eventi
+ * di cura.
  */
 @RestController
 @RequestMapping("/api/notifications")
@@ -31,7 +33,7 @@ public class NotificationController {
      * @return conteggio notifiche non lette
      */
     @GetMapping("/count")
-    public ResponseEntity<Map<String, Long>> getUnreadCount(@RequestParam Long userId) {
+    public ResponseEntity<Map<String, Long>> getUnreadCount(@RequestParam @NonNull Long userId) {
         long count = notificationService.getUnreadCount(userId);
         return ResponseEntity.ok(Map.of("count", count));
     }
@@ -43,13 +45,14 @@ public class NotificationController {
      * @return lista di NotificationDto
      */
     @GetMapping("/recent")
-    public ResponseEntity<List<NotificationDto>> getRecentNotifications(@RequestParam Long userId) {
+    public ResponseEntity<List<NotificationDto>> getRecentNotifications(@RequestParam @NonNull Long userId) {
         List<NotificationDto> notifications = notificationService.getRecentNotifications(userId);
         return ResponseEntity.ok(notifications);
     }
 
     /**
-     * Restituisce tutte le notifiche di un utente, paginate (per la sidebar/storico).
+     * Restituisce tutte le notifiche di un utente, paginate (per la
+     * sidebar/storico).
      *
      * @param userId ID dell'utente
      * @param page   pagina (default 0)
@@ -58,7 +61,7 @@ public class NotificationController {
      */
     @GetMapping
     public Page<NotificationDto> getAllNotifications(
-            @RequestParam Long userId,
+            @RequestParam @NonNull Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return notificationService.getAllNotifications(userId, page, size);
@@ -71,7 +74,7 @@ public class NotificationController {
      * @return stato ok
      */
     @PutMapping("/{notificationId}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Long notificationId) {
+    public ResponseEntity<Void> markAsRead(@PathVariable @NonNull Long notificationId) {
         notificationService.markAsRead(notificationId);
         return ResponseEntity.ok().build();
     }
@@ -83,19 +86,19 @@ public class NotificationController {
      * @return stato ok
      */
     @PutMapping("/read-all")
-    public ResponseEntity<Void> markAllAsRead(@RequestParam Long userId) {
+    public ResponseEntity<Void> markAllAsRead(@RequestParam @NonNull Long userId) {
         notificationService.markAllAsRead(userId);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * Azione rapida: completa un evento di cura direttamente dal centro notifiche.
+     * Completa un evento di cura direttamente dal centro notifiche.
      *
      * @param eventId ID dell'evento di cura
      * @return stato ok con messaggio di conferma
      */
     @PostMapping("/care-events/{eventId}/complete")
-    public ResponseEntity<Map<String, String>> completeCareEvent(@PathVariable Long eventId) {
+    public ResponseEntity<Map<String, String>> completeCareEvent(@PathVariable @NonNull Long eventId) {
         plantService.completeCareEvent(eventId);
         return ResponseEntity.ok(Map.of("message", "Evento completato con successo"));
     }

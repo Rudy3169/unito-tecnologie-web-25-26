@@ -4,7 +4,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * DTO per la risposta della scheda botanica
+ * DTO per la risposta della Scheda Botanica
  */
 @Data
 public class BotanicalCardDto {

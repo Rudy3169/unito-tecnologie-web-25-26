@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 /**
- * Interfaccia repository per Garden
+ * Interfaccia Repository per i Giardini
  */
 public interface GardenRepository extends JpaRepository<Garden, Long> {
     /**

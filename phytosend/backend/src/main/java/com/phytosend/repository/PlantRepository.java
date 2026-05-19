@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Interfaccia repository per Plant
+ * Interfaccia Repository per le Piante
  */
 @Repository
 public interface PlantRepository extends JpaRepository<Plant, Long> {

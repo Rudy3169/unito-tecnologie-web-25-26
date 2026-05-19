@@ -192,13 +192,17 @@ public class DtoConverter {
         dto.setMessage(notification.getMessage());
         dto.setRead(notification.isRead());
         if (notification.getCreatedAt() != null) {
-            // Aggiungiamo 'Z' per forzare il parsing in UTC sul frontend e correggere il fuso orario (+2h)
+            // Aggiungiamo 'Z' per forzare il parsing in UTC sul frontend e correggere il
+            // fuso orario (+2h)
             dto.setCreatedAt(notification.getCreatedAt().toString() + "Z");
         }
         // Se è una notifica social, recuperiamo l'ID dell'autore del post
-        if (notification.getType() != com.phytosend.entity.NotificationType.CARE_WATER && notification.getReferenceId() != null) {
-            postRepository.findById(notification.getReferenceId()).ifPresent(post -> {
-                dto.setPostAuthorId(post.getAuthor().getId());
+        Long refId = notification.getReferenceId();
+        if (notification.getType() != com.phytosend.entity.NotificationType.CARE_WATER && refId != null) {
+            postRepository.findById(refId).ifPresent(post -> {
+                if (post.getAuthor() != null) {
+                    dto.setPostAuthorId(post.getAuthor().getId());
+                }
             });
         }
         // Info sull'attore

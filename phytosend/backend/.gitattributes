@@ -1,2 +1,7 @@
+### Git ###
+*.java text eol=lf
+*.sh text eol=lf
+
+### Maven ###
 /mvnw text eol=lf
 *.cmd text eol=crlf
