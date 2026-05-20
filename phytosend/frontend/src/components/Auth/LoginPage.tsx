@@ -89,13 +89,15 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     <form className="auth-form" onSubmit={handleLogin}>
                         <div className="input-group">
                             <label>Email</label>
-                            <input
-                                type="email"
-                                placeholder="es. mario@botanica.it"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
+                            <div className="email-input-wrapper">
+                                <input
+                                    type="email"
+                                    placeholder="es. mario@botanica.it"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <div className="input-group">
@@ -127,7 +129,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     {/* Finto invito alla registrazione (come da indicazioni del Prof) */}
                     <div className="register-link">
                         Non hai ancora un account?
-                        <a onClick={() => setWarningModal({ isOpen: true, title: 'Registrazione', message: 'Le registrazioni sono disabilitate.\nAccedi con uno degli utenti predefiniti forniti dal team!', type: 'warning' })}>
+                        <a onClick={() => setWarningModal({ isOpen: true, title: 'Registrazioni disabilitate', message: 'Accedi con un account predefinito', type: 'warning' })}>
                             Unisciti ora
                         </a>
                     </div>

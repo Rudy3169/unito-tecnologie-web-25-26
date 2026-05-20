@@ -39,7 +39,7 @@ export function WarningModal({ isOpen, onClose, title, message, type = 'warning'
                         <Icon size={32} />
                     </div>
                     <h3>{title || (type === 'error' ? 'Errore' : 'Attenzione')}</h3>
-                    <p>{message}</p>
+                    <p className="modal-message">{message}</p>
                 </div>
 
                 <div className="warning-modal-footer">
