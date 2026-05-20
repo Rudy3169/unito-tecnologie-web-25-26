@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Fence, Plus, Sprout, Skull, Loader, ArrowLeft, ChevronUp } from 'lucide-react';
+import { Plus, Sprout, Skull, Loader, ArrowLeft, ChevronUp } from 'lucide-react';
 import type { PostProps } from '../Feed/PostCard';
 import { apiFetch } from '../../utils/apiFetch';
 import '../Profile/Profile.css';
@@ -455,22 +455,33 @@ export function MyGarden() {
                 {/* Header della pagina del giardino */}
                 <header className="garden-header">
                     <div className="header-title">
-                        <div className="header-icon-wrapper">
-                            <Fence size={28} />
-                        </div>
                         {isOwnGarden ? (
-                            <h1>Il mio Giardino</h1>
+                            <h1>
+                                <span className="garden-leaf-icon garden-leaf-left">🌿</span>
+                                <span className="garden-title-text">Il mio Giardino</span>
+                                <span className="garden-leaf-icon garden-leaf-right">🌿</span>
+                            </h1>
                         ) : (
                             <h1>
-                                Giardino di{' '}
-                                <Link to={`/profile/${gardenUserId}`} className="garden-owner-link">
-                                    {ownerName || 'Utente'}
-                                </Link>
+                                <span className="garden-leaf-icon garden-leaf-left">🌿</span>
+                                <span className="garden-title-text">
+                                    Giardino di<br />
+                                    <Link to={`/profile/${gardenUserId}`} className="garden-owner-link">
+                                        {ownerName || 'Utente'}
+                                    </Link>
+                                </span>
+                                <span className="garden-leaf-icon garden-leaf-right">🌿</span>
                             </h1>
                         )}
                     </div>
                     {/* Descrizione */}
                     <p className="garden-subtitle">{isOwnGarden ? 'La tua collezione personale di piante certificate Phytosend.' : `Esplora le piante di ${ownerName || 'questo utente'}.`}</p>
+                    {/* Bottone Aggiungi Pianta nel header */}
+                    {isOwnGarden && (
+                        <button className="add-plant-btn garden-header-btn" onClick={() => setIsAddModalOpen(true)}>
+                            <Plus size={18} /> Aggiungi Pianta
+                        </button>
+                    )}
                 </header>
 
                 {/* Contenuto del giardino */}
@@ -494,12 +505,6 @@ export function MyGarden() {
                         </div>
                     ) : (
                         <div className="garden-lists-container">
-                            {/* Bottone per aggiungere pianta (solo nel proprio giardino) */}
-                            {isOwnGarden && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-16px' }}>
-                                <button className="add-plant-btn" style={{ marginTop: 0 }} onClick={() => setIsAddModalOpen(true)}>
-                                    <Plus size={18} /> Aggiungi Pianta
-                                </button>
-                            </div>}
 
                             {/* Sezione piante vive */}
                             {myPlants.filter(p => !p.deathDate).length > 0 && (
