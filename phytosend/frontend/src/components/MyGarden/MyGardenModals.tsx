@@ -487,16 +487,14 @@ export function PlantDetailModal({
                                     });
                                 }
 
-                                // Sort descending by date, with secondary sort for PURCHASE
+                                // Sort descending by date, but force PURCHASE to be always at the very bottom
                                 events.sort((a, b) => {
-                                    const timeDiff = b.date.getTime() - a.date.getTime();
-                                    if (timeDiff !== 0) return timeDiff;
-                                    
-                                    // A parità di data, PURCHASE deve stare in fondo
+                                    // PURCHASE sta sempre in fondo in modo assoluto, anche se ci sono discrepanze di date
                                     if (a.type === 'PURCHASE' && b.type !== 'PURCHASE') return 1;
                                     if (b.type === 'PURCHASE' && a.type !== 'PURCHASE') return -1;
                                     
-                                    return 0;
+                                    const timeDiff = b.date.getTime() - a.date.getTime();
+                                    return timeDiff;
                                 });
 
                                 const displayedEvents = showAllEvents ? events : events.slice(0, 5);
