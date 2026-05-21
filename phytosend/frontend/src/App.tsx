@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { HomeFeed } from './components/Feed/HomeFeed';
@@ -10,6 +10,7 @@ import { MyGarden } from './components/MyGarden/MyGarden';
 import { PlantDetail } from './components/Search/PlantDetail';
 import { SavedPosts } from './components/Feed/SavedPosts';
 import { NotificationPage } from './components/Notifications/NotificationPage';
+import { GlobalLoading } from './components/Common/GlobalLoading';
 import './styles/App.css';
 
 function App() {
@@ -25,6 +26,58 @@ function App() {
         setUserRole(role);
         navigate('/');
     };
+
+    const [isBackendReady, setIsBackendReady] = useState<boolean>(false);
+    const [isTakingLong, setIsTakingLong] = useState<boolean>(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        let attempts = 0;
+
+        const checkBackend = async () => {
+            try {
+                // Fetch to any endpoint through the Vite proxy.
+                const res = await fetch('/api/social/posts?page=0&size=1');
+
+                // Vite proxy usually returns 5xx (502, 503, 504) if the backend is down.
+                if (res.status >= 500) {
+                    throw new Error('Backend not reachable (Proxy Error)');
+                }
+
+                // A volte, se il proxy fallisce, Vite potrebbe restituire la sua pagina index.html di fallback.
+                // Spring Boot restituirà sempre JSON (sia in caso di successo che di errore 401/403).
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('text/html')) {
+                    throw new Error('Backend not reachable (Vite HTML Fallback)');
+                }
+
+                // If we reach here, it means the server responded.
+                // Note: even if it's 401 Unauthorized, it means the server is running.
+                if (isMounted) {
+                    setIsBackendReady(true);
+                }
+            } catch (error) {
+                // Network error: Server is still starting.
+                attempts++;
+                if (attempts > 13 && isMounted) {
+                    setIsTakingLong(true); // After ~26 seconds show taking long message
+                }
+                if (isMounted) {
+                    setTimeout(checkBackend, 2000); // Retry after 2 seconds
+                }
+            }
+        };
+
+        checkBackend();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    if (!isBackendReady) {
+        return <GlobalLoading isTakingLong={isTakingLong} />;
+    }
 
     if (!isLoggedIn) {
         return <LoginPage onLoginSuccess={handleLogin} />;
