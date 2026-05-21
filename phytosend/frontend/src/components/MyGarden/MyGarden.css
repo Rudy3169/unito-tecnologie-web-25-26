@@ -725,6 +725,10 @@
     animation: slideUp 0.25s ease;
 }
 
+body.post-modal-open .plant-detail-modal {
+    overflow-y: hidden;
+}
+
 .close-modal-btn {
     position: absolute;
     top: 16px;
@@ -741,6 +745,231 @@
 
 .close-modal-btn:hover {
     background: rgba(0, 0, 0, 0.75);
+}
+
+.swipe-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.post-media-container:hover .swipe-indicator {
+    opacity: 1;
+}
+
+/* Modale Aggiunta Evento Cura */
+.add-care-event-trigger-btn {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, background 0.2s;
+}
+
+.add-care-event-trigger-btn:hover {
+    transform: scale(1.05);
+    background: var(--color-primary-dark);
+}
+
+.care-event-modal {
+    background: var(--color-bg-card);
+    width: 90%;
+    max-width: 400px;
+    border-radius: var(--border-radius-hard);
+    overflow: hidden;
+    animation: slideUp 0.25s ease;
+}
+
+.care-event-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.care-event-modal-header h3 {
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: 1.2rem;
+}
+
+.care-event-modal-header .close-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s;
+}
+
+.care-event-modal-header .close-btn:hover {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-main);
+}
+
+.care-event-modal-body {
+    padding: 20px;
+}
+
+.care-event-modal-body .form-group {
+    margin-bottom: 16px;
+}
+
+.care-event-modal-body .form-group label {
+    display: block;
+    margin-bottom: 4px; /* Ridotto per avvicinare la scritta al form */
+    color: var(--color-text-main);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.care-event-modal-body .form-group select,
+.care-event-modal-body .form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg-subtle);
+    color: var(--color-text-main);
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.care-event-modal-body .form-group select:hover,
+.care-event-modal-body .form-group input:hover {
+    border-color: var(--color-primary-light, #4ade80);
+    background: var(--color-bg-main);
+}
+
+.care-event-modal-body .form-group select:focus,
+.care-event-modal-body .form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    background: var(--color-bg-main);
+}
+
+/* Migliora l'icona del calendario nell'input date */
+.care-event-modal-body .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 4px;
+    filter: invert(0.5); /* Adatta il colore in base al tema */
+    transition: transform 0.2s ease;
+}
+
+.care-event-modal-body .form-group input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    transform: scale(1.1);
+}
+
+.care-event-modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.care-event-modal-footer .btn-cancel {
+    background: transparent;
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.care-event-modal-footer .btn-cancel:hover {
+    background: var(--color-bg-subtle);
+}
+
+.care-event-modal-footer .btn-confirm {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.care-event-modal-footer .btn-confirm:disabled {
+    background: var(--color-border);
+    cursor: not-allowed;
+}
+
+/* Colori dinamici per il menu a tendina Tipo Cura */
+.care-type-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 10px auto;
+    padding-right: 32px !important;
+}
+
+/* Rimuovi la freccina standard su IE */
+.care-type-select::-ms-expand {
+    display: none;
+}
+
+.care-type-select.type-acqua {
+    background-color: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
+    border-color: rgba(14, 165, 233, 0.3);
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%230ea5e9%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.care-type-select.type-concime {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2310b981%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.care-type-select.type-travaso {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.3);
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23f59e0b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+}
+
+/* Stile per le opzioni interne al select */
+.care-type-select option {
+    background: var(--color-bg-card);
+    color: var(--color-text-main);
+    font-weight: 500;
 }
 
 .detail-header {
@@ -832,6 +1061,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+}
+
+.detail-section ul li.full-width-li {
+    grid-column: 1 / -1;
 }
 
 .detail-section li {
@@ -1216,6 +1449,215 @@
 }
 
 /* Restringe le modali del giardino tra l'header superiore e la tab bar inferiore su mobile */
+/* --- TIMELINE MODERN (Come da design) --- */
+.timeline-modern {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+/* The vertical line */
+.timeline-modern::before {
+    content: '';
+    position: absolute;
+    left: 20px; /* Center of the dot */
+    top: 10px;
+    bottom: 30px;
+    width: 2px;
+    background-color: var(--color-border);
+    z-index: 1;
+}
+
+.timeline-item-modern {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 24px;
+    z-index: 2;
+}
+
+.timeline-item-modern:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-section-wrapper {
+    margin-bottom: -16px;
+}
+
+/* The dot on the line */
+.timeline-item-modern::before {
+    content: '';
+    position: absolute;
+    left: -4px; /* Centered relative to padding-left 28px */
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--color-bg-card);
+    border: 2px solid var(--color-text-muted);
+    z-index: 3;
+}
+
+/* Highlight the dot for future/active events */
+.timeline-item-modern:first-child::before {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.timeline-date-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+}
+
+.timeline-content-card {
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.timeline-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.timeline-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+}
+
+.timeline-future {
+    font-weight: 600;
+}
+
+.timeline-image-container {
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.timeline-event-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
+.timeline-expand-container {
+    position: relative;
+    padding-left: 28px;
+    margin-top: 10px;
+    margin-bottom: 24px;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+}
+
+/* Ensure the line stops right above the button and not pass through it */
+.timeline-modern:has(.timeline-expand-container)::before {
+    bottom: 60px;
+}
+
+.timeline-expand-btn {
+    background: var(--color-bg-main);
+    color: var(--color-text-muted);
+    border: 1px dashed var(--color-border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timeline-expand-btn:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.05);
+}
+
+/* --- TABS --- */
+.plant-tabs {
+    display: flex;
+    gap: 4px;
+    margin: 16px 24px 4px 24px;
+    background: rgba(100, 100, 100, 0.08);
+    padding: 6px;
+    border-radius: 12px;
+}
+
+[data-theme='dark'] .plant-tabs {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.plant-tab-btn {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plant-tab-btn:hover {
+    color: var(--color-text-main);
+    background: rgba(100, 100, 100, 0.05);
+}
+
+[data-theme='dark'] .plant-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.plant-tab-btn.active {
+    color: var(--color-primary);
+    background: var(--color-bg-main);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+}
+
+.timeline-post-clickable {
+    cursor: pointer;
+}
+
+.timeline-post-clickable:hover .timeline-event-img {
+    filter: brightness(0.9);
+    transform: scale(1.02);
+}
+
+.timeline-event-img {
+    transition: transform 0.2s, filter 0.2s;
+}
+
+/* Fine TIMELINE MODERN */
 .mobile-br {
     display: none;
 }

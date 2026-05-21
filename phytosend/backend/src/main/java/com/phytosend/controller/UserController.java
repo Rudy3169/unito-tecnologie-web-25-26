@@ -9,6 +9,7 @@ import com.phytosend.repository.BotanicalCardRepository;
 import com.phytosend.repository.CareEventRepository;
 import com.phytosend.service.DtoConverter;
 import com.phytosend.service.UserService;
+import com.phytosend.service.PlantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,10 @@ public class UserController {
     // Repository per gli eventi di cura
     @Autowired
     private CareEventRepository careEventRepository;
+
+    // Servizio per la gestione delle piante
+    @Autowired
+    private PlantService plantService;
 
     /**
      * Recupera l'elenco di tutti gli utenti attualmente iscritti alla piattaforma
@@ -236,5 +241,32 @@ public class UserController {
         careEventRepository.deleteByPlantIdAndCompletedFalse(plantId);
 
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Aggiunge manualmente un evento di cura per una pianta
+     * 
+     * @param userId  ID dell'utente
+     * @param plantId ID della pianta
+     * @param payload JSON contenente type e date
+     * @return ResponseEntity con il PlantDto aggiornato
+     */
+    @PostMapping("/{userId}/piante/{plantId}/care-events")
+    public ResponseEntity<com.phytosend.dto.PlantDto> addManualCareEvent(
+            @PathVariable @NonNull Long userId,
+            @PathVariable @NonNull Long plantId,
+            @RequestBody java.util.Map<String, String> payload) {
+
+        // Controlla che la pianta appartenga all'utente
+        Plant plant = plantRepository.findById(plantId)
+                .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
+
+        String type = payload.get("type");
+        String dateStr = payload.get("date");
+        LocalDate date = LocalDate.parse(dateStr);
+
+        Plant updatedPlant = plantService.addManualCareEvent(plantId, type, date);
+        
+        return ResponseEntity.ok(dtoConverter.toPlantDto(updatedPlant));
     }
 }

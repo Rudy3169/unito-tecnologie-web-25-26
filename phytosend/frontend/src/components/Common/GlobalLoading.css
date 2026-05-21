@@ -48,9 +48,9 @@
 }
 
 .loading-subtext {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--color-text-muted);
-    max-width: 500px;
+    max-width: 700px;
     line-height: 1.5;
 }
 

@@ -13,5 +13,7 @@ public class PlantDto {
     private String urlPhoto; // URL della foto della pianta
     private LocalDate purchaseDate; // Data di acquisto della pianta
     private LocalDate deathDate; // Data di morte della pianta
+    private LocalDate nextWateringDate; // Data della prossima irrigazione programmata
+    private java.util.List<CareEventDto> careEvents; // Storico degli eventi di cura
     private BotanicalCardDto card; // Scheda botanica della pianta
 }

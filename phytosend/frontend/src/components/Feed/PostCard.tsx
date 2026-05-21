@@ -106,8 +106,8 @@ export function PostCard({
         if (diffMin < 60) return `${diffMin} min fa`;
         if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'ora' : 'ore'} fa`;
         if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'giorno' : 'giorni'} fa`;
-        if (diffWeeks < 4) return `${diffWeeks} ${diffWeeks === 1 ? 'settimana' : 'settimane'} fa`;
-        if (diffMonths < 12) return `${diffMonths} ${diffMonths === 1 ? 'mese' : 'mesi'} fa`;
+        if (diffDays < 30) return `${diffWeeks} ${diffWeeks === 1 ? 'settimana' : 'settimane'} fa`;
+        if (diffDays < 365) return `${diffMonths} ${diffMonths === 1 ? 'mese' : 'mesi'} fa`;
         return `${diffYears} ${diffYears === 1 ? 'anno' : 'anni'} fa`;
     };
 

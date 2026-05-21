@@ -123,6 +123,20 @@ textarea:focus {
 }
 
 /* --- SCROLL LOCK SYSTEM --- */
+html:has(body.post-modal-open),
+html:has(body.settings-modal-open),
+html:has(body.comments-modal-open),
+html:has(body.likes-modal-open),
+html:has(body.warning-modal-open),
+html:has(body.create-post-modal-open),
+html:has(body.add-plant-modal-open),
+html:has(body.delete-plant-modal-open),
+html:has(body.plant-detail-modal-open),
+html:has(body.admin-modal-open),
+html:has(body.large-photo-modal-open) {
+    overflow: hidden !important;
+}
+
 body.post-modal-open,
 body.settings-modal-open,
 body.comments-modal-open,
@@ -134,5 +148,16 @@ body.delete-plant-modal-open,
 body.plant-detail-modal-open,
 body.admin-modal-open,
 body.large-photo-modal-open {
+    overflow: hidden !important;
+}
+
+/* Prevent nested modals from scrolling in the background */
+body.post-modal-open .plant-detail-modal,
+body.large-photo-modal-open .plant-detail-modal,
+body.large-photo-modal-open .profile-post-modal-scroll,
+body.comments-modal-open .plant-detail-modal,
+body.comments-modal-open .profile-post-modal-scroll,
+body.likes-modal-open .plant-detail-modal,
+body.likes-modal-open .profile-post-modal-scroll {
     overflow: hidden !important;
 }

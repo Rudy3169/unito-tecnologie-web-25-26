@@ -591,6 +591,7 @@ export function MyGarden() {
                 setSelectedPostIndex={setSelectedPostIndex}
                 isOwnGarden={isOwnGarden}
                 setDeletePrompt={setDeletePrompt}
+                setMyPlants={setMyPlants}
             />
 
             <PostsScrollModal

@@ -75,6 +75,25 @@ public class DtoConverter {
     }
 
     /**
+     * Converte un'entità CareEvent del database in un Data Transfer Object.
+     * Utile per omettere campi sensibili come la password in fase di risposta API.
+     * 
+     * @param event l'entità origine
+     * @return l'oggetto CareEventDto popolato
+     */
+    public com.phytosend.dto.CareEventDto toCareEventDto(com.phytosend.entity.CareEvent event) {
+        if (event == null) return null;
+        com.phytosend.dto.CareEventDto dto = new com.phytosend.dto.CareEventDto();
+        dto.setId(event.getId());
+        dto.setProgrammedDate(event.getProgrammedDate());
+        dto.setType(event.getType());
+        dto.setCompleted(event.isCompleted());
+        dto.setCompletedDate(event.getCompletedDate());
+        dto.setNotes(event.getNotes());
+        return dto;
+    }
+
+    /**
      * Mappa l'entità Plant (giardino) nel suo rispettivo PlantDto, astraendo le
      * relazioni complesse (Garden)
      * per evitare riferimenti circolari nella serializzazione JSON.
@@ -92,6 +111,18 @@ public class DtoConverter {
         dto.setPurchaseDate(plant.getPurchaseDate());
         dto.setDeathDate(plant.getDeathDate());
         dto.setCard(toBotanicalCardDto(plant.getCard()));
+        
+        if (plant.getCareEvents() != null) {
+            plant.getCareEvents().stream()
+                 .filter(e -> "ACQUA".equals(e.getType()) && !e.isCompleted())
+                 .findFirst()
+                 .ifPresent(e -> dto.setNextWateringDate(e.getProgrammedDate()));
+                 
+            dto.setCareEvents(plant.getCareEvents().stream()
+                 .map(this::toCareEventDto)
+                 .collect(Collectors.toList()));
+        }
+        
         return dto;
     }
 

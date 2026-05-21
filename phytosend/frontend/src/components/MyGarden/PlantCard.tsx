@@ -33,6 +33,29 @@ export function PlantCard({
     const hasNickname = !!plant.plantName && plant.plantName.trim() !== '';
     const imgUrl = plantPhotoMap[plant.id] || plant.urlPhoto || plant.card?.urlDefaultPhoto || '/placeholder-plant.png';
 
+    const getWateringText = () => {
+        if (!plant.nextWateringDate) {
+            return `tra ${plant.card?.waterFrequencyDays || 'Regolare'} giorni`;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const nextWatering = new Date(plant.nextWateringDate);
+        nextWatering.setHours(0, 0, 0, 0);
+
+        const diffTime = nextWatering.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 0) {
+            return `tra ${diffDays} giorni`;
+        } else if (diffDays === 0) {
+            return <strong style={{ color: '#0ea5e9' }}>Oggi</strong>;
+        } else {
+            return <strong style={{ color: '#ef4444' }}>In ritardo di {Math.abs(diffDays)} giorni</strong>;
+        }
+    };
+
     return (
         <div className={`garden-list-card ${plant.deathDate ? 'dead-card' : ''}`} onClick={() => setSelectedPlant(plant)}>
             <div className="garden-card-top">
@@ -107,7 +130,7 @@ export function PlantCard({
             </div>
             {!plant.deathDate && (
                 <div className="garden-card-events">
-                    <Droplets size={14} /> Prossima irrigazione: tra {plant.card?.waterFrequencyDays || 'Regolare'} giorni
+                    <Droplets size={14} /> Prossima irrigazione: {getWateringText()}
                 </div>
             )}
         </div>

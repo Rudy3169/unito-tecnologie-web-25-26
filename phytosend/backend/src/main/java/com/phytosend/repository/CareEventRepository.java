@@ -48,4 +48,15 @@ public interface CareEventRepository extends JpaRepository<CareEvent, Long> {
      * @param plantId ID della pianta
      */
     void deleteByPlantIdAndCompletedFalse(Long plantId);
+
+    /**
+     * Rimuove l'evento di cura pendente (non completato) di un certo tipo per una pianta.
+     *
+     * @param plantId ID della pianta
+     * @param type    tipo di evento
+     */
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Query("DELETE FROM CareEvent c WHERE c.plant.id = :plantId AND c.type = :type AND c.completed = false")
+    void deleteByPlantIdAndTypeAndCompletedFalse(@org.springframework.data.repository.query.Param("plantId") Long plantId, @org.springframework.data.repository.query.Param("type") String type);
 }

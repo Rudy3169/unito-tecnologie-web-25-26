@@ -1,9 +1,20 @@
+export interface CareEventItem {
+    id: number;
+    programmedDate: string;
+    type: string;
+    completed: boolean;
+    completedDate?: string;
+    notes?: string;
+}
+
 export interface PlantItem {
     id: number;
     plantName?: string;
     urlPhoto?: string;
     purchaseDate: string;
     deathDate?: string;
+    nextWateringDate?: string;
+    careEvents?: CareEventItem[];
     card: {
         id?: number;
         commonName: string;

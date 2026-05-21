@@ -114,6 +114,68 @@ public class PlantService {
     }
 
     /**
+     * Aggiunge un evento cura manualmente.
+     *
+     * @param plantId ID della pianta
+     * @param type tipo evento
+     * @param date data completamento
+     * @return la pianta aggiornata
+     */
+    @Transactional
+    public Plant addManualCareEvent(@NonNull Long plantId, String type, LocalDate date) {
+        Plant plant = plantRepository.findById(plantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pianta non trovata"));
+
+        if (plant.getDeathDate() != null) {
+            throw new IllegalStateException("Non puoi aggiungere eventi cura a una pianta morta.");
+        }
+
+        // Inizializza la collezione in-memory
+        if (plant.getCareEvents() != null) {
+            plant.getCareEvents().size();
+        }
+
+        // Crea e salva il nuovo evento completato
+        CareEvent newEvent = new CareEvent();
+        newEvent.setPlant(plant);
+        newEvent.setType(type);
+        newEvent.setCompleted(true);
+        newEvent.setCompletedDate(date);
+        newEvent.setProgrammedDate(date);
+        careEventRepository.save(newEvent);
+
+        // Calcola e crea il prossimo evento SOLO se l'evento è di tipo ACQUA
+        CareEvent nextEvent = null;
+        if ("ACQUA".equals(type)) {
+            long giorniDaAggiungere = 7; // Default per ACQUA
+            if (plant.getCard() != null) {
+                String frequenzaStr = plant.getCard().getWaterFrequencyDays();
+                if (frequenzaStr != null && frequenzaStr.matches(".*\\d+.*")) {
+                    giorniDaAggiungere = Long.parseLong(frequenzaStr.replaceAll("\\D+", ""));
+                }
+            }
+
+            nextEvent = new CareEvent();
+            nextEvent.setPlant(plant);
+            nextEvent.setType(type);
+            nextEvent.setCompleted(false);
+            nextEvent.setProgrammedDate(date.plusDays(giorniDaAggiungere));
+            careEventRepository.save(nextEvent);
+        }
+
+        // Sincronizza la collezione in-memory così il DtoConverter restituisce i dati corretti
+        if (plant.getCareEvents() != null) {
+            plant.getCareEvents().removeIf(e -> type.equals(e.getType()) && !e.isCompleted());
+            plant.getCareEvents().add(newEvent);
+            if (nextEvent != null) {
+                plant.getCareEvents().add(nextEvent);
+            }
+        }
+
+        return plant;
+    }
+
+    /**
      * Completa un evento di cura e crea automaticamente il prossimo evento.
      *
      * @param eventId ID dell'evento da completare
@@ -134,24 +196,24 @@ public class PlantService {
             return event;
         }
 
-        // Crea il prossimo evento dello stesso tipo
-        CareEvent nextEvent = new CareEvent();
-        nextEvent.setPlant(event.getPlant());
-        nextEvent.setType(event.getType());
-        nextEvent.setCompleted(false);
+        // Crea il prossimo evento SOLO se è di tipo ACQUA
+        if ("ACQUA".equals(event.getType())) {
+            CareEvent nextEvent = new CareEvent();
+            nextEvent.setPlant(event.getPlant());
+            nextEvent.setType(event.getType());
+            nextEvent.setCompleted(false);
 
-        // Calcola la data del prossimo evento basata sulla frequenza della scheda
-        // botanica
-        long giorniDaAggiungere = 7; // Default
-        if (event.getPlant().getCard() != null) {
-            String frequenzaStr = event.getPlant().getCard().getWaterFrequencyDays();
-            if (frequenzaStr != null && frequenzaStr.matches(".*\\d+.*")) {
-                giorniDaAggiungere = Long.parseLong(frequenzaStr.replaceAll("\\D+", ""));
+            long giorniDaAggiungere = 7; // Default
+            if (event.getPlant().getCard() != null) {
+                String frequenzaStr = event.getPlant().getCard().getWaterFrequencyDays();
+                if (frequenzaStr != null && frequenzaStr.matches(".*\\d+.*")) {
+                    giorniDaAggiungere = Long.parseLong(frequenzaStr.replaceAll("\\D+", ""));
+                }
             }
-        }
 
-        nextEvent.setProgrammedDate(LocalDate.now().plusDays(giorniDaAggiungere));
-        careEventRepository.save(nextEvent);
+            nextEvent.setProgrammedDate(LocalDate.now().plusDays(giorniDaAggiungere));
+            careEventRepository.save(nextEvent);
+        }
 
         return event;
     }
