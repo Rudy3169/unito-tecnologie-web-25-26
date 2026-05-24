@@ -80,7 +80,6 @@ class PlantServiceTest {
         assertEquals(user.getGarden(), createdPlant.getGarden());
         assertEquals(card, createdPlant.getCard());
         verify(plantRepository).save(any(Plant.class));
-        verify(careEventRepository, times(3)).save(any(CareEvent.class));
     }
 
     /**
@@ -101,28 +100,19 @@ class PlantServiceTest {
     }
 
     /**
-     * Verifica che il primo CareEvent abbia tipo "ACQUA", completed=false
-     * e data programmata = oggi + waterFrequencyDays della scheda botanica.
+     * Verifica che la pianta venga salvata con deathDate a null (pianta viva).
      */
     @Test
     @SuppressWarnings("null")
-    void addPlantToGarden_CreatesWateringEventWithCorrectDateAndType() {
+    void addPlantToGarden_NewPlant_HasNullDeathDate() {
         // Arrange
-        card.setWaterFrequencyDays("Ogni 14 giorni");
         when(plantRepository.save(any(Plant.class))).thenAnswer(i -> i.getArgument(0));
 
-        ArgumentCaptor<CareEvent> careEventCaptor = ArgumentCaptor.forClass(CareEvent.class);
-
         // Act
-        plantService.addPlantToGarden(user, card);
+        Plant createdPlant = plantService.addPlantToGarden(user, card);
 
-        // Assert: catturiamo l'evento salvato e verifichiamo i campi
-        verify(careEventRepository, times(3)).save(careEventCaptor.capture());
-        CareEvent savedEvent = careEventCaptor.getAllValues().get(0); // Il primo è quello dell'ACQUA
-
-        assertEquals("ACQUA", savedEvent.getType());
-        assertFalse(savedEvent.isCompleted());
-        assertEquals(LocalDate.now().plusDays(14), savedEvent.getProgrammedDate());
+        // Assert
+        assertNull(createdPlant.getDeathDate());
     }
 
     // ─── findPlant ────────────────────────────────────────────────────────────
@@ -274,7 +264,7 @@ class PlantServiceTest {
         // Arrange
         CareEvent event = new CareEvent();
         event.setId(500L);
-        event.setType("CONCIME");
+        event.setType("ACQUA"); // Solo ACQUA crea il prossimo evento
         event.setCompleted(false);
 
         Plant alivePlant = new Plant();
@@ -305,8 +295,139 @@ class PlantServiceTest {
 
         CareEvent nextEvent = careEventCaptor.getAllValues().get(1); // Il secondo è il nuovo evento creato
         assertFalse(nextEvent.isCompleted());
-        assertEquals("CONCIME", nextEvent.getType());
+        assertEquals("ACQUA", nextEvent.getType());
         assertEquals(alivePlant, nextEvent.getPlant());
         assertEquals(LocalDate.now().plusDays(10), nextEvent.getProgrammedDate());
+    }
+
+    /**
+     * Verifica che completeCareEvent con tipo CONCIME NON crei il prossimo evento
+     * (solo ACQUA lo fa).
+     */
+    @Test
+    @SuppressWarnings("null")
+    void completeCareEvent_NonWaterType_MarksCompletedWithoutCreatingNext() {
+        // Arrange
+        CareEvent event = new CareEvent();
+        event.setId(600L);
+        event.setType("CONCIME");
+        event.setCompleted(false);
+
+        Plant alivePlant = new Plant();
+        alivePlant.setId(100L);
+        alivePlant.setDeathDate(null);
+        alivePlant.setCard(card);
+        event.setPlant(alivePlant);
+
+        when(careEventRepository.findById(600L)).thenReturn(java.util.Optional.of(event));
+
+        // Act
+        CareEvent result = plantService.completeCareEvent(600L);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isCompleted());
+        // Solo 1 save: l'evento completato, senza creare il prossimo
+        verify(careEventRepository, times(1)).save(any(CareEvent.class));
+    }
+
+    // ─── addManualCareEvent ────────────────────────────────────────────────────
+
+    /**
+     * Verifica che un evento manuale di tipo ACQUA venga creato con completato=true
+     * e che venga generato il prossimo evento programmato.
+     */
+    @Test
+    @SuppressWarnings("null")
+    void addManualCareEvent_WaterType_CreatesCompletedEventAndSchedulesNext() {
+        // Arrange
+        Plant alivePlant = new Plant();
+        alivePlant.setId(100L);
+        alivePlant.setDeathDate(null);
+        alivePlant.setCard(card); // waterFrequencyDays = "Ogni 7 giorni"
+        alivePlant.setCareEvents(new java.util.ArrayList<>());
+
+        when(plantRepository.findById(100L)).thenReturn(java.util.Optional.of(alivePlant));
+
+        ArgumentCaptor<CareEvent> captor = ArgumentCaptor.forClass(CareEvent.class);
+        LocalDate today = LocalDate.now();
+
+        // Act
+        Plant result = plantService.addManualCareEvent(100L, "ACQUA", today);
+
+        // Assert
+        assertNotNull(result);
+        verify(careEventRepository, times(2)).save(captor.capture());
+
+        CareEvent completedEvent = captor.getAllValues().get(0);
+        assertTrue(completedEvent.isCompleted());
+        assertEquals("ACQUA", completedEvent.getType());
+        assertEquals(today, completedEvent.getCompletedDate());
+
+        CareEvent nextEvent = captor.getAllValues().get(1);
+        assertFalse(nextEvent.isCompleted());
+        assertEquals("ACQUA", nextEvent.getType());
+        assertEquals(today.plusDays(7), nextEvent.getProgrammedDate());
+    }
+
+    /**
+     * Verifica che un evento manuale di tipo CONCIME venga creato senza
+     * programmare il prossimo evento.
+     */
+    @Test
+    @SuppressWarnings("null")
+    void addManualCareEvent_NonWaterType_CreatesCompletedEventOnly() {
+        // Arrange
+        Plant alivePlant = new Plant();
+        alivePlant.setId(100L);
+        alivePlant.setDeathDate(null);
+        alivePlant.setCard(card);
+        alivePlant.setCareEvents(new java.util.ArrayList<>());
+
+        when(plantRepository.findById(100L)).thenReturn(java.util.Optional.of(alivePlant));
+        LocalDate today = LocalDate.now();
+
+        // Act
+        Plant result = plantService.addManualCareEvent(100L, "CONCIME", today);
+
+        // Assert
+        assertNotNull(result);
+        // Solo 1 save: l'evento completato, nessun prossimo evento per CONCIME
+        verify(careEventRepository, times(1)).save(any(CareEvent.class));
+    }
+
+    /**
+     * Verifica che venga lanciata IllegalStateException se si tenta di aggiungere
+     * un evento cura a una pianta morta.
+     */
+    @Test
+    @SuppressWarnings("null")
+    void addManualCareEvent_DeadPlant_ThrowsIllegalStateException() {
+        // Arrange
+        Plant deadPlant = new Plant();
+        deadPlant.setId(100L);
+        deadPlant.setDeathDate(LocalDate.now().minusDays(1));
+
+        when(plantRepository.findById(100L)).thenReturn(java.util.Optional.of(deadPlant));
+
+        // Act & Assert
+        assertThrows(IllegalStateException.class,
+                () -> plantService.addManualCareEvent(100L, "ACQUA", LocalDate.now()));
+        verify(careEventRepository, never()).save(any(CareEvent.class));
+    }
+
+    /**
+     * Verifica che venga lanciata ResourceNotFoundException se la pianta non esiste.
+     */
+    @Test
+    @SuppressWarnings("null")
+    void addManualCareEvent_PlantNotFound_ThrowsResourceNotFoundException() {
+        // Arrange
+        when(plantRepository.findById(999L)).thenReturn(java.util.Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class,
+                () -> plantService.addManualCareEvent(999L, "ACQUA", LocalDate.now()));
+        verify(careEventRepository, never()).save(any(CareEvent.class));
     }
 }
