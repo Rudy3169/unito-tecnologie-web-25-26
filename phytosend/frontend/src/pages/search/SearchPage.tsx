@@ -1,10 +1,17 @@
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { Users, Leaf, Sparkles } from 'lucide-react';
 import { useSearchParams, useNavigate, useNavigationType } from 'react-router-dom';
-import { apiFetch } from '../api';
-import type { UserResult, PlantResult } from '../types';
+import { apiFetch } from '../../api';
+import type { UserResult, PlantResult } from '../../types';
 import './SearchPage.css';
 
+// ==========================================
+// CACHE IN MEMORIA
+// ==========================================
+// Usiamo una variabile fuori dal componente (nel modulo) per salvare lo stato della ricerca.
+// A differenza degli state React, questa variabile non si azzera quando il componente viene distrutto.
+// È una soluzione "leggera" per mantenere la posizione e i risultati quando l'utente clicca
+// su una pianta e poi preme il tasto "Indietro" del browser.
 interface SearchCache {
     query: string;
     type: string;
@@ -13,18 +20,22 @@ interface SearchCache {
     hasMore: boolean;
     scrollY: number;
 }
-
-// Cache in memoria
 let moduleCache: SearchCache | null = null;
 
 export function SearchPage() {
-    const [searchParams] = useSearchParams();
+    const [searchParams] = useSearchParams(); // Legge query parameters dall'URL
     const navigate = useNavigate();
+
+    // Indica come l'utente è arrivato qui ('PUSH' = nuovo click, 'POP' = tasto Indietro, 'REPLACE' = redirect)
     const navigationType = useNavigationType();
+
     const query = searchParams.get('q') || '';
     const type = searchParams.get('type') || 'plants';
 
-    // Ripristina dalla cache solo se stiamo tornando indietro (POP) e la cache corrisponde
+    // ==========================================
+    // LOGICA DI RIPRISTINO (BACK BUTTON)
+    // ==========================================
+    // Se l'utente preme "Indietro" (POP) e avevamo salvato una cache coerente con la URL attuale, la carichiamo.
     const cachedRef = useRef<SearchCache | null>(null);
     const restoredRef = useRef(false);
 
@@ -32,7 +43,7 @@ export function SearchPage() {
         if (navigationType === 'POP' && moduleCache && moduleCache.query === query && moduleCache.type === type) {
             cachedRef.current = moduleCache;
         }
-        moduleCache = null; // Consumata o scartata, pulisci sempre
+        moduleCache = null; // Svuotiamo la cache dopo averla consumata (o scartata) per non inquinare navigazioni future
         restoredRef.current = true;
     }
 
@@ -44,7 +55,7 @@ export function SearchPage() {
     const [restoringScroll, setRestoringScroll] = useState(!!cachedRef.current);
     const observerRef = useRef<IntersectionObserver | null>(null);
 
-    // FUNZIONE DI UTILITÀ: Controlla se la pianta è stata importata nelle ultime 12 ore
+    // Controlla se la pianta è stata importata nelle ultime 12 ore
     const isNew = (dateString?: string) => {
         if (!dateString) return false;
         const importDate = new Date(dateString);
@@ -53,33 +64,42 @@ export function SearchPage() {
         return diffInHours <= 12;
     };
 
-    // Sensore che si accorge quando tocchi il fondo della pagina
+    // ==========================================
+    // INFINITE SCROLL (INTERSECTION OBSERVER)
+    // ==========================================
+    // Un "sensore" (IntersectionObserver) che viene agganciato all'ultimo elemento della lista.
+    // Appena quell'elemento entra nello schermo visibile dell'utente (isIntersecting), incrementiamo la pagina.
     const lastElementRef = useCallback((node: HTMLDivElement | null) => {
-        if (loading && plants.length === 0) return; // Non fa niente se sta già caricando
-        if (observerRef.current) observerRef.current.disconnect();
+        if (loading && plants.length === 0) return; // Non facciamo nulla se stiamo già caricando
+        if (observerRef.current) observerRef.current.disconnect(); // Rimuove il sensore dal vecchio "ultimo elemento"
 
         observerRef.current = new IntersectionObserver(entries => {
-            // Se l'ultimo elemento appare nello schermo e ci sono ancora piante nel DB, carica la prossima pagina
             if (entries[0].isIntersecting && hasMore) {
-                setPage(prevPage => prevPage + 1);
+                setPage(prevPage => prevPage + 1); // Triggera l'effetto che fa la fetch della pagina successiva
             }
         });
 
-        if (node) observerRef.current.observe(node);
+        if (node) observerRef.current.observe(node); // Aggancia il sensore al nuovo ultimo nodo
     }, [loading, hasMore]);
 
     // Nasconde la pagina durante il ripristino per evitare l'animazione di scroll visibile
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Ripristina la posizione di scroll dopo che le piante dalla cache sono renderizzate
+    // ==========================================
+    // RIPRISTINO DELLO SCROLL SENZA "FLICKER"
+    // ==========================================
+    // useLayoutEffect viene eseguito *dopo* che React ha calcolato il DOM, ma *prima* che il browser lo dipinga a schermo.
+    // Questo ci permette di scorrere alla posizione salvata nascondendo momentaneamente la pagina, evitando il "salto" visivo.
     useLayoutEffect(() => {
         if (restoringScroll && cachedRef.current && plants.length > 0) {
-            // Nascondi subito la pagina
+            // Nascondiamo il div radice prima del rendering visivo
             if (containerRef.current) containerRef.current.style.visibility = 'hidden';
 
+            // requestAnimationFrame garantisce che la scrollTo avvenga esattamente prima del prossimo "paint" del browser
             requestAnimationFrame(() => {
                 window.scrollTo({ top: cachedRef.current!.scrollY, behavior: 'instant' as ScrollBehavior });
-                // Mostra la pagina solo dopo aver scrollato
+
+                // Ora che siamo nella posizione corretta, rendiamo tutto di nuovo visibile
                 if (containerRef.current) containerRef.current.style.visibility = '';
                 setRestoringScroll(false);
                 cachedRef.current = null;

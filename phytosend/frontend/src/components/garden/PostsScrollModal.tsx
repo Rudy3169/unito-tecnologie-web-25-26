@@ -3,6 +3,13 @@ import { ArrowLeft } from 'lucide-react';
 import { PostCard } from '../feed/PostCard';
 import type { PostProps } from '../../types';
 
+/**
+ * COMPONENTE POSTS SCROLL MODAL
+ * Modale full-screen usata in Giardino e Profilo per scorrere i post verticalmente.
+ * Ricrea un'esperienza utente (UX) mobile-first in puro stile "Instagram", 
+ * agganciando l'apertura all'esatto post cliccato nella griglia.
+ */
+
 interface PostsScrollModalProps {
     selectedPostIndex: number | null;
     setSelectedPostIndex: (val: number | null) => void;
@@ -17,6 +24,11 @@ export function PostsScrollModal({
 }: PostsScrollModalProps) {
     const modalScrollRef = useRef<HTMLDivElement>(null);
 
+    // ==========================================
+    // AUTO-SCROLL (DOM MANIPULATION)
+    // ==========================================
+    // Quando la modale viene montata, usiamo un Timeout (per dare tempo al React di renderizzare i DOM nodes)
+    // e invochiamo scrollIntoView() sul post selezionato, allineandolo all'inizio dello schermo ('start').
     useEffect(() => {
         if (selectedPostIndex !== null && modalScrollRef.current) {
             setTimeout(() => {
@@ -80,5 +92,5 @@ export function PostsScrollModal({
                 ))}
             </div>
         </div>
-    );
+    );
 }

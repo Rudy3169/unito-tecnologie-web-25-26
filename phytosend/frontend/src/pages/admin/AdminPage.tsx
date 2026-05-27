@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, DatabaseBackup, Loader, Server, AlertTriangle, CheckCircle, Info } from 'lucide-react';
-import { apiFetch } from '../api';
+import { apiFetch } from '../../api';
 import './AdminPage.css';
 
+/**
+ * COMPONENTE ADMIN PANEL
+ * Dashboard riservata agli amministratori per gestire l'applicazione e il database.
+ * L'accesso a questa rotta è protetto sia sul frontend (nel Router) che sul backend (Spring Security).
+ */
 export function AdminPanel() {
     const [totalPlants, setTotalPlants] = useState<number | null>(null);
     const [isFetchingStats, setIsFetchingStats] = useState(false);
     const [isReloading, setIsReloading] = useState(false);
 
+    // ==========================================
+    // GESTIONE MODALE GLOBALE DEL PANNELLO
+    // ==========================================
+    // Un unico stato racchiude tutta la configurazione del popup, che può comportarsi
+    // sia da Alert (solo tasto OK) che da Confirm (Annulla / Conferma).
     const [modalConfig, setModalConfig] = useState({
         isOpen: false,
         type: 'alert' as 'alert' | 'confirm',
@@ -23,6 +33,9 @@ export function AdminPanel() {
         setModalConfig({ isOpen: true, type: 'alert', title, message, icon, onConfirm: closePopup });
     };
 
+    // ==========================================
+    // POLLING DELLE STATISTICHE
+    // ==========================================
     const fetchDashboardData = async () => {
         const token = localStorage.getItem('phytosend_token');
         setIsFetchingStats(true);
@@ -43,8 +56,10 @@ export function AdminPanel() {
 
     useEffect(() => {
         fetchDashboardData();
+        // POLLING: Chiede al server lo stato aggiornato ogni 5 secondi.
+        // Utile ad esempio per vedere in tempo reale le piante inserite dagli utenti.
         const dataInterval = setInterval(fetchDashboardData, 5000);
-        return () => clearInterval(dataInterval);
+        return () => clearInterval(dataInterval); // Cleanup vitale per evitare memory leaks alla distruzione del componente
     }, []);
 
     // Blocco dello scroll del body quando la modale dell'admin panel è aperta
@@ -59,6 +74,12 @@ export function AdminPanel() {
         };
     }, [modalConfig.isOpen]);
 
+    // ==========================================
+    // GESTORE AZIONI GENERICHE (COMMAND PATTERN)
+    // ==========================================
+    // Questa funzione permette di chiamare qualsiasi endpoint admin (es. ricarica catalogo)
+    // passandogli la funzione set per aggiornare lo stato di caricamento corretto, 
+    // permettendo il riutilizzo del codice per futuri bottoni della dashboard.
     const handleAction = async (endpoint: string, setLoadingState: (val: boolean) => void, successMsg: string) => {
         const token = localStorage.getItem('phytosend_token');
         setLoadingState(true);
@@ -68,11 +89,13 @@ export function AdminPanel() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
+            // Leggiamo .text() e non .json() perché alcuni endpoint admin (es. /reload-catalog) 
+            // restituiscono stringhe di conferma semplici invece di JSON formattati.
             const responseText = await response.text();
 
             if (response.ok) {
                 showPopup('Operazione Completata', responseText || successMsg, 'success');
-                fetchDashboardData();
+                fetchDashboardData(); // Aggiorna subito i counter a schermo
             } else {
                 showPopup('Errore del Server', `Si è verificato un errore: ${responseText}`, 'warning');
             }

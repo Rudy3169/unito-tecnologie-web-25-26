@@ -11,6 +11,13 @@ interface PostListProps {
     lastPostRef?: (node: HTMLDivElement | null) => void;
 }
 
+/**
+ * COMPONENTE POST LIST
+ * Componente "Dumb/Presentational" puro: non contiene logica di business o chiamate API.
+ * Si limita a ciclare un array di dati (PostProps) fornito dal padre e a mapparli in componenti PostCard.
+ * Sfrutta il pattern 'ref' (lastPostRef) per l'implementazione dell'Infinite Scroll 
+ * tramite l'IntersectionObserver nel componente genitore.
+ */
 export function PostList({ posts, onToggleLike, onDeletePost, onCommentUpdate, onToggleSave, defaultOpenLikes, highlightLikeUserId, lastPostRef }: PostListProps) {
     if (posts.length === 0) {
         return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Nessun post da mostrare. <br />Inizia tu piantando un seme!</p>;

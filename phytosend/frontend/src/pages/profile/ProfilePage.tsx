@@ -1,25 +1,37 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle, ArrowLeft, ChevronUp, Eye } from 'lucide-react';
-import { PostCard } from '../components/feed/PostCard';
-import { ProfileSettings } from '../components/profile/ProfileSettings';
-import type { PostProps } from '../types';
-import { apiFetch } from '../api';
-import { WarningModal } from '../components/common/WarningModal';
-import type { UserProfile } from '../types';
+import { PostCard } from '../../components/feed/PostCard';
+import { ProfileSettings } from '../../components/profile/ProfileSettings';
+import type { PostProps } from '../../types';
+import { apiFetch } from '../../api';
+import { WarningModal } from '../../components/common/WarningModal';
+import type { UserProfile } from '../../types';
 import './ProfilePage.css';
 
+/**
+ * COMPONENTE PROFILE PAGE
+ * Gestisce la visualizzazione e la modifica del profilo utente e della sua bacheca di post.
+ * È un componente "dual-purpose": mostra sia il MIO profilo che il profilo di ALTRI utenti
+ * a seconda della presenza o meno del parametro `userId` nell'URL.
+ */
 export function Profile() {
+    // Estrae l'eventuale parametro dinamico dalla rotta
     const { userId: paramUserId } = useParams<{ userId: string }>();
 
-    // L'ID dell'utente corrente (chi è loggato)
+    // Recupera i dati di sessione salvati nel browser
     const currentUserId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Se c'è un parametro nella URL, mostriamo quel profilo, altrimenti il nostro
+    // ==========================================
+    // LOGICA DI RISOLUZIONE DEL PROFILO
+    // ==========================================
+    // Se c'è un parametro nella URL, mostriamo quel profilo, altrimenti mostriamo il nostro
     const profileUserId = paramUserId || currentUserId;
+
+    // Flag booleano usato nel JSX per mostrare o nascondere tasti sensibili (Modifica Foto, Impostazioni, Cancella Post)
     const isOwnProfile = profileUserId === currentUserId;
 
     const [user, setUser] = useState<UserProfile | null>(null);
@@ -61,21 +73,24 @@ export function Profile() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Funzione per caricare i dati del profilo
+    // ==========================================
+    // CARICAMENTO PROFILO E POST
+    // ==========================================
     const loadProfile = () => {
         if (!profileUserId) {
-            // Se il browser non ha l'ID utente salvato, puliamo tutto e andiamo al login!
+            // Se per qualche motivo manca l'ID, la sessione è invalida o corrotta -> Ritorno al Login
             localStorage.clear();
             window.location.href = '/';
             return;
         }
 
-        // 1. Carica dati utente
+        // 1. Carica i dati anagrafici e i contatori dell'utente dal backend
         apiFetch(`/api/utenti/${profileUserId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => {
-                // Se il MIO profilo è stato cancellato (404), logout
+                // Sicurezza/UX: Se stiamo provando a guardare il NOSTRO profilo ma il server risponde 404,
+                // significa che l'account è stato cancellato di recente dal database. Forziamo il logout.
                 if (res.status === 404 && isOwnProfile) {
                     localStorage.clear();
                     window.location.href = '/';
@@ -110,6 +125,7 @@ export function Profile() {
             .finally(() => setLoading(false));
     };
 
+    // Carica i dati la prima volta che entriamo nella pagina o quando cambia l'ID dell'utente da guardare
     useEffect(() => {
         window.scrollTo(0, 0);
         setLoading(true);
@@ -117,35 +133,37 @@ export function Profile() {
         loadProfile();
     }, [profileUserId]);
 
+    // Funzione per aprire la foto del profilo a schermo intero
     const openLargePhoto = () => {
         if (!avatarRef.current) return;
         const rect = avatarRef.current.getBoundingClientRect();
-        
+
         const screenX = window.innerWidth / 2;
         const screenY = window.innerHeight / 2;
-        
+
         const avatarX = rect.left + rect.width / 2;
         const avatarY = rect.top + rect.height / 2;
-        
+
         const deltaX = avatarX - screenX;
         const deltaY = avatarY - screenY;
-        
+
         const targetSize = Math.min(window.innerWidth * 0.8, 400);
         const scale = rect.width / targetSize;
-        
+
         setAvatarTransform({
             x: deltaX,
             y: deltaY,
             scale: scale
         });
-        
+
         setShowLargePhoto(true);
-        
+
         setTimeout(() => {
             setIsLargePhotoVisible(true);
         }, 15);
     };
 
+    // Chiude la foto del profilo ingrandita
     const closeLargePhoto = () => {
         setIsLargePhotoVisible(false);
         setTimeout(() => {
@@ -166,7 +184,12 @@ export function Profile() {
         };
     }, [showPhotoMenu]);
 
-    // Gestione della classe body per la visualizzazione della modale del post su mobile
+    // ==========================================
+    // GESTIONE SCROLL DELLA PAGINA (MODAL LOCK)
+    // ==========================================
+    // I seguenti useEffect aggiungono dinamicamente classi specifiche al tag <body> 
+    // quando una modale viene aperta a tutto schermo. Questo fa scattare le regole definite in index.css 
+    // (overflow: hidden) che impediscono allo sfondo di scorrere.
     useEffect(() => {
         if (selectedPostIndex !== null) {
             document.body.classList.add('post-modal-open');
@@ -174,7 +197,7 @@ export function Profile() {
             document.body.classList.remove('post-modal-open');
         }
         return () => {
-            document.body.classList.remove('post-modal-open');
+            document.body.classList.remove('post-modal-open'); // Funzione di Cleanup
         };
     }, [selectedPostIndex]);
 
@@ -202,7 +225,7 @@ export function Profile() {
         };
     }, [showLargePhoto]);
 
-    // Ascolta l'evento globale per chiudere la modale (es. dal pulsante indietro dell'header mobile)
+    // Ascolta l'evento globale per chiudere la modale
     useEffect(() => {
         const handleCloseModal = () => setSelectedPostIndex(null);
         window.addEventListener('close-post-modal', handleCloseModal);
@@ -300,7 +323,7 @@ export function Profile() {
         if (!loading && posts.length > 0) {
             const searchParams = new URLSearchParams(location.search);
             const openPostId = searchParams.get('openPost');
-            
+
             if (openPostId) {
                 const index = posts.findIndex(p => p.id === Number(openPostId));
                 if (index !== -1 && selectedPostIndex !== index) {
@@ -505,6 +528,7 @@ export function Profile() {
                     )}
                 </div>
 
+                {/* Nome, Ruolo, Città */}
                 <div className="profile-header-info">
                     <div className="profile-name-row">
                         <h2>{user.name} {user.surname}</h2>
@@ -604,6 +628,8 @@ export function Profile() {
                             <div style={{ width: '34px' }} /> {/* Spacer per allineamento simmetrico */}
                         </div>
 
+
+                        {/* Lista dei post (ordinati dal più recente) */}
                         {posts.map((post, _index) => (
                             <div key={post.id} className="profile-modal-post">
                                 <PostCard
@@ -679,31 +705,31 @@ export function Profile() {
 
             {/* Pop-up per visualizzare la foto profilo grande */}
             {showLargePhoto && user?.profilePhotoUrl && (
-                <div 
-                    className={`large-photo-overlay ${isLargePhotoVisible ? 'visible' : ''}`} 
+                <div
+                    className={`large-photo-overlay ${isLargePhotoVisible ? 'visible' : ''}`}
                     onClick={closeLargePhoto}
                 >
-                    <div 
-                        className="large-photo-container" 
+                    <div
+                        className="large-photo-container"
                         onClick={(e) => e.stopPropagation()}
                         style={
                             !isLargePhotoVisible && avatarTransform
                                 ? {
-                                      transform: `translate(${avatarTransform.x}px, ${avatarTransform.y}px) scale(${avatarTransform.scale})`,
-                                      opacity: 0,
-                                  }
+                                    transform: `translate(${avatarTransform.x}px, ${avatarTransform.y}px) scale(${avatarTransform.scale})`,
+                                    opacity: 0,
+                                }
                                 : {
-                                      transform: 'translate(0, 0) scale(1)',
-                                      opacity: 1,
-                                  }
+                                    transform: 'translate(0, 0) scale(1)',
+                                    opacity: 1,
+                                }
                         }
                     >
-                        <img 
-                            src={user.profilePhotoUrl} 
-                            alt="Foto profilo grande" 
-                            className="large-photo-img" 
+                        <img
+                            src={user.profilePhotoUrl}
+                            alt="Foto profilo grande"
+                            className="large-photo-img"
                         />
-                        <button 
+                        <button
                             className="close-large-photo-btn"
                             onClick={closeLargePhoto}
                             aria-label="Chiudi"

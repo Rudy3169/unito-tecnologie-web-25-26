@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { apiFetch } from '../api';
-import { PostList } from '../components/feed/PostList';
-import { PostCard } from '../components/feed/PostCard';
-import type { PostProps } from '../types';
+import { apiFetch } from '../../api';
+import { PostList } from '../../components/feed/PostList';
+import { PostCard } from '../../components/feed/PostCard';
+import type { PostProps } from '../../types';
 import { Bookmark, Grid3X3, List, Heart, MessageCircle } from 'lucide-react';
-import './HomePage.css';
-import './ProfilePage.css'; // Per riutilizzare la griglia e la modale del profilo
+import '../home/HomePage.css';
+import '../profile/ProfilePage.css'; // Per riutilizzare la griglia e la modale del profilo
 
+/**
+ * COMPONENTE SAVED POSTS PAGE
+ * Mostra i post che l'utente ha salvato (segnalibro).
+ * Supporta due modalità di visualizzazione interscambiabili: Griglia (stile Instagram) e Lista (stile Feed).
+ */
 export function SavedPosts() {
     const [posts, setPosts] = useState<PostProps[]>([]);
     const [loading, setLoading] = useState(true);
@@ -14,12 +19,16 @@ export function SavedPosts() {
     const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
     const modalScrollRef = useRef<HTMLDivElement>(null);
 
+    // ==========================================
+    // FETCH DEI POST SALVATI
+    // ==========================================
     const caricaPostSalvati = () => {
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
 
         if (!userId) return;
 
+        // Richiede al backend esclusivamente la sottolista di post salvati dall'utente
         apiFetch(`/api/social/posts/saved?utenteId=${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -41,7 +50,11 @@ export function SavedPosts() {
         caricaPostSalvati();
     }, []);
 
-    // Sincronizzazione della visualizzazione tra la mobile header ed il componente
+    // ==========================================
+    // SINCRONIZZAZIONE DELLA VISUALIZZAZIONE (EVENTS)
+    // ==========================================
+    // Comunica con l'Header Mobile (esterno a questo componente) tramite eventi globali (CustomEvent)
+    // per tenere sincronizzato il bottone Grid/List che si trova in un'altra parte dell'albero React.
     useEffect(() => {
         const handleRequest = () => {
             window.dispatchEvent(new CustomEvent('sync-saved-posts-view-mode', { detail: viewMode }));
@@ -54,10 +67,10 @@ export function SavedPosts() {
         };
         window.addEventListener('request-saved-posts-view-mode', handleRequest);
         window.addEventListener('change-saved-posts-view-mode', handleChange);
-        
-        // Invia lo stato iniziale
+
+        // Invia lo stato iniziale appena montato
         window.dispatchEvent(new CustomEvent('sync-saved-posts-view-mode', { detail: viewMode }));
-        
+
         return () => {
             window.removeEventListener('request-saved-posts-view-mode', handleRequest);
             window.removeEventListener('change-saved-posts-view-mode', handleChange);
@@ -121,18 +134,24 @@ export function SavedPosts() {
         });
     };
 
-    // Funzione per salvare/rimuovere un post dai salvati
+    // =================================================
+    // RIMOZIONE DAI SALVATI (AGGIORNAMENTO OTTIMISTICO)
+    // =================================================
     const handleToggleSave = (postId: number) => {
         const token = localStorage.getItem('phytosend_token');
         const userId = localStorage.getItem('phytosend_userId');
 
-        // Se l'utente rimuove il salvataggio dalla pagina dei salvati, togliamo direttamente il post dalla lista
+        // Aggiornamento Ottimistico "Radicale": se l'utente clicca il segnalibro qui, 
+        // significa che lo sta togliendo (siamo già nei salvati). Facciamo sparire il post SUBITO dalla UI,
+        // prima ancora che il server risponda. Questo restituisce una sensazione di estrema reattività.
         setPosts(posts.filter(post => post.id !== postId));
 
         apiFetch(`/api/social/posts/${postId}/save?utenteId=${userId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(err => {
+            // Se c'è stato un errore di rete (il comando non è andato a buon fine),
+            // dobbiamo annullare l'aggiornamento ottimistico ricaricando lo stato dal server.
             console.error("Errore save:", err);
             caricaPostSalvati();
         });
@@ -153,7 +172,11 @@ export function SavedPosts() {
 
     return (
         <div style={{ maxWidth: viewMode === 'grid' ? '800px' : '600px', margin: '0 auto', transition: 'max-width 0.3s ease' }}>
+
+            {/* Header */}
             <div className="saved-posts-page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', padding: '0 16px', marginTop: '16px' }}>
+
+                {/* Titolo pagina */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Bookmark size={28} color="var(--color-primary)" />
                     <h1 style={{ margin: 0, color: 'var(--color-text-main)', fontSize: '1.8rem' }}>Post Salvati</h1>
@@ -161,6 +184,8 @@ export function SavedPosts() {
 
                 {posts.length > 0 && (
                     <div style={{ display: 'flex', gap: '8px', background: 'var(--color-bg-card)', padding: '4px', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+
+                        {/* Bottone per la visualizzazione a griglia */}
                         <button
                             onClick={() => setViewMode('grid')}
                             style={{
@@ -171,6 +196,8 @@ export function SavedPosts() {
                         >
                             <Grid3X3 size={20} />
                         </button>
+
+                        {/* Bottone per la visualizzazione a lista */}
                         <button
                             onClick={() => setViewMode('list')}
                             style={{
@@ -185,6 +212,7 @@ export function SavedPosts() {
                 )}
             </div>
 
+            {/* Visualizzazione dei post */}
             {posts.length === 0 ? (
                 <div className="empty-garden" style={{ margin: '0 16px' }}>
                     <Bookmark size={48} color="var(--color-border)" style={{ marginBottom: '16px' }} />

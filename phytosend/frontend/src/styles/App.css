@@ -1,12 +1,21 @@
-/* ── Layout principale ── */
+/* ==========================================
+   LAYOUT PRINCIPALE (APP STRUCTURE)
+   ========================================== */
+
+/* Contenitore radice dell'applicazione. Usa flexbox in colonna per spingere 
+   eventuali footer verso il basso qualora il contenuto sia poco. */
 .app-layout {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
+/* Colonna centrale contenente il "feed" e le pagine.
+   Ha una larghezza massima fissa per non sgranare (o sembrare vuota) su schermi desktop grandi 
+   ed è centrata orizzontalmente tramite margin: 0 auto. */
 .main-content {
     padding-top: 80px;
+    /* Spazio per non finire nascosta sotto la navbar superiore */
     max-width: 680px;
     margin: 0 auto;
     padding-left: var(--spacing-md);
@@ -14,7 +23,13 @@
     width: 100%;
 }
 
-/* ── Copyright badge ── */
+/* ==========================================
+   BADGE DI COPYRIGHT
+   ========================================== */
+
+/* Testo fisso in basso a destra dello schermo.
+   È reso semi-trasparente e "fantasma" ai click (pointer-events: none) 
+   in modo da non dare fastidio all'interazione dell'utente con la pagina. */
 .copyright-badge {
     position: fixed;
     bottom: 16px;
@@ -24,7 +39,6 @@
     opacity: 0.55;
     letter-spacing: 0.4px;
     pointer-events: none;
-    /* non interferisce con i click */
     user-select: none;
     z-index: 50;
     transition: opacity 0.2s;
@@ -34,10 +48,14 @@
     opacity: 1;
 }
 
+/* Adattamento per smartphone (Tablet/Mobile).
+   - Riduciamo padding per sfruttare più spazio visivo.
+   - Nascondiamo il badge copyright per pulizia grafica. */
 @media (max-width: 768px) {
     .main-content {
         padding-top: 66px;
         padding-bottom: 90px;
+        /* Spazio extra per non finire sotto la bottom-navbar mobile */
     }
 
     .copyright-badge {
@@ -45,6 +63,12 @@
     }
 }
 
+/* ==========================================
+   PULSANTE "TORNA SU" (SCROLL TO TOP)
+   ========================================== */
+
+/* Pulsante flottante (FAB) per tornare rapidamente a inizio pagina.
+   Usa un'animazione di entrata per comparire fluidamente dal basso (scrollTopIn). */
 .scroll-to-top-btn {
     position: fixed;
     bottom: 52px;
@@ -65,6 +89,7 @@
     animation: scrollTopIn 0.3s ease forwards;
 }
 
+/* Definizione dei keyframes per l'animazione di entrata "pop-up" fluida */
 @keyframes scrollTopIn {
     from {
         opacity: 0;
@@ -80,14 +105,16 @@
 .scroll-to-top-btn:hover {
     background: var(--color-primary-light);
     transform: translateY(-3px) scale(1.05);
+    /* Effetto sollevamento al passaggio del mouse */
     box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.45);
 }
 
 .scroll-to-top-btn:active {
     transform: translateY(-1px) scale(0.95);
+    /* Effetto pressione tattile */
 }
 
-/* Override responsive per il tasto di scroll, posizionato alla fine del file per corretta precedenza CSS */
+/* Sposta il pulsante più in alto su mobile per evitare che si sovrapponga alle barre di sistema iOS/Android */
 @media (max-width: 768px) {
     .scroll-to-top-btn {
         bottom: 80px !important;
@@ -95,7 +122,12 @@
     }
 }
 
-/* --- MODAL STICKY HEADER (STILE INSTAGRAM) --- */
+/* ==========================================
+   MODAL STICKY HEADER (STILE INSTAGRAM)
+   ========================================== */
+
+/* Intestazione fissa usata per le modali a tutto schermo (es. Commenti o Foto ingrandita).
+   Rimane ancorata in cima (position: sticky) anche mentre il contenuto sotto viene scrollato. */
 .modal-sticky-header {
     position: sticky;
     top: 0;
@@ -108,6 +140,9 @@
     width: 100%;
 }
 
+/* Tasto "Indietro" (freccia).
+   Ha un'ombra (drop-shadow) studiata appositamente per garantire la leggibilità dell'icona bianca 
+   anche se lo sfondo che scorre dietro di essa dovesse essere completamente bianco. */
 .modal-back-btn {
     background: none;
     border: none;
@@ -124,13 +159,13 @@
 
 .modal-back-btn:hover {
     background-color: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
 }
 
 .modal-back-btn:active {
     transform: scale(0.92);
 }
 
+/* Titolo della modale, con ombra di contrasto testuale per massima leggibilità su foto chiare. */
 .modal-header-title {
     font-weight: 700;
     color: #ffffff;

@@ -2,6 +2,13 @@ import { useEffect } from 'react';
 import { X, Loader, Plus } from 'lucide-react';
 import type { PlantSuggestion } from '../../types';
 
+/**
+ * COMPONENTE ADD PLANT MODAL
+ * Modale che permette l'aggiunta di una nuova pianta al giardino.
+ * Implementa un pattern "Typeahead" (autocompletamento) per la ricerca dinamica 
+ * delle piante nel database, aggiornando i suggerimenti in tempo reale.
+ */
+
 interface AddPlantModalProps {
     isOpen: boolean;
     searchQuery: string;

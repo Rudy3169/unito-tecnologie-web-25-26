@@ -4,6 +4,13 @@ import { X, Loader, Plus, Skull, Trash2, Sprout, Info, CalendarHeart, Droplets, 
 import type { PostProps, PlantItem, PostItem } from '../../types';
 import { apiFetch } from '../../api';
 
+/**
+ * COMPONENTE PLANT DETAIL MODAL
+ * Modale "Smart" che mostra il dettaglio di una pianta e la sua storia (Timeline).
+ * Integra logiche complesse come l'ordinamento cronologico di eventi eterogenei 
+ * (Post, Annaffiature, Concimazioni, Decesso) e la validazione lato client delle date.
+ */
+
 interface PlantDetailModalProps {
     selectedPlant: PlantItem | null;
     setSelectedPlant: (val: PlantItem | null) => void;
@@ -223,7 +230,12 @@ export function PlantDetailModal({
                                 </div>
                             )}
                             {(() => {
-                                // Funzione per parsare le date in modo sicuro evitando shift di timezone (es. 2026-05-21T00:00:00Z -> 2026-05-20)
+                                // ==========================================
+                                // GESTIONE DATE & TIMEZONE SHIFT (FIX)
+                                // ==========================================
+                                // Fissa forzatamente l'orario a mezzogiorno (T12:00:00) per evitare che, 
+                                // a causa dei fusi orari (es. GMT+1 vs UTC), una data passata come "2026-05-21T00:00:00Z" 
+                                // venga renderizzata dal client come il giorno precedente (2026-05-20 alle 23:00).
                                 const parseDateForceNoon = (d: string | Date | undefined | null) => {
                                     if (!d) return new Date();
                                     if (typeof d === 'string' && d.length === 10) {
@@ -570,3 +582,4 @@ export function PlantDetailModal({
         </div>
     );
 }
+

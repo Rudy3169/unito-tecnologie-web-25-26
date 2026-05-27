@@ -12,9 +12,9 @@ interface NotificationSidebarProps {
 }
 
 /**
- * Sidebar laterale destra (drawer) per lo storico completo delle notifiche.
- * Si apre con un'animazione slide-in da destra.
- * Supporta caricamento paginato ("Carica altre").
+ * COMPONENTE NOTIFICATION SIDEBAR
+ * Drawer laterale ("Offcanvas") per visualizzare lo storico completo delle notifiche su Desktop.
+ * Implementa un caricamento paginato server-side per limitare la quantità di dati trasferiti (UX optimization).
  */
 export function NotificationSidebar({
     isOpen,

@@ -1,29 +1,36 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Plus, Sprout, Skull, Loader, ArrowLeft, ChevronUp } from 'lucide-react';
-import type { PostProps } from '../types';
-import { apiFetch } from '../api';
-import './ProfilePage.css';
-import { WarningModal } from '../components/common/WarningModal';
+import type { PostProps } from '../../types';
+import { apiFetch } from '../../api';
+import '../profile/ProfilePage.css';
+import { WarningModal } from '../../components/common/WarningModal';
 import './MyGardenPage.css';
 
-import { PlantCard } from '../components/garden/PlantCard';
-import { AddPlantModal } from '../components/garden/AddPlantModal';
-import { DeletePlantModal } from '../components/garden/DeletePlantModal';
-import { PlantDetailModal } from '../components/garden/PlantDetailModal';
-import { PostsScrollModal } from '../components/garden/PostsScrollModal';
-import type { PlantItem, PostItem, PlantSuggestion } from '../types';
+import { PlantCard } from '../../components/garden/PlantCard';
+import { AddPlantModal } from '../../components/garden/AddPlantModal';
+import { DeletePlantModal } from '../../components/garden/DeletePlantModal';
+import { PlantDetailModal } from '../../components/garden/PlantDetailModal';
+import { PostsScrollModal } from '../../components/garden/PostsScrollModal';
+import type { PlantItem, PostItem, PlantSuggestion } from '../../types';
 
-// Funzione principale che gestisce il giardino personale
+/**
+ * COMPONENTE MY GARDEN PAGE
+ * Gestisce la collezione personale di piante di un utente.
+ * Anche questo componente è dual-purpose: mostra il "Mio Giardino" o il "Giardino di un altro"
+ * in base al parametro `userId` nell'URL.
+ */
 export function MyGarden() {
     const { userId: paramUserId } = useParams<{ userId: string }>();
-    const [searchParams] = useSearchParams();
+    const [searchParams] = useSearchParams(); // Usato per leggere query string e aprire il popup di una pianta in automatico
     const navigate = useNavigate();
     const currentUserId = localStorage.getItem('phytosend_userId');
 
-    // Se c'è un parametro nella URL, mostriamo il giardino di quell'utente
+    // ==========================================
+    // RISOLUZIONE DEL PROPRIETARIO DEL GIARDINO
+    // ==========================================
     const gardenUserId = paramUserId || currentUserId;
-    const isOwnGarden = !paramUserId || paramUserId === currentUserId;
+    const isOwnGarden = !paramUserId || paramUserId === currentUserId; // Flag di sicurezza per abilitare i tasti Modifica/Aggiungi
 
     // Nome del proprietario del giardino (per quando visitiamo il giardino di un altro utente)
     const [ownerName, setOwnerName] = useState<string>('');
@@ -87,7 +94,10 @@ export function MyGarden() {
     });
     const modalScrollRef = useRef<HTMLDivElement>(null);
 
-    // Effetto per il caricamento iniziale del giardino
+    // ==========================================
+    // FETCH INIZIALE: GIARDINO E POST
+    // ==========================================
+    // Quando cambia l'ID dell'utente (gardenUserId), ricarichiamo tutto da capo.
     useEffect(() => {
         window.scrollTo(0, 0);
         const token = localStorage.getItem('phytosend_token');
@@ -97,7 +107,7 @@ export function MyGarden() {
         setPlantPhotoMap({});
         setOwnerName('');
 
-        // Se stiamo visitando il giardino di un altro utente, carichiamo il suo nome
+        // Se visitiamo un giardino altrui, chiediamo prima al server come si chiama l'utente
         if (!isOwnGarden && gardenUserId) {
             apiFetch(`/api/utenti/${gardenUserId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -109,14 +119,16 @@ export function MyGarden() {
                 .catch(err => console.error("Errore caricamento nome proprietario:", err));
         }
 
+        // Recuperiamo tutte le piante che l'utente ha inserito nel giardino
         apiFetch(`/api/utenti/${gardenUserId}/piante`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
             .then(data => {
+                // Mappiamo i dati backend (DTO) sul formato aspettato dal frontend (PlantItem)
                 const mappedPlants = data.map((p: any) => ({
                     ...p,
-                    plantName: p.name,
+                    plantName: p.name, // Il backend usa 'name', noi internamente usiamo 'plantName'
                     isDead: p.deathDate !== null
                 }));
                 setMyPlants(mappedPlants);
@@ -124,22 +136,28 @@ export function MyGarden() {
             .catch(err => console.error("Errore recupero giardino:", err))
             .finally(() => setLoading(false));
 
-        // Carica i post dell'utente per costruire la mappa foto piante
+        // ==========================================
+        // TRUCCO ARCHITETTURALE: MAPPA FOTO PIANTE
+        // ==========================================
+        // Le piante del giardino non hanno una propria foto salvata nel DB (a differenza degli utenti o del catalogo base).
+        // Per avere un "Avatar" della pianta usiamo dinamicamente la foto dell'ultimo POST fatto per quella pianta.
+        // Qui scarichiamo tutti i post dell'utente e creiamo un dizionario { plantId: 'url_foto' }.
         apiFetch(`/api/social/posts/user/${gardenUserId}?utenteId=${currentUserId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.ok ? res.json() : [])
             .then((posts: any[]) => {
                 const photoMap: Record<number, string> = {};
-                // I post sono già ordinati per data discendente, quindi il primo per ogni pianta è il più recente
+                // I post sono già ordinati per data discendente dal backend (dal più recente al più vecchio)
                 posts.forEach((p: any) => {
                     const pId = p.plantId;
                     const photo = p.urlphoto || p.URLPhoto;
+                    // Se la pianta non ha ancora una foto assegnata nella mappa, assegnamo questa (essendo la prima che incontriamo, è la più recente)
                     if (pId && photo && !photoMap[pId]) {
                         photoMap[pId] = photo;
                     }
                 });
-                setPlantPhotoMap(photoMap);
+                setPlantPhotoMap(photoMap); // Aggiorniamo la mappa passandola poi come prop alle PlantCard
             })
             .catch(err => console.error("Errore recupero post utente:", err));
     }, [gardenUserId]);
@@ -155,8 +173,14 @@ export function MyGarden() {
         }
     }, [myPlants, searchParams]);
 
-    // Effetto per la ricerca dinamica dal catalogo
+    // ==========================================
+    // AUTOCOMPLETAMENTO CATALOGO (DEBOUNCING)
+    // ==========================================
+    // Quando l'utente aggiunge una pianta, deve sceglierla dal catalogo tramite ricerca testuale.
+    // Usiamo il "Debouncing" (setTimeout di 300ms) per evitare di fare una chiamata API 
+    // ad ogni singola lettera digitata. La fetch parte solo se l'utente smette di digitare per una frazione di secondo.
     useEffect(() => {
+        // Ignora query troppo corte o se l'utente ha già selezionato una pianta
         if (!searchQuery.trim() || searchQuery.length < 2 || newPlantCardId !== "") {
             setSuggestions([]);
             setShowSuggestions(false);
@@ -174,7 +198,7 @@ export function MyGarden() {
                 if (res.ok) {
                     const data = await res.json();
                     setSuggestions(data.content || []);
-                    setShowSuggestions(true);
+                    setShowSuggestions(true); // Mostra il menu a tendina
                 }
             } catch (err) {
                 console.error('Errore ricerca piante:', err);
@@ -183,7 +207,7 @@ export function MyGarden() {
             }
         }, 300);
 
-        return () => clearTimeout(timeoutId);
+        return () => clearTimeout(timeoutId); // Cancella il timer precedente se l'utente preme un altro tasto prima dei 300ms
     }, [searchQuery, newPlantCardId]);
 
     // Effetto per caricare i post quando si seleziona una pianta

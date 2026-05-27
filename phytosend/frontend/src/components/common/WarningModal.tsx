@@ -2,6 +2,13 @@ import { useEffect } from 'react';
 import { X, AlertTriangle, AlertCircle } from 'lucide-react';
 import './WarningModal.css';
 
+/**
+ * COMPONENTE WARNING MODAL
+ * Modale di avviso/errore generica e riutilizzabile in tutta l'app (Dumb Component).
+ * Modifica dinamicamente l'interfaccia (icone e colori) in base alla prop `type` ('warning' o 'error')
+ * e gestisce autonomamente il blocco dello scroll della pagina (useEffect).
+ */
+
 interface WarningModalProps {
     isOpen: boolean;
     onClose: () => void;

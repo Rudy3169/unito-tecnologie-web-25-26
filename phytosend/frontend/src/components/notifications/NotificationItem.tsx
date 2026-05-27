@@ -10,8 +10,10 @@ interface NotificationItemProps {
 }
 
 /**
- * Componente singola notifica — usato sia nel Dropdown che nella Sidebar.
- * Mostra avatar, messaggio, timestamp, pallino non letta, e azione rapida per CARE_WATER.
+ * COMPONENTE NOTIFICATION ITEM
+ * Componente (Dumb) che renderizza la singola notifica della lista (Sidebar o Dropdown).
+ * Riceve la notifica come prop e gestisce il parsing dinamico dell'icona (switch-case) 
+ * e il redirect contestuale al click (navigazione client-side tramite React Router).
  */
 export function NotificationItem({ notification, onMarkAsRead, onClose }: NotificationItemProps) {
     const navigate = useNavigate();

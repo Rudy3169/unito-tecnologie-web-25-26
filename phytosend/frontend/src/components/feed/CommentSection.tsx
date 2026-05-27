@@ -25,6 +25,12 @@ interface CommentSectionProps {
     highlightCommentId?: number;
 }
 
+/**
+ * COMPONENTE COMMENT SECTION
+ * Gestisce l'intera iterazione sui commenti di un post (inserimento, visualizzazione, like, cancellazione).
+ * Supporta una struttura dati ad albero (Thread nidificati tramite parentId) 
+ * e il parsing del testo per generare dinamicamente le Menzioni (@Nome).
+ */
 export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommentsUpdated, highlightCommentId }: CommentSectionProps) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
@@ -69,6 +75,12 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
             .catch(err => console.error("Errore caricamento utenti:", err));
     }, [isOpen]);
 
+    // ==========================================
+    // PARSING TESTO (REGEX) PER MENZIONI DINAMICHE
+    // ==========================================
+    // Questa funzione analizza il testo del commento per cercare pattern come "@Mario".
+    // Se la regex trova un match, e quel match corrisponde a un utente reale,
+    // sostituisce il testo con uno <span> cliccabile che porta al profilo.
     const renderCommentText = (text: string) => {
         if (!text) return '';
         const mentionRegex = /@([A-Za-zÀ-ÖØ-öø-ÿ0-9._-]+)/g;

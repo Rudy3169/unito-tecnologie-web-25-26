@@ -1,40 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* ==========================================
+   DESIGN SYSTEM (CSS VARIABLES)
+   ========================================== */
+/* La pseudo-classe :root definisce le variabili CSS (Design Tokens) globali.
+   Centralizzare i colori e le misure qui permette di mantenere coerenza visiva 
+   in tutta l'app e facilita enormemente l'implementazione del tema scuro (Dark Mode). */
 :root {
-    /* ===== PRIMARY: Forest Teal (non più verde piatto) ===== */
+    /* ===== PRIMARY: Forest Teal ===== */
     --color-primary: #1e5e4b;
-    /* Verde foresta profondo con nota teal */
     --color-primary-light: #2e8a6e;
-    /* Smeraldo medio */
     --color-primary-accent: #9cc4b8;
-    /* Salvia pallida */
     --color-primary-rgb: 30, 94, 75;
-    /* Per rgba() senza hardcoding */
+    /* Usato in combinazione con rgba() per gestire ombre con opacità variabile */
 
-    /* ===== SFONDI: Pergamena botanica ===== */
+    /* ===== SFONDI (Palette Botanica) ===== */
     --color-bg-main: #f4f1eb;
-    /* Crema caldo (come carta da acquerello) */
     --color-bg-card: #fdfcf8;
-    /* Quasi bianco con calore */
 
     /* ===== ACCENTI ===== */
     --color-earth: #7a5c3e;
-    /* Legno/radice caldo */
 
     /* ===== TESTI ===== */
     --color-text-main: #1a2120;
-    /* Quasi nero con sfumatura foresta */
     --color-text-muted: #5a7870;
-    /* Grigio-teal morbido */
 
-    /* ===== BORDI ===== */
+    /* ===== BORDI E DIVISORI ===== */
     --color-border: #d6e5e0;
-    /* Salvia chiarissima */
 
-    /* ===== ERRORE ===== */
+    /* ===== STATI E ALLERTE ===== */
     --color-error: #b54a3f;
 
-    /* ===== FORME ===== */
+    /* ===== GEOMETRIE E SPAZIATURE ===== */
     --border-radius-soft: 16px;
     --border-radius-hard: 8px;
     --shadow-sm: 0 4px 12px rgba(var(--color-primary-rgb), 0.05);
@@ -45,24 +42,37 @@
     --spacing-xl: 2rem;
 }
 
-/* ===== RESET ===== */
+/* ==========================================
+   GLOBAL RESET
+   ========================================== */
+/* Azzera i margini e i padding di default dei browser per avere un punto di partenza uniforme su tutti i device.
+   box-sizing: border-box assicura che il padding non "allarghi" la dimensione totale (width) dell'elemento,
+   semplificando molto la gestione del layout. */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+/* ==========================================
+   STILI BASE STRUTTURALI (HTML & BODY)
+   ========================================== */
 html {
     overflow-y: scroll;
+    /* Forza la presenza della barra di scorrimento fissa per evitare salti laterali ("layout shift") quando il contenuto cambia lunghezza */
     overflow-x: hidden;
+    /* Evita fastidiosi e involontari scroll orizzontali su mobile */
 }
 
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Tipografia a cascata: dal font custom fino ai font di sistema fallback */
     background-color: var(--color-bg-main);
+    /* Associa il colore globale definito nel root */
     color: var(--color-text-main);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    /* Rende i bordi dei font più nitidi e lisci sui display moderni (es. Retina Apple) */
     overflow-x: hidden;
 }
 
@@ -98,9 +108,15 @@ textarea:focus {
     border-color: var(--color-primary);
 }
 
-/* ========== DARK MODE ========== */
+/* ==========================================
+   DARK MODE (TEMA SCURO DINAMICO)
+   ========================================== */
+/* Quando l'utente o il sistema richiede il tema scuro, l'attributo data-theme='dark' viene applicato all'HTML.
+   Questa regola intercetta la modalità e SOTITUISCE "a caldo" tutti i token dei colori.
+   In questo modo, i componenti UI non devono sapere se si è in tema chiaro o scuro, ci pensa il CSS di base. */
 :root[data-theme='dark'] {
     color-scheme: dark;
+    /* Suggerisce al browser di colorare automaticamente le scrollbar o alert nativi in nero */
     --color-bg-main: #0c1412;
     --color-bg-card: #132019;
 
@@ -122,7 +138,13 @@ textarea:focus {
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-/* --- SCROLL LOCK SYSTEM --- */
+/* ==========================================
+   SISTEMA DI BLOCCO DELLO SCROLL (MODAL LOCK)
+   ========================================== */
+/* Questo sistema impedisce un noto bug UX: quando l'utente apre un pop-up/modale, lo sfondo della 
+   pagina (il body sottostante) non deve poter essere scrollato ("scorrimento fantasma").
+   Tramite React, quando un pop-up è aperto, iniettiamo una classe nel body (es. body.post-modal-open).
+   Qui il CSS usa :has() per capire se il body ha quella classe, e in tal caso forza "overflow: hidden" per bloccare lo scorrimento. */
 html:has(body.post-modal-open),
 html:has(body.settings-modal-open),
 html:has(body.comments-modal-open),

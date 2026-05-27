@@ -1,9 +1,19 @@
+/* ==========================================
+ * LOGIN
+ * ==========================================
+ 
+ * Utilizza Flexbox per dividere lo schermo in due metà:
+ * un'immagine evocativa a sinistra (nascosta su mobile) e il form interattivo a destra.
+ */
 .login-container {
     display: flex;
     height: 100vh;
     width: 100vw;
     background-color: var(--color-bg-main);
-    /* Sovrascriviamo le regole di App.tsx per espanderci in tutto lo schermo */
+
+    /* Sovrascriviamo le regole del parent container (App.tsx) 
+       usando position: fixed per forzare la schermata a tutto schermo 
+       in sovraimpressione (z-index alto). */
     position: fixed;
     top: 0;
     left: 0;
@@ -132,7 +142,13 @@
     box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.4);
 }
 
-/* Adattamento mobile */
+/* ==========================================
+ * RESPONSIVE DESIGN (GRACEFUL DEGRADATION)
+ * ==========================================
+ * Su schermi più piccoli di 768px (tablet verticali o smartphone),
+ * disabilitiamo la colonna con l'immagine di sfondo per dare
+ * spazio vitale al form di autenticazione.
+ */
 @media (max-width: 768px) {
     .login-image-side {
         display: none;
@@ -195,7 +211,13 @@
     text-decoration: underline;
 }
 
-/* ========== LOGIN DARK MODE ========== */
+/* ==========================================
+ * LOGIN DARK MODE (CSS TOKENS)
+ * ==========================================
+ * Sfruttiamo il data-attribute [data-theme='dark'] applicato al tag :root 
+ * per creare una gerarchia di specificità maggiore che sovrascrive le regole CSS standard.
+ * Qui usiamo gradienti personalizzati e clip-text per dare un "effetto premium".
+ */
 :root[data-theme='dark'] .login-form-side {
     background: linear-gradient(160deg, #1c3028 0%, #0c1412 100%);
 }

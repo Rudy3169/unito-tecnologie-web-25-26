@@ -2,6 +2,13 @@ import React from 'react';
 import { Skull, Droplets, Pencil, Check, X, Trash2, Plus } from 'lucide-react';
 import type { PlantItem } from '../../types';
 
+/**
+ * COMPONENTE PLANT CARD
+ * Rappresenta la singola essenza vegetale nel "MyGarden" dell'utente.
+ * Supporta l'Inline Editing (modifica diretta senza cambiare pagina) per il soprannome 
+ * e il calcolo dinamico UX-friendly dei giorni mancanti alla prossima irrigazione.
+ */
+
 interface PlantCardProps {
     plant: PlantItem;
     plantPhotoMap: Record<number, string>;
@@ -33,6 +40,12 @@ export function PlantCard({
     const hasNickname = !!plant.plantName && plant.plantName.trim() !== '';
     const imgUrl = plantPhotoMap[plant.id] || plant.urlPhoto || plant.card?.urlDefaultPhoto || '/placeholder-plant.png';
 
+    // ==========================================
+    // CALCOLO DATE LATO CLIENT (UX)
+    // ==========================================
+    // Invece di far calcolare stringhe statiche al server ("Tra 3 giorni"), 
+    // confrontiamo la data di scadenza (UTC) con la mezzanotte locale del client.
+    // Questo garantisce che se l'utente cambia fuso orario, il badge rimanga accurato.
     const getWateringText = () => {
         if (!plant.nextWateringDate) {
             const freq = plant.card?.waterFrequencyDays;

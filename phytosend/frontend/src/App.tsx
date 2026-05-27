@@ -1,25 +1,36 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { LoginPage } from './pages/LoginPage';
+import { LoginPage } from './pages/auth/LoginPage';
 import { Sidebar } from './components/layout/Sidebar';
-import { HomeFeed } from './pages/HomePage';
-import { SearchPage } from './pages/SearchPage';
-import { PlantDetail } from './pages/PlantDetailPage';
-import { Profile } from './pages/ProfilePage';
-import { MyGarden } from './pages/MyGardenPage';
-import { NotificationPage } from './pages/NotificationPage';
-import { SavedPosts } from './pages/SavedPostsPage';
-import { AdminPanel } from './pages/AdminPage';
+import { HomeFeed } from './pages/home/HomePage';
+import { SearchPage } from './pages/search/SearchPage';
+import { PlantDetail } from './pages/plant/PlantDetailPage';
+import { Profile } from './pages/profile/ProfilePage';
+import { MyGarden } from './pages/garden/MyGardenPage';
+import { NotificationPage } from './pages/notifications/NotificationPage';
+import { SavedPosts } from './pages/saved-posts/SavedPostsPage';
+import { AdminPanel } from './pages/admin/AdminPage';
 import { GlobalLoading } from './components/common/GlobalLoading';
 import './styles/App.css';
 
 function App() {
     const navigate = useNavigate();
+
+    // Recupera il ruolo salvato in precedenza per mantenere l'utente loggato anche dopo un refresh
     const savedRole = localStorage.getItem('phytosend_role') as 'USER' | 'ADMIN' | null;
 
+    // ==========================================
+    // STATI GLOBALI DELL'APP
+    // ==========================================
+
+    // Stato di Autenticazione
     const [userRole, setUserRole] = useState<'USER' | 'ADMIN' | null>(savedRole);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(savedRole !== null);
 
+    /**
+     * Funzione chiamata dal LoginPage al momento del login effettuato con successo.
+     * Salva il ruolo, aggiorna lo stato e reindirizza l'utente alla Home.
+     */
     const handleLogin = (role: 'USER' | 'ADMIN') => {
         localStorage.setItem('phytosend_role', role);
         setIsLoggedIn(true);
@@ -27,43 +38,47 @@ function App() {
         navigate('/');
     };
 
+    // Stato di connettività col Server
     const [isBackendReady, setIsBackendReady] = useState<boolean>(false);
-    const [isTakingLong, setIsTakingLong] = useState<boolean>(false);
+    const [isTakingLong, setIsTakingLong] = useState<boolean>(false); // Mostra un messaggio extra se ci mette troppo
 
+    // ==========================================
+    // PING DEL BACKEND (WAITING FOR SPRING BOOT)
+    // ==========================================
+    // Blocca l'UI con un loader finché il backend non risponde.
     useEffect(() => {
         let isMounted = true;
         let attempts = 0;
 
         const checkBackend = async () => {
             try {
-                // Fetch to any endpoint through the Vite proxy.
+                // Fetch a un endpoint qualsiasi. La chiamata passa tramite il proxy di Vite.
                 const res = await fetch('/api/social/posts?page=0&size=1');
 
-                // Vite proxy usually returns 5xx (502, 503, 504) if the backend is down.
+                // Se il server Spring non è ancora su, il proxy di Vite restituisce solitamente un errore 5xx.
                 if (res.status >= 500) {
                     throw new Error('Backend not reachable (Proxy Error)');
                 }
 
-                // A volte, se il proxy fallisce, Vite potrebbe restituire la sua pagina index.html di fallback.
-                // Spring Boot restituirà sempre JSON (sia in caso di successo che di errore 401/403).
+                // Se Vite non trova il proxy configurato, potrebbe rispondere lui stesso con il suo index.html come fallback.
+                // Vogliamo scartare questo caso verificando che non sia HTML.
                 const contentType = res.headers.get('content-type');
                 if (contentType && contentType.includes('text/html')) {
                     throw new Error('Backend not reachable (Vite HTML Fallback)');
                 }
 
-                // If we reach here, it means the server responded.
-                // Note: even if it's 401 Unauthorized, it means the server is running.
+                // Se arriviamo qui, il backend è vivo. Anche un 401 (Unauthorized) o 403 significa che Spring è attivo.
                 if (isMounted) {
                     setIsBackendReady(true);
                 }
             } catch (error) {
-                // Network error: Server is still starting.
+                // Rete non pronta: Il server si sta ancora avviando. Riprova.
                 attempts++;
                 if (attempts > 13 && isMounted) {
-                    setIsTakingLong(true); // After ~26 seconds show taking long message
+                    setIsTakingLong(true); // Dopo circa 26 secondi mostra l'avviso "Ci sta mettendo tanto..."
                 }
                 if (isMounted) {
-                    setTimeout(checkBackend, 2000); // Retry after 2 seconds
+                    setTimeout(checkBackend, 2000); // Ritenta la fetch tra 2 secondi
                 }
             }
         };
@@ -71,29 +86,43 @@ function App() {
         checkBackend();
 
         return () => {
-            isMounted = false;
+            isMounted = false; // Cleanup per prevenire memory leak se il componente viene smontato
         };
     }, []);
 
+    // ==========================================
+    // RENDERING CONDIZIONALE PRINCIPALE
+    // ==========================================
+
+    // FASE 1: Se il backend non è ancora raggiungibile, mostra la schermata di caricamento globale
     if (!isBackendReady) {
         return <GlobalLoading isTakingLong={isTakingLong} />;
     }
 
+    // FASE 2: Se il backend è pronto ma l'utente non è loggato, costringilo sulla pagina di Login
     if (!isLoggedIn) {
         return <LoginPage onLoginSuccess={handleLogin} />;
     }
 
+    // FASE 3: L'utente è loggato ed il backend è pronto -> Mostra l'applicazione completa
     return (
         <div className="app-layout">
+            {/* Sidebar di navigazione globale, visibile in ogni rotta */}
             <Sidebar userRole={userRole} />
 
+            {/* Contenitore principale dove React Router inietterà dinamicamente le varie Pagine in base all'URL */}
             <main className="main-content">
                 <Routes>
                     <Route path="/" element={<HomeFeed />} />
                     <Route path="/search" element={<SearchPage />} />
+
+                    {/* Rotte Dinamiche: I path params (come :plantId o :userId) possono essere letti dai componenti figli */}
                     <Route path="/plant/:plantId" element={<PlantDetail />} />
+
+                    {/* Le route possono avere versioni con o senza parametri dinamici per gestire sia "il mio profilo" che "profilo di un altro" */}
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/profile/:userId" element={<Profile />} />
+
                     <Route path="/admin" element={<AdminPanel />} />
                     <Route path="/my-garden" element={<MyGarden />} />
                     <Route path="/garden/:userId" element={<MyGarden />} />
@@ -102,7 +131,7 @@ function App() {
                 </Routes>
             </main>
 
-            {/* Badge copyright fisso */}
+            {/* Badge copyright fisso in basso a destra */}
             <footer className="copyright-badge">© 2026 PhytoSend</footer>
         </div>
     );

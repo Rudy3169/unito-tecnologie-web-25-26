@@ -2,6 +2,13 @@ import './GlobalLoading.css';
 import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
 import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
 
+/**
+ * COMPONENTE GLOBAL LOADING
+ * Schermata di caricamento a tutto schermo usata in fase di bootstrap dell'app o login.
+ * Supporta dinamicamente il Dark/Light mode tramite lettura dell'attributo DOM `data-theme`
+ * e fornisce feedback contestuale all'utente in caso di ritardi (es. Cold Start del server).
+ */
+
 interface GlobalLoadingProps {
     isTakingLong?: boolean;
 }

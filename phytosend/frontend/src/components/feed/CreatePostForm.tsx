@@ -17,6 +17,13 @@ interface PlantSuggestion {
     urlDefaultPhoto: string;
 }
 
+/**
+ * COMPONENTE CREATE POST FORM
+ * Modale "Smart" ad alta complessità che gestisce l'intero flusso di creazione di un post.
+ * Include manipolazione di file lato client (Canvas API), 
+ * pattern di "Typeahead" con debouncing per la ricerca nel DB,
+ * e logica condizionale complessa (Nuova Pianta vs Pianta Esistente).
+ */
 export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFormProps) {
     // Blocco dello scroll del body quando la modale di creazione post è aperta
     useEffect(() => {
@@ -121,6 +128,12 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
             return;
         }
 
+        // ==========================================
+        // TYPEAHEAD SEARCH & DEBOUNCING
+        // ==========================================
+        // Usiamo un setTimeout (debouncing) di 300ms. Questo evita di lanciare una fetch 
+        // per ogni singola lettera digitata (es. 'M', 'Mo', 'Mon', 'Mons'), 
+        // risparmiando traffico di rete e carico sul database.
         setIsSearching(true);
         const timeoutId = setTimeout(async () => {
             try {
@@ -143,7 +156,12 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         return () => clearTimeout(timeoutId);
     }, [title, postMode, selectedBotanicalCardId]);
 
-    // Gestione Caricamento Immagine
+    // ==========================================
+    // ELABORAZIONE IMMAGINI LATO CLIENT (CANVAS API)
+    // ==========================================
+    // Per evitare di inviare payload enormi al server, prima di fare l'upload
+    // effettuiamo un crop quadrato (1:1) e un ridimensionamento (max 800px) 
+    // dell'immagine direttamente nel browser dell'utente, usando un <canvas> invisibile.
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;

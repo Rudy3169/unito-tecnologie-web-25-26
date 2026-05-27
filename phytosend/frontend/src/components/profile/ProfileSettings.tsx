@@ -4,6 +4,13 @@ import { apiFetch } from '../../api';
 import { WarningModal } from '../common/WarningModal';
 import type { UserProfile } from '../../types';
 
+/**
+ * COMPONENTE PROFILE SETTINGS
+ * Modale per l'aggiornamento dei dati anagrafici dell'utente.
+ * Implementa la validazione dei campi lato client (Nome e Cognome obbligatori) 
+ * prima di inviare il payload (HTTP PUT) al backend.
+ */
+
 interface ProfileSettingsProps {
     user: UserProfile;
     onClose: () => void;

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════
-   PAGINA DETTAGLIO PIANTA
+   DETTAGLIO PIANTA
    ═══════════════════════════════════════════ */
 
 .plant-detail-container {
@@ -69,13 +69,21 @@
     opacity: 0.6;
 }
 
+/* ==========================================
+ * EFFETTI VISIVI (GRADIENTI IN SOVRAPPOSIZIONE)
+ * ==========================================
+ * Questo gradiente trasparente è posizionato in absolute (sopra l'immagine hero).
+ * Serve a creare un contrasto scuro sul fondo dell'immagine per 
+ * favorire la lettura di eventuali testi o pulsanti sovrapposti.
+ * pointer-events: none fa sì che i click "attraversino" il gradiente e colpiscano gli elementi sottostanti.
+ */
 .plant-hero-gradient {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     height: 100px;
-    background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
     pointer-events: none;
 }
 
@@ -138,6 +146,14 @@
     border-bottom: 1px solid var(--color-border);
 }
 
+/* ==========================================
+ * GRIGLIA CARATTERISTICHE (CSS GRID FLUIDA)
+ * ==========================================
+ * Usa 'auto-fill' e 'minmax' per creare una griglia responsiva fluida.
+ * Le schede di cura (es. acqua, sole) si disporranno su più colonne 
+ * a seconda dello spazio disponibile (almeno 260px l'una), 
+ * senza bisogno di media query aggiuntive.
+ */
 .plant-care-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

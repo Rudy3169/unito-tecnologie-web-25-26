@@ -13,6 +13,13 @@ interface SidebarProps {
     userRole: 'USER' | 'ADMIN' | null;
 }
 
+/**
+ * COMPONENTE SIDEBAR (E NAVBAR MOBILE)
+ * Gestisce la navigazione principale, la ricerca unificata (Piante/Utenti), il cambio tema (Dark/Light Mode)
+ * e l'accesso rapido al profilo.
+ * Adotta un pattern ibrido: su schermi grandi si comporta da Top Navbar classica, 
+ * mentre su Mobile si divide in Header superiore e Tab Bar inferiore per l'ergonomia del pollice.
+ */
 export function Sidebar({ userRole }: SidebarProps) {
     const location = useLocation();
     const navigate = useNavigate();
@@ -26,15 +33,17 @@ export function Sidebar({ userRole }: SidebarProps) {
         return initialTheme === 'dark';
     });
 
+    // ==========================================
+    // THEME TOGGLING (DARK / LIGHT MODE)
+    // ==========================================
     const toggleTheme = () => {
-        console.log("[PhytoSend Theme Debug] toggleTheme triggered! Current isDarkMode state:", isDarkMode);
         const newTheme = !isDarkMode ? 'dark' : 'light';
-        console.log("[PhytoSend Theme Debug] Selected new theme value:", newTheme);
         setIsDarkMode(!isDarkMode);
+        // Manipolazione diretta del DOM: cambiamo l'attributo data-theme sul tag <html> (root)
+        // Questo innesca automaticamente tutte le variabili CSS condizionali scritte in index.css
         document.documentElement.setAttribute('data-theme', newTheme);
+        // Persistenza: salviamo la preferenza per i futuri caricamenti di pagina
         localStorage.setItem('phytosend_theme', newTheme);
-        console.log("[PhytoSend Theme Debug] documentElement 'data-theme' set to:", document.documentElement.getAttribute('data-theme'));
-        console.log("[PhytoSend Theme Debug] localStorage 'phytosend_theme' set to:", localStorage.getItem('phytosend_theme'));
     };
 
     const menuRef = useRef<HTMLDivElement>(null);
@@ -76,7 +85,12 @@ export function Sidebar({ userRole }: SidebarProps) {
         }
     }, [location.pathname, location.search]);
 
-    // Stato e sincronizzazione per la modalità di visualizzazione di Post Salvati su mobile
+    // ==========================================
+    // COMUNICAZIONE CROSS-COMPONENT (CUSTOM EVENTS)
+    // ==========================================
+    // Siccome il pulsante Grid/List dei "Post Salvati" su mobile si trova in questa Sidebar (Header),
+    // ma la logica vera e propria sta dentro la pagina SavedPostsPage, usiamo un Event Listener 
+    // sul window object per sincronizzare i due componenti che non hanno un rapporto padre-figlio diretto.
     const [savedPostsViewMode, setSavedPostsViewMode] = useState<'grid' | 'list'>('grid');
 
     useEffect(() => {
@@ -87,8 +101,9 @@ export function Sidebar({ userRole }: SidebarProps) {
             }
         };
         window.addEventListener('sync-saved-posts-view-mode', handleSync);
+        // Appena la sidebar si monta, chiede alla pagina "quale modalità è attiva in questo momento?"
         window.dispatchEvent(new Event('request-saved-posts-view-mode'));
-        return () => window.removeEventListener('sync-saved-posts-view-mode', handleSync);
+        return () => window.removeEventListener('sync-saved-posts-view-mode', handleSync); // Cleanup vitale
     }, []);
 
     const toggleSavedPostsViewMode = (mode: 'grid' | 'list') => {

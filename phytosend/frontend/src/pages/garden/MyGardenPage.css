@@ -1,3 +1,7 @@
+/* ═══════════════════════════════════════════
+   GIARDINO
+   ═══════════════════════════════════════════ */
+
 /* Contenitore Pagina */
 .my-garden-page {
     max-width: 800px;
@@ -86,7 +90,13 @@
     z-index: 1;
 }
 
-/* Leaf icons flanking the title */
+/* ==========================================
+ * ANIMAZIONI MULTIPLE E CONCATENATE
+ * ==========================================
+ * Qui assegniamo DUE animazioni distinte (leafBounce e titleShimmer) 
+ * allo stesso elemento in modo indipendente, separate da virgola.
+ * Il cubic-bezier nella transition assicura un rimbalzo elastico organico.
+ */
 .garden-leaf-icon {
     display: inline-block;
     flex-shrink: 0;
@@ -94,7 +104,7 @@
     filter: drop-shadow(0 1px 3px rgba(var(--color-primary-rgb), 0.2));
     font-size: 2.2rem;
 
-    /* Colora l'emoji con il gradiente del titolo */
+    /* Colora l'emoji sovrascrivendola con il gradiente (Clip-text) */
     background: linear-gradient(135deg,
             var(--color-primary) 0%,
             var(--color-primary-light) 45%,
@@ -240,7 +250,13 @@
 
 
 
-/* Stile Giardino Vuoto */
+/* ==========================================
+ * STATO VUOTO (EMPTY STATE) E ACCESSIBILITA'
+ * ==========================================
+ * Utilizza un bordo tratteggiato (dashed) che universalmente 
+ * suggerisce all'utente un'area vuota "pronta da riempire", 
+ * aumentando l'intuitività e guidando all'azione (Aggiungi Pianta).
+ */
 .empty-garden {
     display: flex;
     flex-direction: column;
@@ -840,7 +856,8 @@ body.post-modal-open .plant-detail-modal {
 
 .care-event-modal-body .form-group label {
     display: block;
-    margin-bottom: 4px; /* Ridotto per avvicinare la scritta al form */
+    margin-bottom: 4px;
+    /* Ridotto per avvicinare la scritta al form */
     color: var(--color-text-main);
     font-weight: 600;
     font-size: 0.95rem;
@@ -878,7 +895,8 @@ body.post-modal-open .plant-detail-modal {
 .care-event-modal-body .form-group input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     padding: 4px;
-    filter: invert(0.5); /* Adatta il colore in base al tema */
+    filter: invert(0.5);
+    /* Adatta il colore in base al tema */
     transition: transform 0.2s ease;
 }
 
@@ -1025,13 +1043,15 @@ body.post-modal-open .plant-detail-modal {
 }
 
 .alive-badge {
-    background: rgba(34, 90, 65, 0.85); /* Verde foresta scuro desaturato */
+    background: rgba(34, 90, 65, 0.85);
+    /* Verde foresta scuro desaturato */
     color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .dead-badge {
-    background: rgba(110, 50, 50, 0.85); /* Rosso mattone scuro desaturato */
+    background: rgba(110, 50, 50, 0.85);
+    /* Rosso mattone scuro desaturato */
     color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -1463,7 +1483,8 @@ body.post-modal-open .plant-detail-modal {
 .timeline-modern::before {
     content: '';
     position: absolute;
-    left: 20px; /* Center of the dot */
+    left: 20px;
+    /* Center of the dot */
     top: 10px;
     bottom: 30px;
     width: 2px;
@@ -1490,7 +1511,8 @@ body.post-modal-open .plant-detail-modal {
 .timeline-item-modern::before {
     content: '';
     position: absolute;
-    left: -4px; /* Centered relative to padding-left 28px */
+    left: -4px;
+    /* Centered relative to padding-left 28px */
     top: 6px;
     width: 10px;
     height: 10px;

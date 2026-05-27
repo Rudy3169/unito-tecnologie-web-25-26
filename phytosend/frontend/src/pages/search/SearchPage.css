@@ -1,3 +1,7 @@
+/* ==========================================
+ * SEARCH PAGE
+ * ========================================== */
+
 .search-page {
     max-width: 680px;
     margin: 0 auto;
@@ -101,7 +105,12 @@
     color: var(--color-primary);
 }
 
-/* Badge per le nuove importazioni */
+/* ==========================================
+ * ANIMAZIONI CUSTOM (CSS KEYFRAMES)
+ * ==========================================
+ * Definisce un'animazione 'pulse-new' per attirare l'attenzione 
+ * sulle piante appena aggiunte al DB (Badge NEW).
+ */
 .badge-new {
     display: inline-flex;
     align-items: center;
@@ -118,6 +127,9 @@
     flex-shrink: 0;
     /* Impedisce al badge di restringersi se il titolo è lungo */
     box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+
+    /* Applica l'animazione 'pulse-new' in modo infinito (loop costante) 
+       con durata di 2 secondi ad ogni ciclo. */
     animation: pulse-new 2s infinite;
 }
 
@@ -128,6 +140,7 @@
 
     50% {
         transform: scale(1.05);
+        /* Al 50% dell'animazione ingrandisce il badge del 5% */
     }
 
     100% {
@@ -135,7 +148,13 @@
     }
 }
 
-/* Assicurati che la griglia delle piante sia ben spaziata */
+/* ==========================================
+ * GRIGLIA FLUIDA (CSS GRID AUTO-FILL)
+ * ==========================================
+ * Questa riga crea una griglia perfettamente responsive SENZA usare media queries.
+ * repeat(auto-fill, minmax(200px, 1fr)): Inserisce quante più colonne possibili
+ * aventi larghezza minima 200px e le allarga equamente (1fr) per occupare tutto lo spazio.
+ */
 .plants-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -155,6 +174,7 @@
     .search-page-header h2 {
         justify-content: center;
     }
+
     .search-page-header p {
         text-align: center;
     }

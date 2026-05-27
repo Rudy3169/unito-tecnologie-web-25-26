@@ -395,6 +395,12 @@
     font-size: 0.95rem;
 }
 
+/* ==========================================
+ * GRIGLIA POST (CSS GRID)
+ * ==========================================
+ * Utilizza CSS Grid per creare una griglia dinamica a 3 colonne paritarie (1fr),
+ * riproducendo il classico pattern a mosaico di Instagram con uno spazio (gap) molto ridotto.
+ */
 .profile-post-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -460,6 +466,14 @@
     animation: fadeIn 0.2s ease;
 }
 
+/* ==========================================
+ * MODALE POST SCROLL (ISOLAMENTO SCROLL)
+ * ==========================================
+ * 'overscroll-behavior: contain' è fondamentale nelle modali:
+ * impedisce il cosiddetto "scroll chaining" (scorrimento fantasma), 
+ * evitando che la pagina sottostante (body) inizi a scorrere quando
+ * lo scroll della modale raggiunge la fine.
+ */
 .profile-post-modal-scroll {
     width: 100%;
     max-width: 600px;
@@ -468,7 +482,7 @@
     padding: 0 var(--spacing-md);
     overscroll-behavior: contain;
 
-    /* Scrollbar nascosta ma funzionale */
+    /* Scrollbar compatta ma funzionale per Firefox */
     scrollbar-width: thin;
     scrollbar-color: var(--color-primary-accent) transparent;
 }

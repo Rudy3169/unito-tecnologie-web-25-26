@@ -1,11 +1,15 @@
 /**
- * Wrapper centralizzato per le chiamate fetch all'API.
- * Se il server risponde con 401, 403 o 500, esegue automaticamente il logout
- * cancellando il localStorage e riportando l'utente alla pagina di login.
+ * API FETCH WRAPPER (Interceptor Pattern base)
+ * 
+ * Centralizza tutte le chiamate di rete verso il backend (Spring Boot).
+ * Agisce da "Interceptor": se il server restituisce codici di errore critici 
+ * legati all'autenticazione (401 Unauthorized, 403 Forbidden) o al server (500, 502, 504),
+ * intercetta la Response prima che arrivi ai componenti React ed esegue un logout 
+ * forzato (cancellazione del JWT dal localStorage) per ragioni di sicurezza e coerenza di stato.
  *
- * Questo risolve il problema in cui, dopo l'avvio di Docker, il backend
- * non è ancora pronto e restituisce 500. Un logout automatico forza un
- * nuovo login che ristabilisce lo stato correttamente.
+ * Questo risolve specifici edge-case:
+ * Es. Dopo il riavvio di Docker, se il backend restituisce 500 perché i token 
+ * in memoria non sono più validi, forziamo il logout per ristabilire la sessione.
  */
 export async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
     const response = await fetch(url, options);

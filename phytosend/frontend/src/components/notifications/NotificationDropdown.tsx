@@ -13,8 +13,10 @@ interface NotificationDropdownProps {
 }
 
 /**
- * Dropdown delle notifiche — mostra le ultime 5 notifiche.
- * Appare sotto la campanella nella navbar.
+ * COMPONENTE NOTIFICATION DROPDOWN
+ * Dropdown contestuale (Presentational) per la visualizzazione rapida delle ultime notifiche.
+ * Appare al click sulla campanella e delega l'effettivo rendering dei singoli messaggi 
+ * al componente figlio NotificationItem.
  */
 export function NotificationDropdown({
     isOpen,

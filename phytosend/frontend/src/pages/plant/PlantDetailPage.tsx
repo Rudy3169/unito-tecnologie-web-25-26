@@ -1,22 +1,35 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sun, Droplets, Flower2, Sprout, FlaskConical, Leaf } from 'lucide-react';
-import { apiFetch } from '../api';
-import type { BotanicalCard } from '../types';
+import { apiFetch } from '../../api';
+import type { BotanicalCard } from '../../types';
 import './PlantDetailPage.css';
 
+/**
+ * COMPONENTE PLANT DETAIL PAGE
+ * Mostra la scheda botanica enciclopedica di una specifica pianta del catalogo.
+ * Recupera l'ID della pianta direttamente dall'URL tramite React Router.
+ */
 export function PlantDetail() {
+    // Estrae il parametro dinamico "plantId" definito nelle rotte di App.tsx
     const { plantId } = useParams<{ plantId: string }>();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // Hook per la navigazione programmatica
     const token = localStorage.getItem('phytosend_token');
 
+    // ==========================================
+    // STATI DEL COMPONENTE
+    // ==========================================
     const [plant, setPlant] = useState<BotanicalCard | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // ==========================================
+    // FETCH DEI DATI BOTANICI
+    // ==========================================
     useEffect(() => {
-        if (!plantId) return;
+        if (!plantId) return; // Evita chiamate a vuoto
 
+        // Richiesta al backend per ottenere i dettagli della pianta
         apiFetch(`/api/catalogo/${plantId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -26,8 +39,8 @@ export function PlantDetail() {
             })
             .then(data => setPlant(data))
             .catch(err => setError(err.message))
-            .finally(() => setLoading(false));
-    }, [plantId]);
+            .finally(() => setLoading(false)); // Ferma il loader a prescindere dal risultato
+    }, [plantId]); // Esegue questo effetto ogni volta che cambia l'ID nell'URL
 
     if (loading) {
         return (
@@ -50,7 +63,12 @@ export function PlantDetail() {
         );
     }
 
-    // Costruiamo le info di cura come array per un rendering dinamico
+    // ==========================================
+    // NORMALIZZAZIONE DATI PER IL RENDER
+    // ==========================================
+    // Costruiamo un array di oggetti per renderizzare dinamicamente le icone e le etichette.
+    // Usiamo il metodo .filter() per scartare in automatico tutte le proprietà 
+    // che il backend non ci ha inviato.
     const careInfo = [
         { icon: <Sun size={20} />, label: 'Esposizione', value: plant.exposure },
         { icon: <Droplets size={20} />, label: 'Irrigazione', value: plant.irrigation },

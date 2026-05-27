@@ -1,13 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ArrowLeft, CheckCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { NotificationItem } from '../components/notifications/NotificationItem';
-import type { NotificationData } from '../types';
-import '../components/notifications/Notifications.css';
+import { NotificationItem } from '../../components/notifications/NotificationItem';
+import type { NotificationData } from '../../types';
+import '../../components/notifications/Notifications.css';
 
 /**
- * Pagina notifiche fullscreen per mobile.
- * Raggiungibile dalla rotta /notifiche.
+ * COMPONENTE NOTIFICATION PAGE
+ * Mostra l'elenco delle notifiche in una vista a pagina intera.
+ * Utilizzata principalmente su schermi piccoli (mobile) dove il dropdown della campanella risulterebbe scomodo.
  */
 export function NotificationPage() {
     const navigate = useNavigate();
@@ -19,8 +20,14 @@ export function NotificationPage() {
     const userId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
 
+    // Calcola se c'è almeno una notifica non letta (usato per mostrare/nascondere il tasto "Segna tutte come lette")
     const hasUnread = notifications.some(n => !n.read);
 
+    // ==========================================
+    // FETCH DELLE NOTIFICHE (PAGINAZIONE)
+    // ==========================================
+    // useCallback "memoizza" questa funzione, impedendo che venga ricreata ad ogni render di React,
+    // ottimizzando l'esecuzione dell'useEffect sottostante.
     const fetchNotifications = useCallback(async (pageNum: number, reset = false) => {
         if (!userId || !token) return;
         setLoading(true);
@@ -34,12 +41,12 @@ export function NotificationPage() {
                 const items: NotificationData[] = data.content || [];
 
                 if (reset) {
-                    setNotifications(items);
+                    setNotifications(items); // Sostituisce la lista (prima pagina)
                 } else {
-                    setNotifications(prev => [...prev, ...items]);
+                    setNotifications(prev => [...prev, ...items]); // Appende i nuovi item alla lista (pagine successive)
                 }
 
-                setHasMore(!data.last);
+                setHasMore(!data.last); // `data.last` è fornito nativamente da Spring Data JPA (interfaccia Page)
                 setPage(pageNum);
             }
         } catch (err) {
@@ -53,6 +60,9 @@ export function NotificationPage() {
         fetchNotifications(0, true);
     }, [fetchNotifications]);
 
+    // ==========================================
+    // INTERAZIONE CON LE NOTIFICHE
+    // ==========================================
     const handleMarkAsRead = async (id: number) => {
         if (!token) return;
         try {
@@ -60,11 +70,13 @@ export function NotificationPage() {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            // Aggiornamento ottimistico: modifico lo stato locale istantaneamente per reattività UX
             setNotifications(prev =>
                 prev.map(n => n.id === id ? { ...n, read: true } : n)
             );
+            // Emetto un evento globale per notificare il badge della campanella nella Sidebar/Navbar
             window.dispatchEvent(new Event('notifications-updated'));
-        } catch { /* silenzioso */ }
+        } catch { /* errore silenziato per non interrompere la UX in caso di problemi temporanei di rete */ }
     };
 
     const handleMarkAllAsRead = async () => {
@@ -75,12 +87,13 @@ export function NotificationPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-            window.dispatchEvent(new Event('notifications-updated'));
+            window.dispatchEvent(new Event('notifications-updated')); // Sincronizza lo stato globale
         } catch { /* silenzioso */ }
     };
 
     return (
         <div className="notification-page">
+            {/** PAGINA NOTIFICHE - HEADER */}
             <div className="notification-page-header">
                 <button className="notification-page-back" onClick={() => navigate(-1)}>
                     <ArrowLeft size={22} />
@@ -98,6 +111,7 @@ export function NotificationPage() {
             </div>
 
             <div className="notification-page-list">
+                {/** PAGINA NOTIFICHE - AZIONI MOBILE*/}
                 {hasUnread && (
                     <div className="notification-mobile-actions">
                         <button onClick={handleMarkAllAsRead} className="notification-mobile-mark-all">
@@ -107,6 +121,7 @@ export function NotificationPage() {
                     </div>
                 )}
 
+                {/** PAGINA NOTIFICHE - ELENCO NOTIFICHE O VUOTO*/}
                 {notifications.length === 0 && !loading ? (
                     <div className="notification-empty notification-empty-page">
                         <span className="notification-empty-icon">🔔</span>
@@ -114,6 +129,7 @@ export function NotificationPage() {
                     </div>
                 ) : (
                     <>
+                        {/** PAGINA NOTIFICHE - NOTIFICHE */}
                         {notifications.map(n => (
                             <NotificationItem
                                 key={n.id}
@@ -121,6 +137,7 @@ export function NotificationPage() {
                                 onMarkAsRead={handleMarkAsRead}
                             />
                         ))}
+                        {/** PAGINA NOTIFICHE - CARICA PIU'*/}
                         {hasMore && (
                             <button
                                 className="notification-load-more"

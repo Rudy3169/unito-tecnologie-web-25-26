@@ -1,3 +1,7 @@
+/*
+ * SIDEBAR E NAVBAR MOBILE
+ */
+
 /* ═══════════════════════════════
    DESKTOP — TOP NAVBAR
 ═══════════════════════════════ */
@@ -233,12 +237,15 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 60px; /* Incrementato a 60px per dare un respiro verticale premium */
+        height: 60px;
+        /* Incrementato a 60px per dare un respiro verticale premium */
         background: var(--color-bg-card);
         border-bottom: 1px solid var(--color-border);
         align-items: center;
-        padding: 0 16px; /* Padding standard di 16px per allinearsi con i margini del sito */
-        gap: 12px;       /* Spazio equilibrato tra logo, barra ed icona notifiche */
+        padding: 0 16px;
+        /* Padding standard di 16px per allinearsi con i margini del sito */
+        gap: 12px;
+        /* Spazio equilibrato tra logo, barra ed icona notifiche */
         z-index: 1100;
         box-shadow: var(--shadow-sm);
     }
@@ -250,7 +257,8 @@
     }
 
     .mobile-header .search-wrapper {
-        height: 38px; /* Altezza definita per un aspetto robusto in stile app iOS/Android */
+        height: 38px;
+        /* Altezza definita per un aspetto robusto in stile app iOS/Android */
         display: flex;
         align-items: center;
         border-radius: 999px;
@@ -273,21 +281,25 @@
         width: 1px;
         height: 16px;
         background-color: var(--color-border);
-        margin: 0 8px; /* Spazio per far respirare il divisore */
+        margin: 0 8px;
+        /* Spazio per far respirare il divisore */
         flex-shrink: 0;
     }
 
     .mobile-header .navbar-search-icon {
         margin-left: 2px;
-        margin-right: 6px; /* Spaziatura tra la lente d'ingrandimento ed il testo */
+        margin-right: 6px;
+        /* Spaziatura tra la lente d'ingrandimento ed il testo */
         color: var(--color-text-muted);
         flex-shrink: 0;
     }
 
     .mobile-header .navbar-search-input {
         height: 100%;
-        padding: 0 12px 0 0; /* Padding destro e azzeramento degli altri */
-        font-size: 0.88rem;   /* Testo leggibile ed elegante */
+        padding: 0 12px 0 0;
+        /* Padding destro e azzeramento degli altri */
+        font-size: 0.88rem;
+        /* Testo leggibile ed elegante */
         border: none;
         background: transparent;
         color: var(--color-text-main);
@@ -296,7 +308,8 @@
     }
 
     .mobile-header .navbar-logo-img.navbar-logo-mobile {
-        height: 32px; /* Logo foglia a 32px, bilanciato e nitido rispetto ai 60px della testata */
+        height: 32px;
+        /* Logo foglia a 32px, bilanciato e nitido rispetto ai 60px della testata */
         width: 32px;
         object-fit: contain;
         flex-shrink: 0;

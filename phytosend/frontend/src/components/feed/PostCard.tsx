@@ -6,6 +6,12 @@ import { apiFetch } from '../../api';
 import type { PostCardLayoutProps, AuthorDto } from '../../types';
 import './PostCard.css';
 
+/**
+ * COMPONENTE POST CARD
+ * Componente "core" usato in Feed, Profilo, Giardino e Salvati per mostrare un singolo post.
+ * Gestisce l'interattività di base (Like, Salvataggio, Cancellazione, apertura Commenti).
+ * È un componente "Smart", nel senso che fa le sue fetch interne per caricare la lista di chi ha messo like.
+ */
 export function PostCard({
     id, title, description, urlphoto, creationDate, author, plant, likesCount = 0, isLikedByMe = false, isSavedByMe = false, commentsCount = 0, onLike, onDelete, onSave, onCommentUpdate, defaultOpenComments = false, defaultOpenLikes = false, highlightCommentId, highlightLikeUserId
 }: PostCardLayoutProps) {
@@ -16,13 +22,17 @@ export function PostCard({
     const [localCommentsCount, setLocalCommentsCount] = useState(commentsCount || 0);
     const navigate = useNavigate();
 
-    // Controllo di sicurezza Frontend: Questo post è mio?
+    // ==========================================
+    // CONTROLLO PERMESSI (AUTHORIZATION LATO CLIENT)
+    // ==========================================
+    // Verifica se il post visualizzato appartiene all'utente loggato.
     const currentUserId = localStorage.getItem('phytosend_userId');
 
-    // Pulizia brutale: toglie spazi e soprattutto le virgolette " o ' invisibili!
+    // Sanitizzazione stringhe: toglie eventuali apici extra dal localStorage che potrebbero far fallire la comparazione.
     const cleanUserId = currentUserId ? currentUserId.replace(/['"]/g, '').trim() : null;
 
-    // Ora facciamo un confronto tra numeri puri e perfetti
+    // Confronto rigoroso tra numeri per abilitare la comparsa del cestino (elimina).
+    // NB: L'autorizzazione vera e propria è comunque assicurata dal backend! Questo è solo per la UI.
     const isMyPost = cleanUserId != null && Number(cleanUserId) === Number(author?.id);
 
     // Sincronizziamo il conteggio locale se la prop cambia dall'esterno (es. refresh globale)
@@ -42,10 +52,14 @@ export function PostCard({
         };
     }, [showLikes]);
 
-    // Funzione per formattare la data in tempo relativo ("2 ore fa", "1 mese fa", ecc.)
+    // ==========================================
+    // PARSING E FORMATTAZIONE DATE
+    // ==========================================
+    // Funzione per formattare la data del post in formato "Tempo Relativo" UX-friendly (es. "2 ore fa").
     const getRelativeTime = (dateStr: string) => {
         if (!dateStr) return '';
-        // Assicuriamoci che venga letta come UTC per evitare sfasamenti
+        // Appende la 'Z' finale per indicare al motore JS che la stringa fornita dal server 
+        // è in formato UTC assoluto, evitando sfasamenti temporali (timezones) dipendenti dal browser del client.
         const utcDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
         const date = new Date(utcDateStr);
         const now = new Date();

@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react';
 import { Skull, Trash2 } from 'lucide-react';
 import type { PlantItem } from '../../types';
 
+/**
+ * COMPONENTE DELETE PLANT MODAL
+ * Modale per la gestione della rimozione di una pianta dal giardino.
+ * Implementa una logica a "due step" (Double Confirmation Pattern) per evitare 
+ * cancellazioni accidentali e differenzia tra "Eliminazione Definitiva" e "Dichiarazione Decesso".
+ */
+
 interface DeletePlantModalProps {
     deletePrompt: number | null;
     myPlants: PlantItem[];

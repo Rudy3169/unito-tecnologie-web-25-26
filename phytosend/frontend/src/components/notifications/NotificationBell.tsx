@@ -7,9 +7,10 @@ import { NotificationSidebar } from './NotificationSidebar';
 import './Notifications.css';
 
 /**
- * Componente campanella per la navbar.
- * Gestisce: badge con contatore non lette, polling ogni 30s,
- * dropdown delle ultime 5, sidebar per lo storico completo.
+ * COMPONENTE NOTIFICATION BELL
+ * Componente "Smart" della Navbar. Gestisce il contatore delle notifiche non lette 
+ * tramite Polling HTTP (ogni 30s) e funge da trigger per Dropdown (Ultime) o Sidebar (Tutte).
+ * Intercetta eventi globali ('notifications-updated') per sincronizzazioni cross-component.
  */
 export function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
@@ -73,7 +74,12 @@ export function NotificationBell() {
         }
     }, [userId, token]);
 
-    // Polling ogni 30 secondi per il contatore
+    // ==========================================
+    // POLLING ARCHITECTURE
+    // ==========================================
+    // Effettua una chiamata HTTP ogni 30 secondi (30000ms) per mantenere aggiornato
+    // il badge delle notifiche non lette, garantendo all'utente un feedback quasi in tempo reale
+    // senza sovraccaricare il server (come avverrebbe con WebSocket o delay più brevi).
     useEffect(() => {
         fetchUnreadCount();
         const interval = setInterval(fetchUnreadCount, 30000);

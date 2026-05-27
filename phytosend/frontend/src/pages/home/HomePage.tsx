@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { useNavigationType } from 'react-router-dom';
 import { PenLine, AlertTriangle } from 'lucide-react';
-import { PostList } from '../components/feed/PostList';
-import { CreatePostForm } from '../components/feed/CreatePostForm';
-import type { PostProps } from '../types';
-import { apiFetch } from '../api';
+import { PostList } from '../../components/feed/PostList';
+import { CreatePostForm } from '../../components/feed/CreatePostForm';
+import type { PostProps } from '../../types';
+import { apiFetch } from '../../api';
 import './HomePage.css';
 
 /**

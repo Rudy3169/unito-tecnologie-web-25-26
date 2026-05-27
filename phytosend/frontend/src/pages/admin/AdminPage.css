@@ -1,3 +1,7 @@
+/* ═══════════════════════════════════════════
+   ADMIN
+   ═══════════════════════════════════════════ */
+
 .admin-dashboard {
     max-width: 1000px;
     margin: 0 auto;
@@ -22,6 +26,13 @@
 
 
 
+/* ==========================================
+ * LAYOUT A GRIGLIA ADATTIVO (CSS GRID 'auto-fit')
+ * ==========================================
+ * 'auto-fit' adatta le colonne (minimo 320px) espandendole (1fr) 
+ * per riempire totalmente lo spazio disponibile nella riga. 
+ * A differenza di 'auto-fill', non lascia "buchi" se lo spazio avanza.
+ */
 .admin-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -138,7 +149,13 @@
     }
 }
 
-/* --- STILI PER I POPUP MODALI --- */
+/* ==========================================
+ * MODALI E BACKDROP FILTER
+ * ==========================================
+ * Utilizziamo backdrop-filter: blur(4px) per sfocare lo sfondo
+ * dietro la modale, creando un effetto di profondità di campo
+ * in stile iOS (Glassmorphism).
+ */
 .admin-modal-overlay {
     position: fixed;
     top: 0;

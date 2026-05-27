@@ -1,0 +1,12 @@
+/* ==========================================
+ * RESPONSIVE DESIGN (MOBILE ADAPTATION)
+ * ==========================================
+ * Su dispositivi mobili nascondiamo con la forza (!important)
+ * l'header della pagina dei post salvati per massimizzare 
+ * lo spazio verticale a disposizione del feed.
+ */
+@media (max-width: 768px) {
+    .saved-posts-page-header {
+        display: none !important;
+    }
+}

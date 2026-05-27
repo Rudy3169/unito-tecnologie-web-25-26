@@ -1,3 +1,7 @@
+/*
+ * COMMENT SECTION
+ */
+
 /* Stile per il cestino posizionato in alto a destra */
 .header-delete-btn {
     margin-left: auto;
@@ -159,7 +163,8 @@
     font-size: 0.9rem;
     color: var(--color-text-main);
     margin-top: 2px;
-    margin-bottom: 4px; /* Rimuove il margine di default del browser che allontanava le azioni dal testo */
+    margin-bottom: 4px;
+    /* Rimuove il margine di default del browser che allontanava le azioni dal testo */
 }
 
 /* Form commento in fondo */
@@ -216,7 +221,8 @@
     display: flex;
     gap: var(--spacing-md);
     margin-top: 4px;
-    margin-bottom: 16px; /* Aggiunge spazio prima del commento o risposta successiva */
+    margin-bottom: 16px;
+    /* Aggiunge spazio prima del commento o risposta successiva */
 }
 
 .comment-mini-actions button {
@@ -337,9 +343,23 @@
 }
 
 @keyframes blinkHighlightComment {
-    0% { background-color: transparent; }
-    25% { background-color: rgba(var(--color-primary-rgb), 0.15); }
-    50% { background-color: transparent; }
-    75% { background-color: rgba(var(--color-primary-rgb), 0.15); }
-    100% { background-color: transparent; }
+    0% {
+        background-color: transparent;
+    }
+
+    25% {
+        background-color: rgba(var(--color-primary-rgb), 0.15);
+    }
+
+    50% {
+        background-color: transparent;
+    }
+
+    75% {
+        background-color: rgba(var(--color-primary-rgb), 0.15);
+    }
+
+    100% {
+        background-color: transparent;
+    }
 }
