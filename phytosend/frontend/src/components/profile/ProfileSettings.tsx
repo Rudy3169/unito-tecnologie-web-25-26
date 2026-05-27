@@ -1,19 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { X, Save } from 'lucide-react';
-import { apiFetch } from '../../utils/apiFetch';
+import { apiFetch } from '../../api';
 import { WarningModal } from '../Common/WarningModal';
-
-interface UserProfile {
-    id: number;
-    name: string;
-    surname: string;
-    email: string;
-    city?: string;
-    phoneNumber?: string;
-    bio?: string;
-    birthDate?: string;
-    role: string;
-}
+import type { UserProfile } from '../../types';
 
 interface ProfileSettingsProps {
     user: UserProfile;

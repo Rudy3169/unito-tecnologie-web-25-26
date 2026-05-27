@@ -1,5 +1,5 @@
-import { PostCard, type PostProps } from './PostCard';
-
+import { PostCard } from './PostCard';
+import type { PostProps } from '../../types';
 interface PostListProps {
     posts: PostProps[];
     onToggleLike: (id: number) => void;

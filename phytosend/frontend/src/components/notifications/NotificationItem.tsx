@@ -1,20 +1,7 @@
 import { Heart, MessageCircle, Reply, Droplets, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import type { NotificationData } from '../../types';
 import './Notifications.css';
-
-export interface NotificationData {
-    id: number;
-    actorId?: number;
-    actorName?: string;
-    actorProfilePhotoUrl?: string;
-    type: 'LIKE_POST' | 'COMMENT' | 'REPLY' | 'LIKE_COMMENT' | 'CARE_WATER';
-    referenceId?: number;
-    secondaryReferenceId?: number;
-    postAuthorId?: number;
-    message: string;
-    read: boolean;
-    createdAt: string;
-}
 
 interface NotificationItemProps {
     notification: NotificationData;

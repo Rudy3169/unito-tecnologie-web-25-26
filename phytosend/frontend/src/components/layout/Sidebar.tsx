@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { Home, Search, User, LogOut, Settings, Leaf, Menu, Bookmark, Sun, Moon, Fence, ArrowLeft, Grid3X3, List } from 'lucide-react';
 import { NotificationBell } from '../Notifications/NotificationBell';
-import { apiFetch } from '../../utils/apiFetch';
+import { apiFetch } from '../../api';
 import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
 import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
 import logoMobileLight from '../../assets/logo/PhytoSend/logo/verde.png';

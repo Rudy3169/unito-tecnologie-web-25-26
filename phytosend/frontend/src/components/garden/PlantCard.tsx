@@ -1,6 +1,6 @@
 import React from 'react';
 import { Skull, Droplets, Pencil, Check, X, Trash2, Plus } from 'lucide-react';
-import type { PlantItem } from './types';
+import type { PlantItem } from '../../types';
 
 interface PlantCardProps {
     plant: PlantItem;

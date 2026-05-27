@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { ImagePlus, X, Check, Loader, Sprout, Fence, Plus } from 'lucide-react';
-import { apiFetch } from '../../utils/apiFetch';
+import { apiFetch } from '../../api';
 import { WarningModal } from '../Common/WarningModal';
 import './CreatePostForm.css';
 

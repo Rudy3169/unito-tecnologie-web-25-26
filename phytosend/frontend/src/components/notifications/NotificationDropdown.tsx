@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NotificationItem } from './NotificationItem';
-import type { NotificationData } from './NotificationItem';
+import type { NotificationData } from '../../types';
 import './Notifications.css';
 
 interface NotificationDropdownProps {

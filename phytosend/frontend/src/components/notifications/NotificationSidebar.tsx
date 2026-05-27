@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { X, CheckCheck } from 'lucide-react';
 import { NotificationItem } from './NotificationItem';
-import type { NotificationData } from './NotificationItem';
+import type { NotificationData } from '../../types';
 import './Notifications.css';
 
 interface NotificationSidebarProps {

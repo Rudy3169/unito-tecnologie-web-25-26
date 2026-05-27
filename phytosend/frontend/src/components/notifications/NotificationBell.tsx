@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import type { NotificationData } from './NotificationItem';
+import type { NotificationData } from '../../types';
 import { NotificationDropdown } from './NotificationDropdown';
 import { NotificationSidebar } from './NotificationSidebar';
 import './Notifications.css';

@@ -1,7 +1,7 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { MessageCircle, X, Send, AlertCircle, Heart, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { apiFetch } from '../../utils/apiFetch';
+import { apiFetch } from '../../api';
 import './CommentSection.css';
 
 interface Comment {

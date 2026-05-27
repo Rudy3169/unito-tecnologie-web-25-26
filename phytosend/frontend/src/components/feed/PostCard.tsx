@@ -2,53 +2,12 @@ import { Heart, MessageCircle, Bookmark, Trash2, X, Loader } from 'lucide-react'
 import { CommentSection } from './CommentSection';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiFetch } from '../../utils/apiFetch';
+import { apiFetch } from '../../api';
+import type { PostCardLayoutProps, AuthorDto } from '../../types';
 import './PostCard.css';
 
-export interface AuthorDto {
-    id: number;
-    name: string;
-    surname: string;
-    email: string;
-    role: string;
-    profilePhotoUrl?: string;
-}
-
-export interface PostProps {
-    id: number;
-    title: string;
-    description: string;
-    urlphoto: string;
-    creationDate: string;
-    author: AuthorDto;
-    plant?: {
-        id: number;
-        name?: string;
-        card?: {
-            id: number;
-            commonName: string;
-        }
-    };
-    likesCount?: number;
-    isLikedByMe?: boolean;
-    isSavedByMe?: boolean;
-    commentsCount?: number;
-    onCommentUpdate: () => void;
-}
-
-interface PostCardLayoutProps extends PostProps {
-    onLike?: (id: number) => void;
-    onDelete?: (id: number) => void;
-    onSave?: (id: number) => void;
-    onCommentUpdate: () => void;
-    defaultOpenComments?: boolean;
-    defaultOpenLikes?: boolean;
-    highlightCommentId?: number;
-    highlightLikeUserId?: number;
-}
-
 export function PostCard({
-    id, title, description, urlphoto, creationDate, author, plant, likesCount, isLikedByMe, isSavedByMe, commentsCount, onLike, onDelete, onSave, onCommentUpdate, defaultOpenComments, defaultOpenLikes, highlightCommentId, highlightLikeUserId
+    id, title, description, urlphoto, creationDate, author, plant, likesCount = 0, isLikedByMe = false, isSavedByMe = false, commentsCount = 0, onLike, onDelete, onSave, onCommentUpdate, defaultOpenComments = false, defaultOpenLikes = false, highlightCommentId, highlightLikeUserId
 }: PostCardLayoutProps) {
     const [showComments, setShowComments] = useState(defaultOpenComments || false);
     const [showLikes, setShowLikes] = useState(defaultOpenLikes || false);
