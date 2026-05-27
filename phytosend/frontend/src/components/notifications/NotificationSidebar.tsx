@@ -8,7 +8,6 @@ interface NotificationSidebarProps {
     isOpen: boolean;
     onClose: () => void;
     onMarkAsRead: (id: number) => void;
-    onCompleteCareEvent: (eventId: number, notificationId: number) => void;
     onMarkAllAsRead: () => void;
 }
 
@@ -21,7 +20,6 @@ export function NotificationSidebar({
     isOpen,
     onClose,
     onMarkAsRead,
-    onCompleteCareEvent,
     onMarkAllAsRead
 }: NotificationSidebarProps) {
     const [notifications, setNotifications] = useState<NotificationData[]>([]);
@@ -140,7 +138,6 @@ export function NotificationSidebar({
                                     key={n.id}
                                     notification={n}
                                     onMarkAsRead={handleMarkAsRead}
-                                    onCompleteCareEvent={onCompleteCareEvent}
                                     onClose={onClose}
                                 />
                             ))}

@@ -1,27 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle, ArrowLeft, ChevronUp, Eye } from 'lucide-react';
-import { PostCard } from '../Feed/PostCard';
-import { ProfileSettings } from './ProfileSettings';
-import type { PostProps } from '../Feed/PostCard';
-import { apiFetch } from '../../utils/apiFetch';
-import { WarningModal } from '../Common/WarningModal';
-import './Profile.css';
-
-interface UserProfile {
-    id: number;
-    name: string;
-    surname: string;
-    email: string;
-    city?: string;
-    phoneNumber?: string;
-    bio?: string;
-    birthDate?: string;
-    role: string;
-    postsCount: number;
-    plantsCount: number;
-    profilePhotoUrl?: string;
-}
+import { PostCard } from '../components/feed/PostCard';
+import { ProfileSettings } from '../components/profile/ProfileSettings';
+import type { PostProps } from '../types';
+import { apiFetch } from '../api';
+import { WarningModal } from '../components/common/WarningModal';
+import type { UserProfile } from '../types';
+import './ProfilePage.css';
 
 export function Profile() {
     const { userId: paramUserId } = useParams<{ userId: string }>();

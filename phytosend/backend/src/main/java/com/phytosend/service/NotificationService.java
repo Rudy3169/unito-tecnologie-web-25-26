@@ -131,4 +131,15 @@ public class NotificationService {
         unread.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(unread);
     }
+
+    /**
+     * Verifica se esiste già una notifica per un tipo specifico e ID secondario.
+     * 
+     * @param type Tipo di notifica
+     * @param secondaryReferenceId ID entità secondaria (es. ID evento di cura)
+     * @return true se la notifica esiste già, false altrimenti
+     */
+    public boolean existsByTypeAndSecondaryReferenceId(NotificationType type, Long secondaryReferenceId) {
+        return notificationRepository.existsByTypeAndSecondaryReferenceId(type, secondaryReferenceId);
+    }
 }

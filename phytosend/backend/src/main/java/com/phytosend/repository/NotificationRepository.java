@@ -33,4 +33,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * Trova tutte le notifiche non lette di un utente.
      */
     List<Notification> findByRecipientIdAndIsReadFalseOrderByCreatedAtDesc(Long recipientId);
+
+    /**
+     * Verifica se esiste già una notifica di un certo tipo per un'entità secondaria.
+     */
+    boolean existsByTypeAndSecondaryReferenceId(com.phytosend.entity.NotificationType type, Long secondaryReferenceId);
 }

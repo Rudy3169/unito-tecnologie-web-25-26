@@ -23,6 +23,9 @@ public class DtoConverter {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private com.phytosend.repository.PlantRepository plantRepository;
+
     /**
      * Converte un'entità User del database in un Data Transfer Object.
      * Utile per omettere campi sensibili come la password in fase di risposta API.
@@ -236,11 +239,24 @@ public class DtoConverter {
                 }
             });
         }
+        
         // Info sull'attore
         if (notification.getActor() != null) {
             dto.setActorId(notification.getActor().getId());
             dto.setActorName(notification.getActor().getName() + " " + notification.getActor().getSurname());
             dto.setActorProfilePhotoUrl(notification.getActor().getProfilePhotoUrl());
+        } else if (notification.getType() == com.phytosend.entity.NotificationType.CARE_WATER && refId != null) {
+            // Usa la foto della pianta come avatar della notifica
+            plantRepository.findById(refId).ifPresent(plant -> {
+                String photoUrl = plant.getUrlPhoto();
+                if (photoUrl == null && plant.getCard() != null) {
+                    photoUrl = plant.getCard().getUrlDefaultPhoto();
+                }
+                if (photoUrl == null) {
+                    photoUrl = "/placeholder-plant.png";
+                }
+                dto.setActorProfilePhotoUrl(photoUrl);
+            });
         }
         return dto;
     }

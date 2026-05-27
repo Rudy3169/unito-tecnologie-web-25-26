@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ArrowLeft, CheckCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { NotificationItem } from './NotificationItem';
-import type { NotificationData } from './NotificationItem';
-import './Notifications.css';
+import { NotificationItem } from '../components/notifications/NotificationItem';
+import type { NotificationData } from '../types';
+import '../components/notifications/Notifications.css';
 
 /**
  * Pagina notifiche fullscreen per mobile.
@@ -79,26 +79,6 @@ export function NotificationPage() {
         } catch { /* silenzioso */ }
     };
 
-    const handleCompleteCareEvent = async (eventId: number, notificationId: number) => {
-        if (!token) return;
-        try {
-            const res = await fetch(`/api/notifications/care-events/${eventId}/complete`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                handleMarkAsRead(notificationId);
-                setNotifications(prev =>
-                    prev.map(n =>
-                        n.id === notificationId
-                            ? { ...n, read: true, message: '✅ ' + n.message.replace('💧 ', '') + ' — Fatto!' }
-                            : n
-                    )
-                );
-            }
-        } catch { /* silenzioso */ }
-    };
-
     return (
         <div className="notification-page">
             <div className="notification-page-header">
@@ -139,7 +119,6 @@ export function NotificationPage() {
                                 key={n.id}
                                 notification={n}
                                 onMarkAsRead={handleMarkAsRead}
-                                onCompleteCareEvent={handleCompleteCareEvent}
                             />
                         ))}
                         {hasMore && (

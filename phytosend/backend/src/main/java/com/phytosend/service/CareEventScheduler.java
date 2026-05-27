@@ -30,15 +30,15 @@ public class CareEventScheduler {
     private NotificationService notificationService;
 
     /**
-     * Cron job che si esegue ogni giorno a mezzanotte.
+     * Cron job che si esegue ogni minuto.
      * Controlla tutti gli eventi di cura (tipo ACQUA) non completati
      * con data programmata <= oggi e genera una notifica CARE_WATER
      * per il proprietario della pianta.
      */
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 * * * * *")
     @Transactional
     public void checkOverdueCareEvents() {
-        log.info("🌙 [CareEventScheduler] Controllo eventi di cura in scadenza...");
+        log.info("[CareEventScheduler] Controllo eventi di cura in scadenza...");
 
         LocalDate today = LocalDate.now();
         List<CareEvent> overdueEvents = careEventRepository
@@ -62,10 +62,16 @@ public class CareEventScheduler {
             }
 
             User owner = plant.getGarden().getOwner();
+            
+            // Controlla se abbiamo già inviato una notifica di sistema per questo specifico evento
+            if (notificationService.existsByTypeAndSecondaryReferenceId(NotificationType.CARE_WATER, event.getId())) {
+                continue;
+            }
+
             String plantName = plant.getName() != null ? plant.getName()
                     : (plant.getCard() != null ? plant.getCard().getCommonName() : "la tua pianta");
 
-            String message = "💧 " + plantName + " ha bisogno di acqua!";
+            String message = plantName + " ha bisogno di acqua!";
 
             // Crea la notifica di sistema (actor = null)
             notificationService.createNotification(
@@ -78,6 +84,8 @@ public class CareEventScheduler {
             count++;
         }
 
-        log.info("🌙 [CareEventScheduler] Generate {} notifiche di irrigazione.", count);
+        if (count > 0) {
+            log.info("[CareEventScheduler] Generate {} nuove notifiche di irrigazione.", count);
+        }
     }
 }

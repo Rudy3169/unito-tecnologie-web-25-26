@@ -1,26 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { Users, Leaf, Sparkles } from 'lucide-react';
 import { useSearchParams, useNavigate, useNavigationType } from 'react-router-dom';
-import { apiFetch } from '../../utils/apiFetch';
+import { apiFetch } from '../api';
+import type { UserResult, PlantResult } from '../types';
 import './SearchPage.css';
-
-interface UserResult {
-    id: number;
-    name: string;
-    surname: string;
-    email: string;
-    role: string;
-    profilePhotoUrl?: string;
-}
-
-interface PlantResult {
-    id: number;
-    commonName: string;
-    scientificName: string;
-    family: string;
-    urlDefaultPhoto?: string;
-    createdAt?: string;
-}
 
 interface SearchCache {
     query: string;

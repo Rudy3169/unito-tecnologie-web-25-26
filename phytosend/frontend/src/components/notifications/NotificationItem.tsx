@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Reply, Droplets, Check } from 'lucide-react';
+import { Heart, MessageCircle, Reply, Droplets } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { NotificationData } from '../../types';
 import './Notifications.css';
@@ -6,7 +6,6 @@ import './Notifications.css';
 interface NotificationItemProps {
     notification: NotificationData;
     onMarkAsRead: (id: number) => void;
-    onCompleteCareEvent?: (eventId: number, notificationId: number) => void;
     onClose?: () => void;
 }
 
@@ -14,7 +13,7 @@ interface NotificationItemProps {
  * Componente singola notifica — usato sia nel Dropdown che nella Sidebar.
  * Mostra avatar, messaggio, timestamp, pallino non letta, e azione rapida per CARE_WATER.
  */
-export function NotificationItem({ notification, onMarkAsRead, onCompleteCareEvent, onClose }: NotificationItemProps) {
+export function NotificationItem({ notification, onMarkAsRead, onClose }: NotificationItemProps) {
     const navigate = useNavigate();
 
     // Icona in base al tipo di notifica
@@ -94,14 +93,6 @@ export function NotificationItem({ notification, onMarkAsRead, onCompleteCareEve
         }
     };
 
-    // Azione rapida: completa evento cura
-    const handleCompleteCareEvent = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (notification.secondaryReferenceId && onCompleteCareEvent) {
-            onCompleteCareEvent(notification.secondaryReferenceId, notification.id);
-        }
-    };
-
     return (
         <div
             className={`notification-item ${!notification.read ? 'unread' : ''}`}
@@ -125,17 +116,6 @@ export function NotificationItem({ notification, onMarkAsRead, onCompleteCareEve
                 <p className="notification-message">{notification.message}</p>
                 <span className="notification-time">{getRelativeTime(notification.createdAt)}</span>
             </div>
-
-            {/* Azione rapida per CARE_WATER */}
-            {notification.type === 'CARE_WATER' && !notification.read && onCompleteCareEvent && (
-                <button
-                    className="notification-quick-action"
-                    onClick={handleCompleteCareEvent}
-                    title="Segna come fatto"
-                >
-                    <Check size={16} />
-                </button>
-            )}
         </div>
     );
 }

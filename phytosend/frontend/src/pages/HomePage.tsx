@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { useNavigationType } from 'react-router-dom';
 import { PenLine, AlertTriangle } from 'lucide-react';
-import { PostList } from './PostList';
-import { CreatePostForm } from './CreatePostForm';
-import type { PostProps } from './PostCard';
-import { apiFetch } from '../../utils/apiFetch';
-import './HomeFeed.css';
+import { PostList } from '../components/feed/PostList';
+import { CreatePostForm } from '../components/feed/CreatePostForm';
+import type { PostProps } from '../types';
+import { apiFetch } from '../api';
+import './HomePage.css';
 
+/**
+ * Interfaccia per la cache della Home.
+ * Serve a memorizzare lo stato del feed quando l'utente naviga via dalla Home 
+ * per poi ripristinarlo al suo ritorno.
+ */
 interface HomeFeedCache {
     posts: PostProps[];
     page: number;
@@ -14,54 +19,71 @@ interface HomeFeedCache {
     scrollY: number;
 }
 
-// Cache in memoria (si perde al reload della pagina, perfetto per conservare lo scroll tornando indietro)
+// Conserva i dati in memoria RAM finché non si fa un refresh forzato del browser.
 let moduleCache: HomeFeedCache | null = null;
 
 export function HomeFeed() {
+    // Rileva il tipo di navigazione
     const navigationType = useNavigationType();
 
-    // Ripristina dalla cache solo se stiamo tornando indietro (POP)
+    // Riflettiamo la cache in un ref locale in modo da poterne leggere i valori in modo sincrono durante il montaggio.
     const cachedRef = useRef<HomeFeedCache | null>(null);
-    const restoredRef = useRef(false);
+    const restoredRef = useRef(false); // Flag per evitare di ripristinare la cache più di una volta per render
 
+    // Ripristino sincronizzato della cache SOLO se stiamo tornando indietro e la cache esiste
     if (!restoredRef.current) {
         if (navigationType === 'POP' && moduleCache) {
             cachedRef.current = moduleCache;
         }
-        moduleCache = null; // pulisci sempre
+        moduleCache = null; // Puliamo la cache globale per non usarla per navigazioni future non volute
         restoredRef.current = true;
     }
 
-    // Funzione per caricare i post
+    // ==========================================
+    // STATI DEL COMPONENTE (STATE MANAGEMENT)
+    // ==========================================
+
+    // Lista dei post visualizzati nel feed
     const [posts, setPosts] = useState<PostProps[]>(cachedRef.current?.posts ?? []);
 
-    // Funzione per aggiungere un post
+    // Stato booleano per la visualizzazione del form di creazione di un nuovo post
     const [showCreateForm, setShowCreateForm] = useState(false);
 
-    // Funzione per eliminare un post
+    // Memorizza l'ID del post che l'utente sta cercando di eliminare
     const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
-    // Pagination state
-    const [page, setPage] = useState(cachedRef.current?.page ?? 0);
-    const [hasMore, setHasMore] = useState(cachedRef.current?.hasMore ?? true);
-    const [loading, setLoading] = useState(false);
+    // Stati per l'impaginazione e lo scroll infinito
+    const [page, setPage] = useState(cachedRef.current?.page ?? 0); // Pagina corrente richiesta al backend
+    const [hasMore, setHasMore] = useState(cachedRef.current?.hasMore ?? true); // true se il server ha ancora post da inviare
+    const [loading, setLoading] = useState(false); // Flag di caricamento per mostrare un feedback visivo
+
+    // Flag per gestire l'animazione invisibile di ripristino dello scroll
     const [restoringScroll, setRestoringScroll] = useState(!!cachedRef.current);
+
+    // Riferimenti usati per catturare l'intersezione dello scroll
     const observerRef = useRef<IntersectionObserver | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Refs per conservare lo stato aggiornato nella funzione di cleanup di unmount
+    // ==========================================
+    // GESTIONE CACHE AL DISMOUNT
+    // ==========================================
+
+    // Refs utilizzati per avere sempre il valore più aggiornato degli stati
     const postsRef = useRef(posts);
     const pageRef = useRef(page);
     const hasMoreRef = useRef(hasMore);
 
+    // Aggiorna il ref ogni volta che la lista dei post cambia
     useEffect(() => {
         postsRef.current = posts;
     }, [posts]);
 
+    // Aggiorna il ref ogni volta che la pagina cambia
     useEffect(() => {
         pageRef.current = page;
     }, [page]);
 
+    // Aggiorna il ref ogni volta che hasMore cambia
     useEffect(() => {
         hasMoreRef.current = hasMore;
     }, [hasMore]);
@@ -148,11 +170,13 @@ export function HomeFeed() {
             .finally(() => setLoading(false));
     };
 
+    // Trigger per il caricamento dei post
     useEffect(() => {
         if (restoringScroll) return;
         caricaPosts(page);
     }, [page]);
 
+    // Gestisce l'aggiunta di un nuovo post
     const handleAddPost = () => {
         if (page === 0) {
             caricaPosts(0);
@@ -273,19 +297,21 @@ export function HomeFeed() {
                 lastPostRef={lastElementRef}
             />
 
+            {/* Footer con lo spinner per lo scroll infinito */}
             {loading && (
                 <div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-text-muted)' }}>
                     Caricamento nuovi post...
                 </div>
             )}
 
+            {/* Footer con lo stato di fine pagina */}
             {!hasMore && posts.length > 0 && (
                 <div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-text-muted)', marginBottom: '40px' }}>
                     Non ci sono altri post da mostrare.
                 </div>
             )}
 
-            {/* POP-UP DI CONFERMA ELIMINAZIONE */}
+            {/* MODAL DI CONFERMA ELIMINAZIONE */}
             {postToDelete !== null && (
                 <div className="comment-overlay" onClick={() => setPostToDelete(null)}>
                     <div className="delete-modal" onClick={e => e.stopPropagation()}>

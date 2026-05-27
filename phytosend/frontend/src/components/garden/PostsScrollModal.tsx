@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { PostCard } from '../Feed/PostCard';
+import { PostCard } from '../feed/PostCard';
 import type { PostProps } from '../../types';
 
 interface PostsScrollModalProps {

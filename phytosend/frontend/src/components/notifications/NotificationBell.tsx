@@ -128,31 +128,6 @@ export function NotificationBell() {
         }
     };
 
-    // Azione rapida: completa evento cura
-    const handleCompleteCareEvent = async (eventId: number, notificationId: number) => {
-        if (!token) return;
-        try {
-            const res = await fetch(`/api/notifications/care-events/${eventId}/complete`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                // Segna anche la notifica come letta
-                handleMarkAsRead(notificationId);
-
-                // Aggiorna la lista rimuovendo l'azione rapida visivamente
-                setRecentNotifications(prev =>
-                    prev.map(n =>
-                        n.id === notificationId
-                            ? { ...n, read: true, message: '✅ ' + n.message.replace('💧 ', '') + ' — Fatto!' }
-                            : n
-                    )
-                );
-            }
-        } catch {
-            // Silenzioso
-        }
-    };
 
     // Toggle dropdown
     const handleBellClick = () => {
@@ -197,7 +172,6 @@ export function NotificationBell() {
                     onOpenSidebar={handleOpenSidebar}
                     notifications={recentNotifications}
                     onMarkAsRead={handleMarkAsRead}
-                    onCompleteCareEvent={handleCompleteCareEvent}
                     onMarkAllAsRead={handleMarkAllAsRead}
                 />
             </div>
@@ -206,7 +180,6 @@ export function NotificationBell() {
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
                 onMarkAsRead={handleMarkAsRead}
-                onCompleteCareEvent={handleCompleteCareEvent}
                 onMarkAllAsRead={handleMarkAllAsRead}
             />
         </>

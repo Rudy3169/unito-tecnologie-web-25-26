@@ -1,22 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sun, Droplets, Flower2, Sprout, FlaskConical, Leaf } from 'lucide-react';
-import { apiFetch } from '../../utils/apiFetch';
-import './PlantDetail.css';
-
-interface BotanicalCard {
-    id: number;
-    commonName: string;
-    scientificName: string;
-    family: string;
-    exposure?: string;
-    irrigation?: string;
-    waterFrequencyDays?: string;
-    fertilization?: string;
-    soil?: string;
-    urlDefaultPhoto?: string;
-    createdAt?: string;
-}
+import { apiFetch } from '../api';
+import type { BotanicalCard } from '../types';
+import './PlantDetailPage.css';
 
 export function PlantDetail() {
     const { plantId } = useParams<{ plantId: string }>();

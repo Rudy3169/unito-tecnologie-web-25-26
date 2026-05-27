@@ -9,7 +9,6 @@ interface NotificationDropdownProps {
     onOpenSidebar: () => void;
     notifications: NotificationData[];
     onMarkAsRead: (id: number) => void;
-    onCompleteCareEvent: (eventId: number, notificationId: number) => void;
     onMarkAllAsRead: () => void;
 }
 
@@ -23,7 +22,6 @@ export function NotificationDropdown({
     onOpenSidebar,
     notifications,
     onMarkAsRead,
-    onCompleteCareEvent,
     onMarkAllAsRead
 }: NotificationDropdownProps) {
     const [isVisible, setIsVisible] = useState(false);
@@ -63,7 +61,6 @@ export function NotificationDropdown({
                                 key={n.id}
                                 notification={n}
                                 onMarkAsRead={onMarkAsRead}
-                                onCompleteCareEvent={onCompleteCareEvent}
                                 onClose={onClose}
                             />
                         ))

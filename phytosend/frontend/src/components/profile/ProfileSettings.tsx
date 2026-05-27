@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { X, Save } from 'lucide-react';
 import { apiFetch } from '../../api';
-import { WarningModal } from '../Common/WarningModal';
+import { WarningModal } from '../common/WarningModal';
 import type { UserProfile } from '../../types';
 
 interface ProfileSettingsProps {

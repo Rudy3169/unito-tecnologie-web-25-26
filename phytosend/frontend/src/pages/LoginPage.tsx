@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { Eye, EyeOff } from 'lucide-react'; // <-- Importate le due icone!
-import { WarningModal } from '../Common/WarningModal';
+import { WarningModal } from '../components/common/WarningModal';
 import './LoginPage.css';
 
 // Il tuo fantastico logo
-import logoLight from '../../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
-import logoDark from '../../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
+import logoLight from '../assets/logo/PhytoSend/logo & scritta/v2 verde scuro.png';
+import logoDark from '../assets/logo/PhytoSend/logo & scritta/v2 bianco.png';
 
 interface LoginPageProps {
     onLoginSuccess: (role: 'USER' | 'ADMIN') => void;

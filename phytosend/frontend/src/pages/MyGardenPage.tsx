@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Plus, Sprout, Skull, Loader, ArrowLeft, ChevronUp } from 'lucide-react';
-import type { PostProps } from '../Feed/PostCard';
-import { apiFetch } from '../../utils/apiFetch';
-import '../Profile/Profile.css';
-import { WarningModal } from '../Common/WarningModal';
-import './MyGarden.css';
+import type { PostProps } from '../types';
+import { apiFetch } from '../api';
+import './ProfilePage.css';
+import { WarningModal } from '../components/common/WarningModal';
+import './MyGardenPage.css';
 
-import { PlantCard } from './PlantCard';
-import { AddPlantModal, DeletePlantModal, PlantDetailModal, PostsScrollModal } from './MyGardenModals';
-import type { PlantItem, PostItem, PlantSuggestion } from './types';
+import { PlantCard } from '../components/garden/PlantCard';
+import { AddPlantModal } from '../components/garden/AddPlantModal';
+import { DeletePlantModal } from '../components/garden/DeletePlantModal';
+import { PlantDetailModal } from '../components/garden/PlantDetailModal';
+import { PostsScrollModal } from '../components/garden/PostsScrollModal';
+import type { PlantItem, PostItem, PlantSuggestion } from '../types';
 
 // Funzione principale che gestisce il giardino personale
 export function MyGarden() {

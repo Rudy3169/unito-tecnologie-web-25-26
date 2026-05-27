@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, DatabaseBackup, Loader, Server, AlertTriangle, CheckCircle, Info } from 'lucide-react';
-import { apiFetch } from '../../utils/apiFetch';
-import './AdminPanel.css';
+import { apiFetch } from '../api';
+import './AdminPage.css';
 
 export function AdminPanel() {
     const [totalPlants, setTotalPlants] = useState<number | null>(null);

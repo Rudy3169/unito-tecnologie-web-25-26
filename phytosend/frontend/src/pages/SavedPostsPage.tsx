@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { apiFetch } from '../../utils/apiFetch';
-import { PostList } from '../Feed/PostList';
-import { PostCard } from '../Feed/PostCard';
-import type { PostProps } from '../Feed/PostCard';
+import { apiFetch } from '../api';
+import { PostList } from '../components/feed/PostList';
+import { PostCard } from '../components/feed/PostCard';
+import type { PostProps } from '../types';
 import { Bookmark, Grid3X3, List, Heart, MessageCircle } from 'lucide-react';
-import '../Feed/HomeFeed.css';
-import '../Profile/Profile.css'; // Per riutilizzare la griglia e la modale del profilo
+import './HomePage.css';
+import './ProfilePage.css'; // Per riutilizzare la griglia e la modale del profilo
 
 export function SavedPosts() {
     const [posts, setPosts] = useState<PostProps[]>([]);

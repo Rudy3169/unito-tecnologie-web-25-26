@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { Sidebar } from './components/Sidebar/Sidebar';
-import { HomeFeed } from './components/Feed/HomeFeed';
-import { LoginPage } from './components/Auth/LoginPage';
-import { Profile } from './components/Profile/Profile';
-import { SearchPage } from './components/Search/SearchPage';
-import { AdminPanel } from './components/Admin/AdminPanel';
-import { MyGarden } from './components/MyGarden/MyGarden';
-import { PlantDetail } from './components/Search/PlantDetail';
-import { SavedPosts } from './components/Feed/SavedPosts';
-import { NotificationPage } from './components/Notifications/NotificationPage';
-import { GlobalLoading } from './components/Common/GlobalLoading';
+import { LoginPage } from './pages/LoginPage';
+import { Sidebar } from './components/layout/Sidebar';
+import { HomeFeed } from './pages/HomePage';
+import { SearchPage } from './pages/SearchPage';
+import { PlantDetail } from './pages/PlantDetailPage';
+import { Profile } from './pages/ProfilePage';
+import { MyGarden } from './pages/MyGardenPage';
+import { NotificationPage } from './pages/NotificationPage';
+import { SavedPosts } from './pages/SavedPostsPage';
+import { AdminPanel } from './pages/AdminPage';
+import { GlobalLoading } from './components/common/GlobalLoading';
 import './styles/App.css';
 
 function App() {

@@ -35,7 +35,11 @@ export function PlantCard({
 
     const getWateringText = () => {
         if (!plant.nextWateringDate) {
-            return `tra ${plant.card?.waterFrequencyDays || 'Regolare'} giorni`;
+            const freq = plant.card?.waterFrequencyDays;
+            if (typeof freq === 'number') {
+                return `tra ${freq} giorn${freq === 1 ? 'o' : 'i'}`;
+            }
+            return `tra Regolare giorni`;
         }
 
         const today = new Date();
@@ -48,11 +52,12 @@ export function PlantCard({
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays > 0) {
-            return `tra ${diffDays} giorni`;
+            return `tra ${diffDays} giorn${diffDays === 1 ? 'o' : 'i'}`;
         } else if (diffDays === 0) {
             return <strong style={{ color: '#0ea5e9' }}>Oggi</strong>;
         } else {
-            return <strong style={{ color: '#ef4444' }}>In ritardo di {Math.abs(diffDays)} giorni</strong>;
+            const absDays = Math.abs(diffDays);
+            return <strong style={{ color: '#ef4444' }}>In ritardo di {absDays} giorn{absDays === 1 ? 'o' : 'i'}</strong>;
         }
     };
 
