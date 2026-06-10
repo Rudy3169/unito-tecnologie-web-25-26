@@ -3,9 +3,9 @@
 ## 1. Scenari di Utilizzo
 Sulla base della visione di PhytoSend come un social network che unisce la cura del verde al benessere comunitario, sono stati individuati i seguenti scenari principali:
 
-- **Scenario A (Gestione Personale):** Un utente utilizza l'applicazione per gestire il proprio "angolo verde". Vuole registrare una nuova pianta appena acquistata, ricevere consigli sulla cura consultando il catalogo botanico e ricevere notifiche automatiche per le annaffiature per evitare che la pianta muoia.
-- **Scenario B (Social & Supporto):** Un utente nota che una delle sue piante ha delle macchie sulle foglie. Condivide una foto nel feed pubblico e chiede consiglio alla community. Un altro utente, esperto coltivatore, visualizza la richiesta e fornisce una diagnosi utile tramite un commento.
-- **Scenario C (Moderazione e Amministrazione):** Un amministratore della piattaforma naviga nell'Admin Panel per monitorare le statistiche di sistema e gestire le funzionalità core (come la ricarica dei dati del catalogo e la visione d'insieme) per assicurare la stabilità del servizio.
+- **Scenario A (Gestione Personale):** Un utente utilizza l'applicazione per gestire il proprio "angolo verde". Vuole registrare una nuova pianta appena acquistata, ricevere consigli sulla cura consultando il catalogo botanico e ricevere notifiche automatiche per le annaffiature per evitare che la pianta muoia. *Dispositivo prevalente: smartphone, durante la routine quotidiana di cura delle piante.*
+- **Scenario B (Social & Supporto):** Un utente nota che una delle sue piante ha delle macchie sulle foglie. Condivide una foto nel feed pubblico e chiede consiglio alla community. Un altro utente, esperto coltivatore, visualizza la richiesta e fornisce una diagnosi utile tramite un commento. *Dispositivo: indifferente (smartphone per chi pubblica in mobilità, computer o tablet per chi legge e risponde con più calma).*
+- **Scenario C (Moderazione e Amministrazione):** Un amministratore della piattaforma naviga nell'Admin Panel per monitorare le statistiche di sistema e gestire le funzionalità core (come la ricarica dei dati del catalogo e la visione d'insieme) per assicurare la stabilità del servizio. *Dispositivo prevalente: computer desktop, data la natura gestionale e la necessità di avere una visione d'insieme del pannello.*
 
 ---
 
@@ -45,6 +45,14 @@ Sulla base della visione di PhytoSend come un social network che unisce la cura 
 5. L'utente esperto inserisce un commento con un consiglio pratico (es. "Hai dato troppa acqua!").
 6. L'autore originale riceve una notifica push in-app che lo avvisa del nuovo commento.
 7. L'autore può rispondere al commento, mettere "Mi Piace" per ringraziare.
+
+### Caso d'Uso 3: Monitoraggio e Gestione della Piattaforma (Rif. Scenario C)
+1. L'amministratore effettua il login con le proprie credenziali admin.
+2. Il sistema riconosce il ruolo `ADMIN` e rende visibile il link al pannello di amministrazione nella navbar.
+3. L'amministratore accede all'AdminPanel, dove visualizza le statistiche aggregate della piattaforma: numero di utenti registrati, piante censite, post pubblicati e catalogo botanico.
+4. Naviga nella sezione del catalogo botanico per verificare la completezza dei dati delle specie presenti.
+5. Se necessario, avvia manualmente il ricaricamento (re-seed) dei dati del catalogo tramite l'apposita funzione.
+6. Può consultare la lista degli utenti e dei loro giardini per avere una visione d'insieme dello stato della community.
 
 ---
 
