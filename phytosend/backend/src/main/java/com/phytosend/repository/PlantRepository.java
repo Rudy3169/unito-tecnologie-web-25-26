@@ -17,4 +17,10 @@ public interface PlantRepository extends JpaRepository<Plant, Long> {
      * @return Lista di piante del proprietario
      */
     List<Plant> findByGardenOwnerId(Long ownerId);
+
+    /**
+     * Conta il numero di piante vive (senza data di morte)
+     * @return Numero di piante vive
+     */
+    long countByDeathDateIsNull();
 }

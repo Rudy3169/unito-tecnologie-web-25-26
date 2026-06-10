@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, DatabaseBackup, Loader, Server, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { LayoutDashboard, DatabaseBackup, Loader, Server, AlertTriangle, CheckCircle, Info, Users, FileText, Sprout } from 'lucide-react';
 import { apiFetch } from '../../api';
 import './AdminPage.css';
 
@@ -9,7 +9,19 @@ import './AdminPage.css';
  * L'accesso a questa rotta è protetto sia sul frontend (nel Router) che sul backend (Spring Security).
  */
 export function AdminPanel() {
-    const [totalPlants, setTotalPlants] = useState<number | null>(null);
+    const [stats, setStats] = useState<{
+        totalPlants: number | null,
+        totalUsers: number | null,
+        totalPosts: number | null,
+        totalAlivePlants: number | null,
+        totalNotifications: number | null
+    }>({
+        totalPlants: null,
+        totalUsers: null,
+        totalPosts: null,
+        totalAlivePlants: null,
+        totalNotifications: null
+    });
     const [isFetchingStats, setIsFetchingStats] = useState(false);
     const [isReloading, setIsReloading] = useState(false);
 
@@ -45,7 +57,13 @@ export function AdminPanel() {
             });
             if (response.ok) {
                 const data = await response.json();
-                setTotalPlants(data.totalPlants);
+                setStats({
+                    totalPlants: data.totalPlants,
+                    totalUsers: data.totalUsers,
+                    totalPosts: data.totalPosts,
+                    totalAlivePlants: data.totalAlivePlants,
+                    totalNotifications: data.totalNotifications
+                });
             }
         } catch (error) {
             console.error("Errore recupero statistiche", error);
@@ -110,22 +128,40 @@ export function AdminPanel() {
         <div className="admin-dashboard">
             <div className="admin-header">
                 <h2><LayoutDashboard size={32} /> Command Center</h2>
-                {/* Il badge dell'API esterna è stato rimosso */}
             </div>
 
             <div className="admin-grid">
+                {/* CARD 1: Statistiche Community */}
+                <div className="admin-card">
+                    <div className="admin-card-header"><Users size={24} /> Statistiche Community</div>
+                    <p>Panoramica in tempo reale dell'utilizzo social dell'applicazione.</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px', marginTop: 'auto' }}>
+                        <div className="stat-box" style={{ marginBottom: 0 }}>
+                            <h4>{isFetchingStats && stats.totalUsers === null ? <Loader className="spin" /> : stats.totalUsers}</h4>
+                            <span><Users size={14} style={{ marginRight: '4px', verticalAlign: 'middle', marginTop: '-2px' }} />Utenti</span>
+                        </div>
+                        <div className="stat-box" style={{ marginBottom: 0 }}>
+                            <h4>{isFetchingStats && stats.totalPosts === null ? <Loader className="spin" /> : stats.totalPosts}</h4>
+                            <span><FileText size={14} style={{ marginRight: '4px', verticalAlign: 'middle', marginTop: '-2px' }} />Post</span>
+                        </div>
+                        <div className="stat-box" style={{ marginBottom: 0 }}>
+                            <h4>{isFetchingStats && stats.totalAlivePlants === null ? <Loader className="spin" /> : stats.totalAlivePlants}</h4>
+                            <span><Sprout size={14} style={{ marginRight: '4px', verticalAlign: 'middle', marginTop: '-2px' }} />Piante Vive</span>
+                        </div>
+                    </div>
+                </div>
 
-                {/* CARD 1: Statistiche Database */}
+                {/* CARD 2: Statistiche Database */}
                 <div className="admin-card">
                     <div className="admin-card-header"><Server size={24} /> Stato Database</div>
                     <p>Contenuto attuale del tuo database locale PostgreSQL.</p>
-                    <div className="stat-box">
-                        <h4>{isFetchingStats && totalPlants === null ? <Loader className="spin" /> : totalPlants}</h4>
+                    <div className="stat-box" style={{ marginTop: 'auto', marginBottom: 0 }}>
+                        <h4>{isFetchingStats && stats.totalPlants === null ? <Loader className="spin" /> : stats.totalPlants}</h4>
                         <span>Schede Botaniche</span>
                     </div>
                 </div>
 
-                {/* CARD 2: Sincronizzazione Database */}
+                {/* CARD 3: Sincronizzazione Database */}
                 <div className="admin-card">
                     <div className="admin-card-header"><DatabaseBackup size={24} /> Sincronizza Catalogo</div>
                     <p>Aggiorna il database locale con le ultime schede botaniche dal file <strong>data.sql</strong>. <br />I nuovi dati verranno aggiunti senza sovrascrivere o eliminare i tuoi progressi.</p>
@@ -147,7 +183,7 @@ export function AdminPanel() {
                 </div>
             </div>
 
-            {/* Popup Modale */}
+            {/* Popup Modale Generico */}
             {modalConfig.isOpen && (
                 <div className="admin-modal-overlay">
                     <div className="admin-modal">
