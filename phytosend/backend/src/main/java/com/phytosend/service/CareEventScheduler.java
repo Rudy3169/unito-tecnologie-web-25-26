@@ -8,6 +8,8 @@ import com.phytosend.repository.CareEventRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,19 @@ public class CareEventScheduler {
 
     @Autowired
     private NotificationService notificationService;
+
+    /**
+     * Esegue un controllo immediato degli eventi di cura all'avvio dell'applicazione.
+     * Viene invocato dopo che tutti i CommandLineRunner (seeders) sono terminati,
+     * garantendo che eventuali eventi di cura già scaduti nel database generino
+     * subito le relative notifiche, senza attendere il primo ciclo del cron job.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional
+    public void onApplicationReady() {
+        log.info("[CareEventScheduler] Controllo iniziale eventi di cura all'avvio...");
+        checkOverdueCareEvents();
+    }
 
     /**
      * Cron job che si esegue ogni minuto.

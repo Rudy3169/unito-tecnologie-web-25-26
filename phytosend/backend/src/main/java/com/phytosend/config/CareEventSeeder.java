@@ -58,9 +58,17 @@ public class CareEventSeeder implements CommandLineRunner {
 
             LocalDate eventDate = plant.getPurchaseDate().plusDays(freq);
             LocalDate limitDate = plant.getDeathDate() != null ? plant.getDeathDate() : LocalDate.now();
+
+            // Per le piante vive, fermiamo il loop di storico un ciclo prima,
+            // così l'ultimo evento pendente risulta già scaduto al momento del seeding.
+            // Questo simula che la pianta ha bisogno di acqua e permette al
+            // CareEventScheduler di generare notifiche CARE_WATER all'avvio.
+            LocalDate waterHistoryLimit = (plant.getDeathDate() == null)
+                    ? limitDate.minusDays(freq / 2)
+                    : limitDate;
             
             // Genera storico annaffiature
-            while (eventDate.isBefore(limitDate) || eventDate.isEqual(limitDate)) {
+            while (eventDate.isBefore(waterHistoryLimit) || eventDate.isEqual(waterHistoryLimit)) {
                 CareEvent waterEvent = new CareEvent();
                 waterEvent.setPlant(plant);
                 waterEvent.setType("ACQUA");
@@ -78,8 +86,9 @@ public class CareEventSeeder implements CommandLineRunner {
                 eventDate = eventDate.plusDays(freq);
             }
             
-            // Prossima annaffiatura (futura o da fare oggi)
-            // La generiamo solo se la pianta NON è morta
+            // Prossima annaffiatura: per le piante vive, eventDate cade qualche giorno
+            // nel passato (scaduta), così il CareEventScheduler genera subito le notifiche.
+            // La generiamo solo se la pianta NON è morta.
             if (plant.getDeathDate() == null) {
                 CareEvent futureWater = new CareEvent();
                 futureWater.setPlant(plant);
