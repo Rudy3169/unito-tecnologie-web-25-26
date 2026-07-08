@@ -1,7 +1,7 @@
 # Documento di Sintesi - PhytoSend
 
 ## Adeguatezza dei framework utilizzati e difficoltà riscontrate
-La scelta obbligata dello stack **React (Vite) + Spring Boot** si è rivelata molto efficace per la natura dell'applicazione. Spring Boot, grazie a Spring Data JPA e alla sua solida architettura a layer (Controller, Service, Repository), ha semplificato enormemente la gestione del modello relazionale (Utenti, Piante, Giardini, Post, Commenti e Notifiche) e lo sviluppo di un task asincrono con `@Scheduled` per il controllo notturno delle annaffiature (`CareEventScheduler`).
+La scelta obbligata dello stack **React (Vite) + Spring Boot** si è rivelata molto efficace per la natura dell'applicazione. Spring Boot, grazie a Spring Data JPA e alla sua solida architettura a layer (Controller, Service, Repository), ha semplificato enormemente la gestione del modello relazionale (Utenti, Piante, Giardini, Post, Commenti e Notifiche) e lo sviluppo di un task asincrono con `@Scheduled` per il controllo periodico delle annaffiature (`CareEventScheduler`).
 Lato client, React ha permesso di sviluppare interfacce molto reattive (come il toggle dei "Like", il salvataggio dei post e la ricerca dinamica nel catalogo botanico) attraverso la scomposizione in componenti riutilizzabili. 
 Tuttavia, sono emerse alcune sfide:
 - **Gestione dello stato globale in React:** Senza librerie esterne come Redux, il passaggio di funzioni di callback e stati tra componenti distanti (prop drilling) per aggiornare, ad esempio, il badge delle notifiche o il feed dopo la creazione di un post, ha richiesto un'attenta progettazione.
@@ -14,7 +14,7 @@ Per rendere PhytoSend disponibile al mondo, l'approccio ideale sfrutta la contai
 
 ## Strumenti ulteriori in prospettiva
 Per un'espansione e un miglioramento del progetto su scala reale, si potrebbero adottare:
-- **Cloud Object Storage (es. AWS S3 o Cloudinary):** Attualmente i file multimediali (foto delle piante e dei post) vengono salvati localmente in una cartella `uploads`. In produzione, servirebbe uno storage esterno per garantire scalabilità e non perdere le immagini ai riavvii dei server.
+- **Cloud Object Storage (es. AWS S3 o Cloudinary):** Attualmente le foto profilo degli utenti vengono salvate localmente in una cartella `uploads`, mentre le immagini delle piante nel catalogo botanico sono link esterni da internet. In produzione, servirebbe uno storage esterno per le foto profilo per garantire scalabilità e non perdere le immagini ai riavvii dei server.
 - **WebSockets (es. Spring WebSocket / STOMP):** Le notifiche attualmente richiedono il refresh o chiamate HTTP per aggiornarsi. Le WebSockets permetterebbero di ricevere notifiche push in tempo reale (es. quando qualcuno commenta un post).
 - **State Manager Globale (es. Zustand o Redux):** Per gestire lo stato dell'utente loggato, le notifiche e il giardino in maniera più pulita su React.
 

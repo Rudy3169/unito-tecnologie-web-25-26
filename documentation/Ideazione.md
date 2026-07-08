@@ -60,10 +60,10 @@ Sulla base della visione di PhytoSend come un social network che unisce la cura 
 L'implementazione realizzata sviluppa appieno questi casi d'uso, integrando backend strutturato (Spring Boot) e frontend reattivo (React).
 
 ### Funzionalità Core Implementate:
-- **Gestione Ruoli e Sicurezza:** Sistema di Login/Registrazione con autenticazione JWT e due ruoli distinti (`USER` e `ADMIN`) per differenziare i permessi di accesso, in particolare al pannello di amministrazione (AdminPanel).
+- **Gestione Ruoli e Sicurezza:** Sistema di Login con autenticazione JWT e utenti predefiniti, con due ruoli distinti (`USER` e `ADMIN`) per differenziare i permessi di accesso, in particolare al pannello di amministrazione (AdminPanel).
 - **Gestione "Il mio Giardino" e Piante:** Completa implementazione CRUD (Create, Read, Update, Delete) per il giardino dell'utente. Si distingue tra cancellazione definitiva (Hard Delete) e segnalazione di "Morte" della pianta, mantenendo i ricordi fotografici.
 - **Bacheca Sociale Avanzata:** Implementazione della creazione di post (anche legati a piante specifiche del giardino), con funzionalità di Like, salvataggio post (Preferiti), e un sistema di Commenti thread-based.
-- **Sistema di Notifiche e Task Asincroni:** Sviluppo di un servizio in background (`@Scheduled`) che analizza ogni notte lo stato delle piante e invia notifiche in-app relative alle necessità di cura (es. innaffiatura).
+- **Sistema di Notifiche e Task Asincroni:** Sviluppo di un servizio in background (`@Scheduled`) che analizza periodicamente lo stato delle piante e invia notifiche in-app relative alle necessità di cura (es. innaffiatura).
 
 ### Motivazione e Scelte Architetturali: 
 Questa selezione di funzionalità ha richiesto lo sviluppo di un'architettura dati complessa e completa:
