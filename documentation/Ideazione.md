@@ -18,7 +18,7 @@ Sulla base della visione di PhytoSend come un social network che unisce la cura 
 ### Scenario B: Social & Supporto
 - **Attori:**
   - **Giardiniere in difficoltà (Utente Base `USER`):** Vuole ricevere un parere affidabile su un problema.
-  - **Esperto (Utente Base `USER` con maggiore esperienza):** Vuole condividere la propria conoscenza, commentare e lasciare "Like" per aiutare gli altri.
+  - **Esperto (Utente Base `USER`):** Vuole condividere la propria conoscenza, commentare e lasciare "Like" per aiutare gli altri.
 - **Obiettivo:** Risolvere un problema di cura della pianta tramite l'interazione sociale.
 
 ### Scenario C: Moderazione e Amministrazione
@@ -31,20 +31,21 @@ Sulla base della visione di PhytoSend come un social network che unisce la cura 
 
 ### Caso d'Uso 1: Adozione di una nuova pianta dal Catalogo (Rif. Scenario A)
 1. L'utente effettua il login e accede alla dashboard personale "Il mio Giardino".
-2. Clicca per aggiungere un post/pianta e cerca una specie nel Catalogo Botanico integrato.
-3. Seleziona la pianta trovata (es. "Ficus") e inserisce opzionalmente un soprannome.
-4. L'utente sceglie di aggiungerla anche al proprio giardino tramite un apposito toggle e completa la creazione.
-5. Il backend registra la pianta associandola al giardino dell'utente.
-6. Le scadenze di cura iniziali vengono generate e l'utente riceverà delle notifiche automatiche generate dal sistema (`CareEventScheduler`) allo scadere del tempo.
+2. Clicca sul pulsante per aggiungere una nuova pianta, aprendo la modale di aggiunta.
+3. Cerca una specie nel Catalogo Botanico integrato tramite il campo di ricerca con autocompletamento e seleziona la pianta desiderata.
+4. Inserisce opzionalmente un soprannome per la pianta e conferma cliccando "Salva nel Giardino".
+5. Il backend registra la pianta associandola al giardino dell'utente e genera automaticamente gli eventi di cura con le relative scadenze.
+6. L'utente riceverà notifiche automatiche generate periodicamente dal sistema (`CareEventScheduler`) quando la pianta avrà bisogno di cure.
 
 ### Caso d'Uso 2: Richiesta SOS e Interazione Sociale (Rif. Scenario B)
-1. L'utente accede alla bacheca pubblica (Feed).
-2. Crea un nuovo post, allegando la foto della pianta malata o scegliendo una pianta dal proprio giardino, aggiungendo una descrizione (es. "Foglie gialle, cosa succede?").
-3. Il post viene pubblicato nel feed e diventa visibile a tutti gli iscritti.
-4. Un altro utente naviga nel feed, vede il post e lo apre per visualizzare i dettagli.
-5. L'utente esperto inserisce un commento con un consiglio pratico (es. "Hai dato troppa acqua!").
-6. L'autore originale riceve una notifica push in-app che lo avvisa del nuovo commento.
-7. L'autore può rispondere al commento, mettere "Mi Piace" per ringraziare.
+1. L'utente effettua il login ed accede alla bacheca pubblica (Feed).
+2. Crea un nuovo post, caricando la foto della pianta malata dalla galleria.
+3. Sceglie se restare nella sezione "Nuova pianta" o "Dal Giardino"
+4. Seleziona la pianta, aggiunge una descrizione e pubblica il post.
+5. Un utente esperto effettua il login, naviga nel feed e vede il post.
+6. L'utente esperto inserisce un commento con un consiglio pratico.
+7. L'autore del post riceve una notifica che lo avvisa del nuovo commento.
+8. L'autore può rispondere al commento e/o mettere "Mi Piace" per ringraziare.
 
 ### Caso d'Uso 3: Monitoraggio e Gestione della Piattaforma (Rif. Scenario C)
 1. L'amministratore effettua il login con le proprie credenziali admin.
@@ -61,12 +62,13 @@ L'implementazione realizzata sviluppa appieno questi casi d'uso, integrando back
 
 ### Funzionalità Core Implementate:
 - **Gestione Ruoli e Sicurezza:** Sistema di Login con autenticazione JWT e utenti predefiniti, con due ruoli distinti (`USER` e `ADMIN`) per differenziare i permessi di accesso, in particolare al pannello di amministrazione (AdminPanel).
-- **Gestione "Il mio Giardino" e Piante:** Completa implementazione CRUD (Create, Read, Update, Delete) per il giardino dell'utente. Si distingue tra cancellazione definitiva (Hard Delete) e segnalazione di "Morte" della pianta, mantenendo i ricordi fotografici.
+- **Gestione "Il mio Giardino" e Piante:** Implementazione CRUD (Create, Read, Update, Delete) per il giardino dell'utente. Si distingue tra cancellazione definitiva (Hard Delete) e segnalazione di "Morte" della pianta, mantenendo i ricordi fotografici.
 - **Bacheca Sociale Avanzata:** Implementazione della creazione di post (anche legati a piante specifiche del giardino), con funzionalità di Like, salvataggio post (Preferiti), e un sistema di Commenti thread-based.
-- **Sistema di Notifiche e Task Asincroni:** Sviluppo di un servizio in background (`@Scheduled`) che analizza periodicamente lo stato delle piante e invia notifiche in-app relative alle necessità di cura (es. innaffiatura).
+- **Sistema di Notifiche e Task Asincroni:** Sviluppo di un servizio in background (`@Scheduled`) che analizza periodicamente lo stato delle piante e invia notifiche in-app relative alle necessità di cura.
 
 ### Motivazione e Scelte Architetturali: 
 Questa selezione di funzionalità ha richiesto lo sviluppo di un'architettura dati complessa e completa:
-- **Relazioni Avanzate:** Presenza di schemi relazionali avanzati nel database relazionale (Relazioni `1-N` tra Utente e Piante; `1-N` tra Post e Commenti; `N-M` per i Like e Post Salvati).
+- **Relazioni Avanzate:** Presenza di schemi relazionali complessi nel database: relazioni `1-1` (es. Utente-Giardino), `1-N` (es. Utente-Post, Post-Commenti) e costrutti avanzati come la relazione auto-referenziale per le risposte ai commenti (`COMMENT-ANSWER`) e il doppio legame per la gestione delle notifiche (`RECEIVES` / `GENERATE`).
+![Diagramma ER del database PhytoSend](assets/ER_phytosend_db.drawio.svg)
 - **Interattività del Client:** Utilizzo di React per garantire risposte visive istantanee (es. aggiornamento del badge notifiche e comparsa immediata dei commenti senza ricaricare la pagina).
 - **Logica di Business nel Backend:** Delega al server (tramite Spring Data JPA e i layer di Servizio) del calcolo intelligente delle date e della verifica dei permessi/proprietà (es. limitazione cancellazione post).

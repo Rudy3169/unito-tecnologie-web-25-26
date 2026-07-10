@@ -49,10 +49,13 @@ export function PlantCard({
     const getWateringText = () => {
         if (!plant.nextWateringDate) {
             const freq = plant.card?.waterFrequencyDays;
-            if (typeof freq === 'number') {
-                return `tra ${freq} giorn${freq === 1 ? 'o' : 'i'}`;
+            if (freq) {
+                const numFreq = parseInt(freq, 10);
+                if (!isNaN(numFreq) && numFreq > 0) {
+                    return `tra ${numFreq} giorn${numFreq === 1 ? 'o' : 'i'}`;
+                }
             }
-            return `tra Regolare giorni`;
+            return 'da pianificare';
         }
 
         const today = new Date();
