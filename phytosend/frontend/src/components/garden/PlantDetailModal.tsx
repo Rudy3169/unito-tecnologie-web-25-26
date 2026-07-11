@@ -53,7 +53,7 @@ export function PlantDetailModal({
         const lastEvent = selectedPlant.careEvents
             ?.filter(ce => ce.completed && ce.type === addCareEventType)
             ?.sort((a, b) => new Date(b.completedDate!).getTime() - new Date(a.completedDate!).getTime())[0];
-        
+
         let minDateStr: string | undefined;
         if (lastEvent && lastEvent.completedDate) {
             minDateStr = new Date(lastEvent.completedDate).toISOString().split('T')[0];
@@ -78,7 +78,7 @@ export function PlantDetailModal({
             if (lastEventDateStr === addCareEventDate) {
                 // Formattazione data europea per il messaggio di errore
                 const [y, m, d] = addCareEventDate.split('-');
-                
+
                 // Messaggio differenziato per "oggi" o date passate
                 if (addCareEventDate === new Date().toISOString().split('T')[0]) {
                     setCareEventPopup({
@@ -129,7 +129,7 @@ export function PlantDetailModal({
                 try {
                     const errorData = await res.json();
                     errorMsg = errorData.message || JSON.stringify(errorData);
-                } catch(e) {
+                } catch (e) {
                     errorMsg = res.statusText;
                 }
                 setCareEventPopup({
@@ -195,7 +195,13 @@ export function PlantDetailModal({
                             <li><strong>Esposizione:</strong> {selectedPlant.card?.exposure}</li>
                             <li><strong>Terreno:</strong> {selectedPlant.card?.soil}</li>
                             <li><strong>Concimazione:</strong> {selectedPlant.card?.fertilization}</li>
-                            <li className="full-width-li"><strong>Irrigazione consigliata:</strong> ogni {selectedPlant.card?.waterFrequencyDays || 'Regolare'} giorni</li>
+                            <li className="full-width-li">
+                                <strong>Irrigazione consigliata:</strong> {
+                                    selectedPlant.card?.waterFrequencyDays
+                                        ? `ogni ${selectedPlant.card.waterFrequencyDays} giorni`
+                                        : 'Da pianificare'
+                                }
+                            </li>
                         </ul>
                     </div>
 
@@ -220,7 +226,7 @@ export function PlantDetailModal({
                         <div className="detail-section timeline-section-wrapper" style={{ position: 'relative' }}>
                             {!selectedPlant.deathDate && isOwnGarden && (
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-                                    <button 
+                                    <button
                                         className="add-care-event-trigger-btn"
                                         onClick={() => setIsAddCareEventModalOpen(true)}
                                         title="Aggiungi evento cura"
@@ -325,7 +331,7 @@ export function PlantDetailModal({
                                     // PURCHASE sta sempre in fondo in modo assoluto, anche se ci sono discrepanze di date
                                     if (a.type === 'PURCHASE' && b.type !== 'PURCHASE') return 1;
                                     if (b.type === 'PURCHASE' && a.type !== 'PURCHASE') return -1;
-                                    
+
                                     const timeDiff = b.date.getTime() - a.date.getTime();
                                     return timeDiff;
                                 });
@@ -432,8 +438,8 @@ export function PlantDetailModal({
                                 <div className="care-event-modal-body">
                                     <div className="form-group">
                                         <label>Tipo di Cura</label>
-                                        <select 
-                                            value={addCareEventType} 
+                                        <select
+                                            value={addCareEventType}
                                             onChange={e => setAddCareEventType(e.target.value)}
                                             className={`care-type-select type-${addCareEventType.toLowerCase()}`}
                                         >
@@ -444,9 +450,9 @@ export function PlantDetailModal({
                                     </div>
                                     <div className="form-group">
                                         <label>Data Completamento</label>
-                                        <input 
-                                            type="date" 
-                                            value={addCareEventDate} 
+                                        <input
+                                            type="date"
+                                            value={addCareEventDate}
                                             onChange={e => setAddCareEventDate(e.target.value)}
                                             onClick={(e) => {
                                                 if ('showPicker' in HTMLInputElement.prototype) {
@@ -484,30 +490,30 @@ export function PlantDetailModal({
                     {careEventPopup && (
                         <div className="modal-overlay" onClick={() => setCareEventPopup(null)} style={{ zIndex: 1200 }}>
                             <div className="delete-dialog" onClick={e => e.stopPropagation()}>
-                                <div style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center', 
-                                    color: careEventPopup.type === 'success' ? '#22c55e' : '#ef4444', 
-                                    marginBottom: '16px' 
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: careEventPopup.type === 'success' ? '#22c55e' : '#ef4444',
+                                    marginBottom: '16px'
                                 }}>
                                     {careEventPopup.type === 'success' ? <CheckCircle size={36} /> : <AlertTriangle size={36} />}
                                 </div>
                                 <h3 style={{ marginBottom: '12px' }}>{careEventPopup.title}</h3>
                                 <p style={{ fontSize: '1.05rem' }}>{careEventPopup.text}</p>
                                 <div className="delete-actions" style={{ marginTop: '24px' }}>
-                                    <button 
-                                        className="btn-confirm" 
+                                    <button
+                                        className="btn-confirm"
                                         onClick={() => setCareEventPopup(null)}
-                                        style={{ 
-                                            width: '100%', 
-                                            background: careEventPopup.type === 'success' ? '#22c55e' : 'var(--color-primary)', 
-                                            color: 'white', 
-                                            border: 'none', 
-                                            padding: '12px', 
-                                            borderRadius: '8px', 
-                                            cursor: 'pointer', 
-                                            fontWeight: 600 
+                                        style={{
+                                            width: '100%',
+                                            background: careEventPopup.type === 'success' ? '#22c55e' : 'var(--color-primary)',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontWeight: 600
                                         }}
                                     >
                                         Ho capito
@@ -580,6 +586,7 @@ export function PlantDetailModal({
                 )}
             </div>
         </div>
-    );
+    );
+
 }
 
