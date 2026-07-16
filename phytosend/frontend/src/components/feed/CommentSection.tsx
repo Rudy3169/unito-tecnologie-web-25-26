@@ -5,24 +5,24 @@ import { apiFetch } from '../../api';
 import './CommentSection.css';
 
 interface Comment {
-    id: number;
-    text: string;
-    authorName: string;
-    authorId: number;
-    likesCount?: number;
-    isLikedByMe?: boolean;
-    parentId?: number | null;
-    creationDate?: string;
-    profilePhotoUrl?: string | null;
+    id: number; // ID del commento
+    text: string; // Testo del commento
+    authorName: string; // Nome dell'autore del commento
+    authorId: number; // ID dell'autore del commento
+    likesCount?: number; // Numero di like al commento
+    isLikedByMe?: boolean; // Flag per indicare se l'utente ha messo like al commento
+    parentId?: number | null; // ID del commento genitore (per risposte nidificate)
+    creationDate?: string; // Data di creazione del commento
+    profilePhotoUrl?: string | null; // URL della foto profilo dell'autore del commento
 }
 
 interface CommentSectionProps {
-    postId: number;
-    postAuthorId: number;
-    isOpen: boolean;
-    onClose: () => void;
-    onCommentsUpdated?: (newCount?: number) => void;
-    highlightCommentId?: number;
+    postId: number; // ID del post
+    postAuthorId: number; // ID dell'autore del post
+    isOpen: boolean; // Flag per indicare se la modale dei commenti è aperta
+    onClose: () => void; // Funzione per chiudere la modale dei commenti
+    onCommentsUpdated?: (newCount?: number) => void; // Funzione per aggiornare il conteggio dei commenti
+    highlightCommentId?: number; // ID del commento da evidenziare
 }
 
 /**
@@ -32,23 +32,15 @@ interface CommentSectionProps {
  * e il parsing del testo per generare dinamicamente le Menzioni (@Nome).
  */
 export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommentsUpdated, highlightCommentId }: CommentSectionProps) {
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [newComment, setNewComment] = useState('');
-    const [errorMsg, setErrorMsg] = useState('');
-    const navigate = useNavigate();
-    const [highlightedId, setHighlightedId] = useState<number | null>(null);
+    // ==========================================
+    // 1. useState
+    // ==========================================
 
-    // Blocco dello scroll del body quando la modale dei commenti è aperta
-    useEffect(() => {
-        if (isOpen) {
-            document.body.classList.add('comments-modal-open');
-        } else {
-            document.body.classList.remove('comments-modal-open');
-        }
-        return () => {
-            document.body.classList.remove('comments-modal-open');
-        };
-    }, [isOpen]);
+    const [comments, setComments] = useState<Comment[]>([]); // Array di commenti
+    const [newComment, setNewComment] = useState(''); // Testo del nuovo commento
+    const [errorMsg, setErrorMsg] = useState(''); // Messaggio di errore
+    const navigate = useNavigate(); // Funzione di navigazione
+    const [highlightedId, setHighlightedId] = useState<number | null>(null); // ID del commento da evidenziare
 
     // Stato per tracciare a CHI stiamo rispondendo e sotto quale COMMENTO GENITORE
     const [replyingTo, setReplyingTo] = useState<{ authorName: string, parentId: number } | null>(null);
@@ -62,6 +54,23 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
     // Stato per tutti gli utenti per risolvere le menzioni (@Nome)
     const [allUsers, setAllUsers] = useState<any[]>([]);
 
+    // ==========================================
+    // 2. useEffect
+    // ==========================================
+
+    // Blocco dello scroll del body quando la modale dei commenti è aperta
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add('comments-modal-open');
+        } else {
+            document.body.classList.remove('comments-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('comments-modal-open');
+        };
+    }, [isOpen]);
+
+    // Carica tutti gli utenti dal backend per risolvere le menzioni
     useEffect(() => {
         if (!isOpen) return;
         const token = localStorage.getItem('phytosend_token');
@@ -75,99 +84,7 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
             .catch(err => console.error("Errore caricamento utenti:", err));
     }, [isOpen]);
 
-    // ==========================================
-    // PARSING TESTO (REGEX) PER MENZIONI DINAMICHE
-    // ==========================================
-    // Questa funzione analizza il testo del commento per cercare pattern come "@Mario".
-    // Se la regex trova un match, e quel match corrisponde a un utente reale,
-    // sostituisce il testo con uno <span> cliccabile che porta al profilo.
-    const renderCommentText = (text: string) => {
-        if (!text) return '';
-        const mentionRegex = /@([A-Za-zÀ-ÖØ-öø-ÿ0-9._-]+)/g;
-        const parts = [];
-        let lastIndex = 0;
-        let match;
-
-        while ((match = mentionRegex.exec(text)) !== null) {
-            const matchIndex = match.index;
-            const fullMatch = match[0];
-            const name = match[1];
-
-            if (matchIndex > lastIndex) {
-                parts.push(text.substring(lastIndex, matchIndex));
-            }
-
-            const matchedUser = allUsers.find(
-                u => u.name.toLowerCase() === name.toLowerCase()
-            );
-
-            if (matchedUser) {
-                parts.push(
-                    <span
-                        key={matchIndex}
-                        onClick={() => {
-                            onClose();
-                            navigate(`/profile/${matchedUser.id}`);
-                        }}
-                        style={{
-                            color: 'var(--color-primary)',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            textDecoration: 'none'
-                        }}
-                        onMouseEnter={(e) => {
-                            (e.target as HTMLElement).style.color = 'var(--color-primary-light)';
-                        }}
-                        onMouseLeave={(e) => {
-                            (e.target as HTMLElement).style.color = 'var(--color-primary)';
-                        }}
-                    >
-                        {fullMatch}
-                    </span>
-                );
-            } else {
-                parts.push(fullMatch);
-            }
-
-            lastIndex = mentionRegex.lastIndex;
-        }
-
-        if (lastIndex < text.length) {
-            parts.push(text.substring(lastIndex));
-        }
-
-        return parts.length > 0 ? parts : text;
-    };
-
-    // Funzione per caricare i commenti
-    const getRelativeTime = (dateString?: string) => {
-        if (!dateString) return 'Ora';
-
-        const now = new Date();
-        const past = new Date(dateString);
-        const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
-        if (diffInSeconds < 60) return `${Math.max(0, diffInSeconds)} sec fa`;
-
-        const diffInMinutes = Math.floor(diffInSeconds / 60);
-        if (diffInMinutes < 60) return `${diffInMinutes} min fa`;
-
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        if (diffInHours < 24) return `${diffInHours} h fa`;
-
-        const diffInDays = Math.floor(diffInHours / 24);
-        if (diffInDays < 7) return `${diffInDays} giorn${diffInDays === 1 ? 'o' : 'i'} fa`;
-
-        const diffInWeeks = Math.floor(diffInDays / 7);
-        if (diffInWeeks < 4) return `${diffInWeeks} sett fa`;
-
-        const diffInMonths = Math.floor(diffInDays / 30);
-        if (diffInMonths < 12) return `${diffInMonths} mes${diffInMonths === 1 ? 'e' : 'i'} fa`;
-
-        const diffInYears = Math.floor(diffInDays / 365);
-        return `${diffInYears} ann${diffInYears === 1 ? 'o' : 'i'} fa`;
-    };
-
+    // Usa useEffect per gestire l'apertura/chiusura del popup
     useEffect(() => {
         // Se il popup è chiuso, non fare nulla
         if (!isOpen) return;
@@ -226,6 +143,109 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
 
         return () => clearTimeout(timer);
     }, [highlightCommentId, comments, isOpen]);
+
+    // ==========================================
+    // 3. FUNZIONI HANDLER E UTILITY
+    // ==========================================
+
+    // PARSING TESTO (REGEX) PER MENZIONI DINAMICHE
+    // Questa funzione analizza il testo del commento per cercare pattern come "@Mario".
+    // Se la regex trova un match, e quel match corrisponde a un utente reale,
+    // sostituisce il testo con uno <span> cliccabile che porta al profilo.
+    const renderCommentText = (text: string) => {
+        if (!text) return '';
+        const mentionRegex = /@([A-Za-zÀ-ÖØ-öø-ÿ0-9._-]+)/g; // Regex per trovare le menzioni (@Nome)
+        const parts = []; // Array di parti del testo
+        let lastIndex = 0; // Indice dell'ultima parte del testo
+        let match; // Match trovato dalla regex
+
+        // Cicla su tutte le menzioni trovate nel testo
+        while ((match = mentionRegex.exec(text)) !== null) {
+            const matchIndex = match.index; // Indice della menzione
+            const fullMatch = match[0]; // Match completo (es. "@Mario")
+            const name = match[1]; // Nome utente estratto (es. "Mario")
+
+            // Aggiunge la parte di testo prima della menzione
+            if (matchIndex > lastIndex) {
+                parts.push(text.substring(lastIndex, matchIndex));
+            }
+
+            // Cerca l'utente corrispondente alla menzione
+            const matchedUser = allUsers.find(
+                u => u.name.toLowerCase() === name.toLowerCase()
+            );
+
+            // Se l'utente viene trovato, crea uno span cliccabile che naviga al suo profilo
+            if (matchedUser) {
+                parts.push(
+                    <span
+                        key={matchIndex}
+                        onClick={() => {
+                            onClose();
+                            navigate(`/profile/${matchedUser.id}`);
+                        }}
+                        style={{
+                            color: 'var(--color-primary)',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            textDecoration: 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                            (e.target as HTMLElement).style.color = 'var(--color-primary-light)';
+                        }}
+                        onMouseLeave={(e) => {
+                            (e.target as HTMLElement).style.color = 'var(--color-primary)';
+                        }}
+                    >
+                        {fullMatch}
+                    </span>
+                );
+            } else {
+                parts.push(fullMatch); // Se l'utente non viene trovato, aggiunge il testo normale
+            }
+
+            lastIndex = mentionRegex.lastIndex; // Aggiorna l'indice dell'ultima parte del testo
+        }
+
+        // Aggiunge la parte finale del testo se presente
+        if (lastIndex < text.length) {
+            parts.push(text.substring(lastIndex));
+        }
+
+        // Ritorna le parti del testo o il testo normale se non ci sono menzioni
+        return parts.length > 0 ? parts : text;
+    };
+
+    // Funzione per calcolare il tempo relativo
+    const getRelativeTime = (dateString?: string) => {
+        if (!dateString) return 'Ora';
+
+        // Crea una data corrente e una data passata dal commento
+        const now = new Date();
+        const past = new Date(dateString);
+        // Calcola la differenza in secondi
+        const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+        if (diffInSeconds < 60) return `${Math.max(0, diffInSeconds)} sec fa`; // Meno di un minuto
+
+        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        if (diffInMinutes < 60) return `${diffInMinutes} min fa`; // Minuti
+
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours} h fa`; // Ore
+
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 7) return `${diffInDays} giorn${diffInDays === 1 ? 'o' : 'i'} fa`; // Giorni
+
+        const diffInWeeks = Math.floor(diffInDays / 7);
+        if (diffInWeeks < 4) return `${diffInWeeks} sett fa`; // Settimane
+
+        const diffInMonths = Math.floor(diffInDays / 30);
+        if (diffInMonths < 12) return `${diffInMonths} mes${diffInMonths === 1 ? 'e' : 'i'} fa`; // Mesi
+
+        const diffInYears = Math.floor(diffInDays / 365);
+        return `${diffInYears} ann${diffInYears === 1 ? 'o' : 'i'} fa`; // Anni
+    };
 
     // Funzione per aggiungere o rimuovere un like a un commento
     const handleLikeComment = (commentId: number) => {
@@ -383,6 +403,10 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
         }
     };
 
+    // ==========================================
+    // 4. EARLY RETURN E PREPARAZIONE RENDER
+    // ==========================================
+
     if (!isOpen) return null;
 
     // Otteniamo l'ID dell'utente corrente
@@ -427,8 +451,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                         data-comment-id={parent.id}
                                     >
                                         <div className="comment-header-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <div 
-                                                className="comment-avatar" 
+                                            <div
+                                                className="comment-avatar"
                                                 onClick={() => navigate(`/profile/${parent.authorId}`)}
                                                 style={{
                                                     width: '24px',
@@ -471,8 +495,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                             </button>
                                             {/* RISPONDI */}
                                             {!isParentAuthor && (
-                                                 <button onClick={() => handleReply(parent.authorName, parent.id, false)}>Rispondi</button>
-                                             )}
+                                                <button onClick={() => handleReply(parent.authorName, parent.id, false)}>Rispondi</button>
+                                            )}
                                         </div>
                                     </div>
 
@@ -497,8 +521,8 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                                     data-comment-id={reply.id}
                                                                 >
                                                                     <div className="comment-header-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                        <div 
-                                                                            className="comment-avatar" 
+                                                                        <div
+                                                                            className="comment-avatar"
                                                                             onClick={() => navigate(`/profile/${reply.authorId}`)}
                                                                             style={{
                                                                                 width: '20px',
@@ -532,10 +556,10 @@ export function CommentSection({ postId, postAuthorId, isOpen, onClose, onCommen
                                                                             <Heart size={12} fill={reply.isLikedByMe ? "var(--color-error)" : "none"} color={reply.isLikedByMe ? "var(--color-error)" : "currentColor"} />
                                                                             {reply.likesCount || ''}
                                                                         </button>
-                                                                         {/* RISPONDI */}
-                                                                         {!isReplyAuthor && (
-                                                                             <button onClick={() => handleReply(reply.authorName, parent.id, true)}>Rispondi</button>
-                                                                         )}
+                                                                        {/* RISPONDI */}
+                                                                        {!isReplyAuthor && (
+                                                                            <button onClick={() => handleReply(reply.authorName, parent.id, true)}>Rispondi</button>
+                                                                        )}
 
                                                                         {/* ELIMINA */}
                                                                         {canDeleteReply && (

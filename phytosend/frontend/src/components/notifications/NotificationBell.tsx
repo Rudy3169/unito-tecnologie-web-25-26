@@ -13,18 +13,26 @@ import './Notifications.css';
  * Intercetta eventi globali ('notifications-updated') per sincronizzazioni cross-component.
  */
 export function NotificationBell() {
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [recentNotifications, setRecentNotifications] = useState<NotificationData[]>([]);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const bellRef = useRef<HTMLDivElement>(null);
+    // ==========================================
+    // 1. useState
+    // ==========================================
 
-    const userId = localStorage.getItem('phytosend_userId');
-    const token = localStorage.getItem('phytosend_token');
-    const navigate = useNavigate();
-    const location = useLocation();
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-    const isActive = location.pathname === '/notifiche';
+    const [unreadCount, setUnreadCount] = useState(0); // Contatore delle notifiche non lette
+    const [recentNotifications, setRecentNotifications] = useState<NotificationData[]>([]); // Ultime notifiche da mostrare nel dropdown
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Stato di apertura del dropdown
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Stato di apertura della sidebar delle notifiche
+    const bellRef = useRef<HTMLDivElement>(null); // Riferimento al bottone per gestire il click outside
+
+    const userId = localStorage.getItem('phytosend_userId'); // ID utente recuperato da localStorage
+    const token = localStorage.getItem('phytosend_token'); // Token recuperato da localStorage
+    const navigate = useNavigate(); // Navigazione tra pagine
+    const location = useLocation(); // Posizione corrente
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768; // Verifica se dispositivo mobile
+    const isActive = location.pathname === '/notifiche'; // Indica se la pagina corrente è quella delle notifiche
+
+    // ==========================================
+    // 2. useCallback
+    // ==========================================
 
     // Fetch contatore non lette
     const fetchUnreadCount = useCallback(async () => {
@@ -41,22 +49,6 @@ export function NotificationBell() {
             // Silenzioso — il polling non deve causare problemi
         }
     }, [userId, token]);
-
-    // Chiude il dropdown se si clicca fuori
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (isDropdownOpen && bellRef.current && !bellRef.current.contains(event.target as Node)) {
-                setIsDropdownOpen(false);
-            }
-        };
-
-        if (isDropdownOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isDropdownOpen]);
 
     // Fetch ultime 5 notifiche (on-demand quando si apre il dropdown)
     const fetchRecentNotifications = useCallback(async () => {
@@ -75,8 +67,26 @@ export function NotificationBell() {
     }, [userId, token]);
 
     // ==========================================
-    // POLLING ARCHITECTURE
+    // 3. useEffect
     // ==========================================
+
+    // Chiude il dropdown se si clicca fuori
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isDropdownOpen && bellRef.current && !bellRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        if (isDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isDropdownOpen]);
+
+    // POLLING ARCHITECTURE:
     // Effettua una chiamata HTTP ogni 30 secondi (30000ms) per mantenere aggiornato
     // il badge delle notifiche non lette, garantendo all'utente un feedback quasi in tempo reale
     // senza sovraccaricare il server (come avverrebbe con WebSocket o delay più brevi).
@@ -98,6 +108,10 @@ export function NotificationBell() {
             fetchRecentNotifications();
         }
     }, [isDropdownOpen, fetchRecentNotifications]);
+
+    // ==========================================
+    // 4. FUNZIONI HANDLER
+    // ==========================================
 
     // Segna una notifica come letta
     const handleMarkAsRead = async (notificationId: number) => {
@@ -133,7 +147,6 @@ export function NotificationBell() {
             // Silenzioso
         }
     };
-
 
     // Toggle dropdown
     const handleBellClick = () => {

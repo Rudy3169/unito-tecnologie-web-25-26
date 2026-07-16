@@ -25,6 +25,48 @@ interface PlantSuggestion {
  * e logica condizionale complessa (Nuova Pianta vs Pianta Esistente).
  */
 export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFormProps) {
+    // ==========================================
+    // 1. useState
+    // ==========================================
+
+    // State per i campi del post
+    const [title, setTitle] = useState(''); // Titolo del post
+    const [caption, setCaption] = useState(''); // Descrizione del post
+    const [imageUrl, setImageUrl] = useState(''); // URL dell'immagine
+    const [previewUrl, setPreviewUrl] = useState(''); // URL dell'anteprima
+    const [isLoading, setIsLoading] = useState(false); // Stato di caricamento
+    const [plantNickname, setPlantNickname] = useState(''); // Nickname della pianta
+    // State per gestire la finestra modale di avviso
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
+        isOpen: false,
+        message: '',
+    });
+
+    // State per la gestione della modalità del post (nuova pianta o pianta dal giardino)
+    const [postMode, setPostMode] = useState<'new' | 'garden'>('new'); // Modalità post
+    const [myPlants, setMyPlants] = useState<any[]>([]); // Piante dell'utente
+    const [selectedPlantId, setSelectedPlantId] = useState<number | null>(null); // ID della pianta selezionata
+    const [selectedBotanicalCardId, setSelectedBotanicalCardId] = useState<number | null>(null); // ID della botanical card selezionata
+    const [addToGarden, setAddToGarden] = useState(false); // Aggiungi pianta al giardino
+
+    // State per la ricerca piante nel giardino
+    const [gardenSearchQuery, setGardenSearchQuery] = useState(''); // Query di ricerca nel giardino
+    const [showGardenDropdown, setShowGardenDropdown] = useState(false); // Mostra dropdown del giardino
+
+    // Mappa plantId -> foto dell'ultimo post (stessa logica di MyGarden)
+    const [plantPhotoMap, setPlantPhotoMap] = useState<Record<number, string>>({}); // Mappa plantId -> foto dell'ultimo post
+
+    // State per la ricerca di piante nel catalogo
+    const [suggestions, setSuggestions] = useState<PlantSuggestion[]>([]); // Suggerimenti di piante
+    const [showSuggestions, setShowSuggestions] = useState(false); // Mostra suggerimenti
+    const [isSearching, setIsSearching] = useState(false); // Indica se sta cercando
+
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // ==========================================
+    // 2. useEffect
+    // ==========================================
+
     // Blocco dello scroll del body quando la modale di creazione post è aperta
     useEffect(() => {
         if (isOpen) {
@@ -36,39 +78,6 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
             document.body.classList.remove('create-post-modal-open');
         };
     }, [isOpen]);
-
-    // State per gestire l'input del titolo/nome della pianta
-    const [title, setTitle] = useState('');
-    const [caption, setCaption] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
-    const [previewUrl, setPreviewUrl] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [plantNickname, setPlantNickname] = useState('');
-    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
-        isOpen: false,
-        message: '',
-    });
-
-    // State per gestire la selezione tra pianta nuova o pianta dal giardino
-    const [postMode, setPostMode] = useState<'new' | 'garden'>('new');
-    const [myPlants, setMyPlants] = useState<any[]>([]);
-    const [selectedPlantId, setSelectedPlantId] = useState<number | null>(null);
-    const [selectedBotanicalCardId, setSelectedBotanicalCardId] = useState<number | null>(null);
-    const [addToGarden, setAddToGarden] = useState(false);
-
-    // State per la ricerca piante nel giardino
-    const [gardenSearchQuery, setGardenSearchQuery] = useState('');
-    const [showGardenDropdown, setShowGardenDropdown] = useState(false);
-
-    // Mappa plantId -> foto dell'ultimo post (stessa logica di MyGarden)
-    const [plantPhotoMap, setPlantPhotoMap] = useState<Record<number, string>>({});
-
-    // State per la ricerca di piante nel catalogo
-    const [suggestions, setSuggestions] = useState<PlantSuggestion[]>([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
-
-    const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Chiudi i dropdown quando si clicca fuori
     useEffect(() => {
@@ -82,6 +91,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Gestione apertura modale
     useEffect(() => {
         if (isOpen) {
             const token = localStorage.getItem('phytosend_token');
@@ -120,6 +130,7 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
         }
     }, [isOpen]);
 
+    // Logica di ricerca (typeahead) con debouncing
     useEffect(() => {
         if (postMode !== 'new' || !title.trim() || title.length < 2 || selectedBotanicalCardId !== null) {
             setSuggestions([]);
@@ -128,9 +139,6 @@ export function CreatePostForm({ onPostCreated, isOpen, onClose }: CreatePostFor
             return;
         }
 
-        // ==========================================
-        // TYPEAHEAD SEARCH & DEBOUNCING
-        // ==========================================
         // Usiamo un setTimeout (debouncing) di 300ms. Questo evita di lanciare una fetch 
         // per ogni singola lettera digitata (es. 'M', 'Mo', 'Mon', 'Mons'), 
         // risparmiando traffico di rete e carico sul database.

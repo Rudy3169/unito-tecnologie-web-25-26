@@ -16,7 +16,12 @@ interface NotificationItemProps {
  * e il redirect contestuale al click (navigazione client-side tramite React Router).
  */
 export function NotificationItem({ notification, onMarkAsRead, onClose }: NotificationItemProps) {
-    const navigate = useNavigate();
+
+    const navigate = useNavigate(); // Hook per la navigazione contestuale
+
+    // ==========================================
+    // 2. FUNZIONI HANDLER E UTILITY
+    // ==========================================
 
     // Icona in base al tipo di notifica
     const getIcon = () => {

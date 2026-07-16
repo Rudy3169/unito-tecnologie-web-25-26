@@ -1,14 +1,14 @@
 import { PostCard } from './PostCard';
 import type { PostProps } from '../../types';
 interface PostListProps {
-    posts: PostProps[];
-    onToggleLike: (id: number) => void;
-    onDeletePost: (id: number) => void;
-    onCommentUpdate: () => void;
-    onToggleSave?: (id: number) => void;
-    defaultOpenLikes?: boolean;
-    highlightLikeUserId?: number;
-    lastPostRef?: (node: HTMLDivElement | null) => void;
+    posts: PostProps[]; // Array di post da visualizzare
+    onToggleLike: (id: number) => void; // Funzione per fare like
+    onDeletePost: (id: number) => void; // Funzione per eliminare post
+    onCommentUpdate: () => void; // Funzione per aggiornare commenti
+    onToggleSave?: (id: number) => void; // Funzione per salvare post
+    defaultOpenLikes?: boolean; // Indica se aprire i like di default
+    highlightLikeUserId?: number; // ID utente da evidenziare
+    lastPostRef?: (node: HTMLDivElement | null) => void; // Ref per l'ultimo post
 }
 
 /**

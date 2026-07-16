@@ -18,17 +18,26 @@ interface ProfileSettingsProps {
 }
 
 export function ProfileSettings({ user, onClose, onSaved }: ProfileSettingsProps) {
-    const [name, setName] = useState(user.name || '');
-    const [surname, setSurname] = useState(user.surname || '');
-    const [bio, setBio] = useState(user.bio || '');
-    const [city, setCity] = useState(user.city || '');
-    const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || '');
-    const [saving, setSaving] = useState(false);
+    // ==========================================
+    // 1. useState
+    // ==========================================
+
+    const [name, setName] = useState(user.name || ''); // Stato per il nome dell'utente
+    const [surname, setSurname] = useState(user.surname || ''); // Stato per il cognome dell'utente
+    const [bio, setBio] = useState(user.bio || ''); // Stato per la biografia dell'utente
+    const [city, setCity] = useState(user.city || ''); // Stato per la città dell'utente
+    const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || ''); // Stato per il numero di telefono dell'utente
+    const [saving, setSaving] = useState(false); // Flag per indicare se è in corso un salvataggio
     const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
         isOpen: false,
         message: '',
-    });
+    }); // Stato per gestire la finestra modale di avviso (es. per campi obbligatori mancanti)
 
+    // ==========================================
+    // 2. FUNZIONI HANDLER
+    // ==========================================
+
+    // Gestisce l'invio del form di aggiornamento profilo
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 

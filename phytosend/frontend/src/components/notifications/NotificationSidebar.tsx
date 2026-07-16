@@ -22,12 +22,16 @@ export function NotificationSidebar({
     onMarkAsRead,
     onMarkAllAsRead
 }: NotificationSidebarProps) {
-    const [notifications, setNotifications] = useState<NotificationData[]>([]);
-    const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const [loading, setLoading] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
-    const sidebarRef = useRef<HTMLDivElement>(null);
+    // ==========================================
+    // 1. useState, useRef e useCallback
+    // ==========================================
+
+    const [notifications, setNotifications] = useState<NotificationData[]>([]); // Lista delle notifiche
+    const [page, setPage] = useState(0); // Pagina corrente per la paginazione
+    const [hasMore, setHasMore] = useState(true); // Flag per sapere se ci sono altre notifiche da caricare
+    const [loading, setLoading] = useState(false); // Stato di caricamento
+    const [isVisible, setIsVisible] = useState(false); // Stato per gestire l'animazione CSS
+    const sidebarRef = useRef<HTMLDivElement>(null); // Riferimento al div della sidebar per il click outside
 
     const userId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
@@ -60,6 +64,10 @@ export function NotificationSidebar({
         }
     }, [userId, token]);
 
+    // ==========================================
+    // 2. useEffect
+    // ==========================================
+
     // Carica notifiche quando la sidebar si apre
     useEffect(() => {
         if (isOpen) {
@@ -83,6 +91,10 @@ export function NotificationSidebar({
         }
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isOpen, onClose]);
+
+    // ==========================================
+    // 3. FUNZIONI HANDLER
+    // ==========================================
 
     // Aggiorna la notifica locale quando viene segnata come letta
     const handleMarkAsRead = (id: number) => {
