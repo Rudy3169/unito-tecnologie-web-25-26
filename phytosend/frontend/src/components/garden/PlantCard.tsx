@@ -24,17 +24,17 @@ interface PlantCardProps {
 }
 
 export function PlantCard({
-    plant,
-    plantPhotoMap,
-    isOwnGarden,
-    editingPlantId,
-    editNameValue,
-    setEditingPlantId,
-    setEditNameValue,
-    handleSaveName,
-    handleRemoveNickname,
-    setDeletePrompt,
-    setSelectedPlant
+    plant, // Oggetto che rappresenta la pianta
+    plantPhotoMap, // Mappa delle foto delle piante
+    isOwnGarden, // Indica se il giardino è proprio
+    editingPlantId, // ID della pianta in fase di modifica
+    editNameValue, // Valore del nome della pianta in fase di modifica
+    setEditingPlantId, // Funzione per impostare l'ID della pianta in fase di modifica
+    setEditNameValue, // Funzione per impostare il nome della pianta in fase di modifica
+    handleSaveName, // Funzione per salvare il nome della pianta
+    handleRemoveNickname, // Funzione per rimuovere il soprannome
+    setDeletePrompt, // Funzione per impostare l'eliminazione
+    setSelectedPlant // Funzione per impostare la pianta selezionata
 }: PlantCardProps) {
 
     // Calcola il nome visualizzato (o soprannome o nome comune o sconosciuta)
