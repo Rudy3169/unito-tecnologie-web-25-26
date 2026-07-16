@@ -10,20 +10,20 @@ import type { PlantSuggestion } from '../../types';
  */
 
 interface AddPlantModalProps {
-    isOpen: boolean;
-    searchQuery: string;
-    setSearchQuery: (val: string) => void;
-    newPlantCardId: string;
-    setNewPlantCardId: (val: string) => void;
-    newPlantName: string;
-    setNewPlantName: (val: string) => void;
-    showSuggestions: boolean;
-    setShowSuggestions: (val: boolean) => void;
-    suggestions: PlantSuggestion[];
-    isSearching: boolean;
-    handleSelectSuggestion: (s: PlantSuggestion) => void;
-    handleCloseModal: () => void;
-    handleAddNewPlant: () => void;
+    isOpen: boolean; // Indica se il modale è aperto o chiuso
+    searchQuery: string; // Query di ricerca corrente
+    setSearchQuery: (val: string) => void; // Funzione per impostare la query di ricerca
+    newPlantCardId: string; // ID della pianta selezionata
+    setNewPlantCardId: (val: string) => void; // Funzione per impostare l'ID della pianta selezionata
+    newPlantName: string; // Nome della pianta selezionata
+    setNewPlantName: (val: string) => void; // Funzione per impostare il nome della pianta selezionata
+    showSuggestions: boolean; // Indica se mostrare i suggerimenti
+    setShowSuggestions: (val: boolean) => void; // Funzione per impostare i suggerimenti
+    suggestions: PlantSuggestion[]; // Suggerimenti per le piante
+    isSearching: boolean; // Indica se sta cercando
+    handleSelectSuggestion: (s: PlantSuggestion) => void; // Funzione per gestire la selezione di un suggerimento
+    handleCloseModal: () => void; // Funzione per chiudere il modale
+    handleAddNewPlant: () => void; // Funzione per aggiungere la pianta
 }
 
 export function AddPlantModal({

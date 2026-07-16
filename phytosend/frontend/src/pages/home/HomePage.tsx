@@ -13,10 +13,10 @@ import './HomePage.css';
  * per poi ripristinarlo al suo ritorno.
  */
 interface HomeFeedCache {
-    posts: PostProps[];
-    page: number;
-    hasMore: boolean;
-    scrollY: number;
+    posts: PostProps[]; // Lista dei post visualizzati nel feed
+    page: number; // Pagina corrente richiesta al backend
+    hasMore: boolean; // true se il server ha ancora post da inviare
+    scrollY: number; // Posizione dello scroll all'uscita dalla Home
 }
 
 // Conserva i dati in memoria RAM finché non si fa un refresh forzato del browser.

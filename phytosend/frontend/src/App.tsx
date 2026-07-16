@@ -47,7 +47,7 @@ function App() {
     // ==========================================
     // Blocca l'UI con un loader finché il backend non risponde.
     useEffect(() => {
-        let isMounted = true;
+        let isMounted = true; // evita memory leak in caso di refresh forzato
         let attempts = 0;
 
         const checkBackend = async () => {
@@ -75,7 +75,7 @@ function App() {
                 // Rete non pronta: Il server si sta ancora avviando. Riprova.
                 attempts++;
                 if (attempts > 13 && isMounted) {
-                    setIsTakingLong(true); // Dopo circa 26 secondi mostra l'avviso "Ci sta mettendo tanto..."
+                    setIsTakingLong(true); // Dopo circa 26 secondi cambia il testo della schermata
                 }
                 if (isMounted) {
                     setTimeout(checkBackend, 2000); // Ritenta la fetch tra 2 secondi
@@ -83,10 +83,10 @@ function App() {
             }
         };
 
-        checkBackend();
+        checkBackend(); // Avvia la prima fetch
 
         return () => {
-            isMounted = false; // Cleanup per prevenire memory leak se il componente viene smontato
+            isMounted = false; // Cleanup per prevenire memory leak in caso di refresh forzato
         };
     }, []);
 
@@ -94,17 +94,17 @@ function App() {
     // RENDERING CONDIZIONALE PRINCIPALE
     // ==========================================
 
-    // FASE 1: Se il backend non è ancora raggiungibile, mostra la schermata di caricamento globale
+    // Se il backend non è ancora raggiungibile, mostra la schermata di caricamento globale
     if (!isBackendReady) {
         return <GlobalLoading isTakingLong={isTakingLong} />;
     }
 
-    // FASE 2: Se il backend è pronto ma l'utente non è loggato, costringilo sulla pagina di Login
+    // Se il backend è pronto ma l'utente non è loggato, costringilo sulla pagina di Login
     if (!isLoggedIn) {
         return <LoginPage onLoginSuccess={handleLogin} />;
     }
 
-    // FASE 3: L'utente è loggato ed il backend è pronto -> Mostra l'applicazione completa
+    // L'utente è loggato ed il backend è pronto -> Mostra l'applicazione completa
     return (
         <div className="app-layout">
             {/* Sidebar di navigazione globale, visibile in ogni rotta */}

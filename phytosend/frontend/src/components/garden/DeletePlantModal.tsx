@@ -10,10 +10,10 @@ import type { PlantItem } from '../../types';
  */
 
 interface DeletePlantModalProps {
-    deletePrompt: number | null;
-    myPlants: PlantItem[];
-    setDeletePrompt: (val: number | null) => void;
-    handleDeleteAction: (id: number, markAsDead: boolean) => void;
+    deletePrompt: number | null; // ID della pianta da eliminare
+    myPlants: PlantItem[]; // Lista delle piante dell'utente
+    setDeletePrompt: (val: number | null) => void; // Funzione per impostare l'eliminazione
+    handleDeleteAction: (id: number, markAsDead: boolean) => void; // Funzione per gestire l'eliminazione
 }
 
 export function DeletePlantModal({ deletePrompt, myPlants, setDeletePrompt, handleDeleteAction }: DeletePlantModalProps) {
@@ -38,9 +38,13 @@ export function DeletePlantModal({ deletePrompt, myPlants, setDeletePrompt, hand
         };
     }, [deletePrompt]);
 
+    // Se non c'è una pianta da eliminare, non renderizzare il modale
     if (deletePrompt === null) return null;
+
+    // Trova la pianta da eliminare
     const plantToDelete = myPlants.find(p => p.id === deletePrompt);
 
+    // Gestisce la conferma dell'azione
     const handleConfirm = () => {
         if (confirmAction) {
             handleDeleteAction(deletePrompt, confirmAction === 'dead');

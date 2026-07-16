@@ -10,17 +10,17 @@ import type { PlantItem } from '../../types';
  */
 
 interface PlantCardProps {
-    plant: PlantItem;
-    plantPhotoMap: Record<number, string>;
-    isOwnGarden: boolean;
-    editingPlantId: number | null;
-    editNameValue: string;
-    setEditingPlantId: (id: number | null) => void;
-    setEditNameValue: (val: string) => void;
-    handleSaveName: (e: React.MouseEvent, id: number) => void;
-    handleRemoveNickname: (e: React.MouseEvent, id: number) => void;
-    setDeletePrompt: (id: number) => void;
-    setSelectedPlant: (plant: PlantItem) => void;
+    plant: PlantItem; // Oggetto che rappresenta la pianta
+    plantPhotoMap: Record<number, string>; // Mappa delle foto delle piante
+    isOwnGarden: boolean; // Indica se il giardino è proprio
+    editingPlantId: number | null; // ID della pianta in fase di modifica
+    editNameValue: string; // Valore del nome della pianta in fase di modifica
+    setEditingPlantId: (id: number | null) => void; // Funzione per impostare l'ID della pianta in fase di modifica
+    setEditNameValue: (val: string) => void; // Funzione per impostare il nome della pianta in fase di modifica
+    handleSaveName: (e: React.MouseEvent, id: number) => void; // Funzione per salvare il nome della pianta
+    handleRemoveNickname: (e: React.MouseEvent, id: number) => void; // Funzione per rimuovere il soprannome
+    setDeletePrompt: (id: number) => void; // Funzione per impostare l'eliminazione
+    setSelectedPlant: (plant: PlantItem) => void; // Funzione per impostare la pianta selezionata
 }
 
 export function PlantCard({
@@ -36,8 +36,12 @@ export function PlantCard({
     setDeletePrompt,
     setSelectedPlant
 }: PlantCardProps) {
+
+    // Calcola il nome visualizzato (o soprannome o nome comune o sconosciuta)
     const displayName = plant.card?.commonName || 'Pianta Sconosciuta';
+    // Controlla se la pianta ha un soprannome
     const hasNickname = !!plant.plantName && plant.plantName.trim() !== '';
+    // Ottiene l'URL della foto della pianta o quella predefinita
     const imgUrl = plantPhotoMap[plant.id] || plant.urlPhoto || plant.card?.urlDefaultPhoto || '/placeholder-plant.png';
 
     // ==========================================
@@ -47,6 +51,7 @@ export function PlantCard({
     // confrontiamo la data di scadenza (UTC) con la mezzanotte locale del client.
     // Questo garantisce che se l'utente cambia fuso orario, il badge rimanga accurato.
     const getWateringText = () => {
+        // Se non c'è una data di irrigazione, calcola la frequenza
         if (!plant.nextWateringDate) {
             const freq = plant.card?.waterFrequencyDays;
             if (freq) {
@@ -58,12 +63,15 @@ export function PlantCard({
             return 'da pianificare';
         }
 
+        // Data odierna (solo giorno, senza orario) per confronto
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
+        // Data di irrigazione (solo giorno, senza orario)
         const nextWatering = new Date(plant.nextWateringDate);
         nextWatering.setHours(0, 0, 0, 0);
 
+        // Differenza in giorni
         const diffTime = nextWatering.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 

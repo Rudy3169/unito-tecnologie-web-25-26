@@ -11,7 +11,7 @@ import { PlantCard } from '../../components/garden/PlantCard';
 import { AddPlantModal } from '../../components/garden/AddPlantModal';
 import { DeletePlantModal } from '../../components/garden/DeletePlantModal';
 import { PlantDetailModal } from '../../components/garden/PlantDetailModal';
-import { PostsScrollModal } from '../../components/garden/PostsScrollModal';
+import { PostsScrollModal } from '../../components/common/PostsScrollModal';
 import type { PlantItem, PostItem, PlantSuggestion } from '../../types';
 
 /**

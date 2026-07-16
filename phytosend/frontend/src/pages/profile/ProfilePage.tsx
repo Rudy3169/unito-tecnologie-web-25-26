@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle, ArrowLeft, ChevronUp, Eye } from 'lucide-react';
-import { PostCard } from '../../components/feed/PostCard';
 import { ProfileSettings } from '../../components/profile/ProfileSettings';
+import { PostsScrollModal } from '../../components/common/PostsScrollModal';
 import type { PostProps } from '../../types';
 import { apiFetch } from '../../api';
 import { WarningModal } from '../../components/common/WarningModal';
@@ -51,7 +51,6 @@ export function Profile() {
     });
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const modalScrollRef = useRef<HTMLDivElement>(null);
     const avatarRef = useRef<HTMLDivElement>(null);
 
     const [showScrollTop, setShowScrollTop] = useState(false);
@@ -190,16 +189,8 @@ export function Profile() {
     // I seguenti useEffect aggiungono dinamicamente classi specifiche al tag <body> 
     // quando una modale viene aperta a tutto schermo. Questo fa scattare le regole definite in index.css 
     // (overflow: hidden) che impediscono allo sfondo di scorrere.
-    useEffect(() => {
-        if (selectedPostIndex !== null) {
-            document.body.classList.add('post-modal-open');
-        } else {
-            document.body.classList.remove('post-modal-open');
-        }
-        return () => {
-            document.body.classList.remove('post-modal-open'); // Funzione di Cleanup
-        };
-    }, [selectedPostIndex]);
+    // NOTA: La gestione della classe 'post-modal-open' e dell'evento 'close-post-modal' per il modale
+    // dei post è delegata al componente condiviso PostsScrollModal.
 
     // Gestione della classe body per la visualizzazione della modale impostazioni
     useEffect(() => {
@@ -224,15 +215,6 @@ export function Profile() {
             document.body.classList.remove('large-photo-modal-open');
         };
     }, [showLargePhoto]);
-
-    // Ascolta l'evento globale per chiudere la modale
-    useEffect(() => {
-        const handleCloseModal = () => setSelectedPostIndex(null);
-        window.addEventListener('close-post-modal', handleCloseModal);
-        return () => {
-            window.removeEventListener('close-post-modal', handleCloseModal);
-        };
-    }, []);
 
     // Gestione like dai post in modale
     const handleToggleLike = (postId: number) => {
@@ -305,18 +287,7 @@ export function Profile() {
         }
     };
 
-    // Quando un post viene aperto in modale, scrolla alla posizione corretta
-    useEffect(() => {
-        if (selectedPostIndex !== null && modalScrollRef.current) {
-            // Piccolo delay per permettere al DOM di renderizzare
-            setTimeout(() => {
-                const postElements = modalScrollRef.current?.querySelectorAll('.profile-modal-post');
-                if (postElements && postElements[selectedPostIndex]) {
-                    postElements[selectedPostIndex].scrollIntoView({ behavior: 'auto', block: 'start' });
-                }
-            }, 50);
-        }
-    }, [selectedPostIndex]);
+    // NOTA: L'auto-scroll al post selezionato è delegato al componente condiviso PostsScrollModal.
 
     // Gestione parametri URL (da notifiche)
     useEffect(() => {
@@ -611,53 +582,21 @@ export function Profile() {
                 )}
             </div>
 
-            {/* ═══ MODALE POST (Click su thumbnail) ═══ */}
-            {selectedPostIndex !== null && (
-                <div className="profile-post-modal-overlay" onClick={() => setSelectedPostIndex(null)}>
-                    <div
-                        className="profile-post-modal-scroll"
-                        ref={modalScrollRef}
-                        onClick={e => e.stopPropagation()}
-                    >
-                        {/* Sticky Header Bar in stile Instagram Mobile */}
-                        <div className="modal-sticky-header">
-                            <button className="modal-back-btn" onClick={() => setSelectedPostIndex(null)} aria-label="Indietro">
-                                <ArrowLeft size={22} />
-                            </button>
-                            <span className="modal-header-title">Post</span>
-                            <div style={{ width: '34px' }} /> {/* Spacer per allineamento simmetrico */}
-                        </div>
-
-
-                        {/* Lista dei post (ordinati dal più recente) */}
-                        {posts.map((post, _index) => (
-                            <div key={post.id} className="profile-modal-post">
-                                <PostCard
-                                    id={post.id}
-                                    title={post.title}
-                                    description={post.description}
-                                    urlphoto={post.urlphoto}
-                                    creationDate={post.creationDate}
-                                    author={post.author}
-                                    plant={post.plant}
-                                    likesCount={post.likesCount}
-                                    isLikedByMe={post.isLikedByMe}
-                                    isSavedByMe={post.isSavedByMe}
-                                    commentsCount={post.commentsCount}
-                                    onLike={handleToggleLike}
-                                    onSave={handleToggleSave}
-                                    onDelete={setPostToDelete}
-                                    onCommentUpdate={loadProfile}
-                                    defaultOpenComments={new URLSearchParams(location.search).get('openPost') === String(post.id) && new URLSearchParams(location.search).get('openComments') === 'true'}
-                                    defaultOpenLikes={new URLSearchParams(location.search).get('openPost') === String(post.id) && openLikes}
-                                    highlightCommentId={new URLSearchParams(location.search).get('openPost') === String(post.id) ? (new URLSearchParams(location.search).get('commentId') ? Number(new URLSearchParams(location.search).get('commentId')) : undefined) : undefined}
-                                    highlightLikeUserId={new URLSearchParams(location.search).get('openPost') === String(post.id) ? highlightLikeUserId : undefined}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {/* ═══ MODALE POST (Click su thumbnail) — Componente condiviso ═══ */}
+            <PostsScrollModal
+                selectedPostIndex={selectedPostIndex}
+                setSelectedPostIndex={setSelectedPostIndex}
+                plantPostCards={posts}
+                handleToggleLike={handleToggleLike}
+                handleToggleSave={handleToggleSave}
+                handleDeleteClick={setPostToDelete}
+                onCommentUpdate={loadProfile}
+                notificationPostId={searchParams.get('openPost') ? Number(searchParams.get('openPost')) : null}
+                defaultOpenComments={searchParams.get('openComments') === 'true'}
+                defaultOpenLikes={openLikes}
+                highlightCommentId={searchParams.get('commentId') ? Number(searchParams.get('commentId')) : undefined}
+                highlightLikeUserId={highlightLikeUserId}
+            />
 
             {/* ═══ MODALE IMPOSTAZIONI ═══ */}
             {showSettings && (

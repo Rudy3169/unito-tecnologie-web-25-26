@@ -12,35 +12,71 @@ import { apiFetch } from '../../api';
  */
 
 interface PlantDetailModalProps {
-    selectedPlant: PlantItem | null;
-    setSelectedPlant: (val: PlantItem | null) => void;
-    plantPosts: PostItem[];
-    loadingPosts: boolean;
-    setPlantPostCards: (cards: PostProps[]) => void;
-    setSelectedPostIndex: (index: number | null) => void;
-    isOwnGarden: boolean;
-    setDeletePrompt: (id: number) => void;
-    setMyPlants?: React.Dispatch<React.SetStateAction<PlantItem[]>>;
+    selectedPlant: PlantItem | null; // Oggetto che rappresenta la pianta selezionata
+    setSelectedPlant: (val: PlantItem | null) => void; // Funzione per impostare la pianta selezionata
+    plantPosts: PostItem[]; // Array che rappresentano i post associati alla pianta
+    loadingPosts: boolean; // Booleano che indica se i post sono in fase di caricamento
+    setPlantPostCards: (cards: PostProps[]) => void; // Funzione per impostare le card dei post
+    setSelectedPostIndex: (index: number | null) => void; // Funzione per impostare l'indice del post selezionato
+    isOwnGarden: boolean; // Indica se il giardino è di proprietà dell'utente
+    setDeletePrompt: (id: number) => void; // Funzione per impostare la pianta da eliminare
+    setMyPlants?: React.Dispatch<React.SetStateAction<PlantItem[]>>;// Funzione per impostare la lista delle piante dell'utente
 }
 
 export function PlantDetailModal({
     selectedPlant, setSelectedPlant, plantPosts, loadingPosts,
     setPlantPostCards, setSelectedPostIndex, isOwnGarden, setDeletePrompt, setMyPlants
 }: PlantDetailModalProps) {
-    const [showAllEvents, setShowAllEvents] = useState(false);
-    const [activeTab, setActiveTab] = useState<'timeline' | 'posts'>('timeline');
 
+    // ==========================================
+    // 1. useState
+    // ==========================================
+
+    // Indica se mostrare tutti gli eventi o solo i primi 3
+    const [showAllEvents, setShowAllEvents] = useState(false);
+    // Indica quale tab è attivo
+    const [activeTab, setActiveTab] = useState<'timeline' | 'posts'>('timeline');
+    // Indica se il modale per aggiungere eventi cura è aperto
     const [isAddCareEventModalOpen, setIsAddCareEventModalOpen] = useState(false);
+    // Tipo di evento cura da aggiungere
     const [addCareEventType, setAddCareEventType] = useState('ACQUA');
+    // Data dell'evento cura da aggiungere
     const [addCareEventDate, setAddCareEventDate] = useState('');
+    // Indica se il modale per aggiungere eventi cura è in fase di invio
     const [isSubmittingCareEvent, setIsSubmittingCareEvent] = useState(false);
+    // Popup per visualizzare messaggi di errore o successo
     const [careEventPopup, setCareEventPopup] = useState<{ type: 'error' | 'success', title: string, text: string } | null>(null);
 
+    // ==========================================
+    // 2. useEffect
+    // ==========================================
+
+    // Gestisce il cambio dello stato del modale (blocco scroll pagina e reset stato interno)
+    useEffect(() => {
+        if (selectedPlant !== null) {
+            document.body.classList.add('plant-detail-modal-open');
+            setShowAllEvents(false);
+            setActiveTab('timeline');
+        } else {
+            document.body.classList.remove('plant-detail-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('plant-detail-modal-open');
+        };
+    }, [selectedPlant]);
+
+    // ==========================================
+    // 3. FUNZIONI HANDLER
+    // ==========================================
+
+    // Funzione per aggiungere eventi cura
     const handleAddCareEvent = async () => {
         if (!addCareEventDate || !selectedPlant) return;
 
         // Front-end Date Validation
         const maxDateStr = new Date().toISOString().split('T')[0];
+
+        // 1. La data non può essere nel futuro
         if (addCareEventDate > maxDateStr) {
             setCareEventPopup({
                 type: 'error',
@@ -50,10 +86,11 @@ export function PlantDetailModal({
             return;
         }
 
+        // 2.Trova l'ultimo evento dello stesso tipo
         const lastEvent = selectedPlant.careEvents
             ?.filter(ce => ce.completed && ce.type === addCareEventType)
             ?.sort((a, b) => new Date(b.completedDate!).getTime() - new Date(a.completedDate!).getTime())[0];
-
+        // Imposta la data minima in base all'ultimo evento o all'acquisto
         let minDateStr: string | undefined;
         if (lastEvent && lastEvent.completedDate) {
             minDateStr = new Date(lastEvent.completedDate).toISOString().split('T')[0];
@@ -61,6 +98,7 @@ export function PlantDetailModal({
             minDateStr = new Date(selectedPlant.purchaseDate).toISOString().split('T')[0];
         }
 
+        // 3. La data non può essere PRIMA dell'ultimo evento (o dell'acquisto)
         if (minDateStr && addCareEventDate < minDateStr) {
             // Formattazione data europea per il messaggio di errore
             const [y, m, d] = minDateStr.split('-');
@@ -72,9 +110,10 @@ export function PlantDetailModal({
             return;
         }
 
-        // Check if there is already an event on the same day as the selected date
+        // 4. Non puoi registrare due eventi dello stesso tipo nello stesso giorno
         if (minDateStr && addCareEventDate === minDateStr && lastEvent && lastEvent.completedDate) {
             const lastEventDateStr = new Date(lastEvent.completedDate).toISOString().split('T')[0];
+            // Se la data è uguale all'ultimo evento, mostra un messaggio di errore
             if (lastEventDateStr === addCareEventDate) {
                 // Formattazione data europea per il messaggio di errore
                 const [y, m, d] = addCareEventDate.split('-');
@@ -97,11 +136,16 @@ export function PlantDetailModal({
             }
         }
 
+        // Inizio invio evento cura
         setIsSubmittingCareEvent(true);
+        // Azzera popup
         setCareEventPopup(null);
+
         try {
+            // Prende token e user id dal local storage
             const token = localStorage.getItem('phytosend_token');
             const userId = localStorage.getItem('phytosend_userId');
+            // Chiamata API
             const res = await apiFetch(`/api/utenti/${userId}/piante/${selectedPlant.id}/care-events`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -110,6 +154,8 @@ export function PlantDetailModal({
                     date: addCareEventDate
                 })
             });
+
+            // Se la chiamata API è andata a buon fine
             if (res.ok) {
                 const updatedPlant = await res.json();
                 const newPlantMapped = {
@@ -117,14 +163,18 @@ export function PlantDetailModal({
                     plantName: updatedPlant.name,
                     isDead: updatedPlant.deathDate !== null
                 };
+                // Aggiorna la pianta
                 setSelectedPlant(newPlantMapped);
+                // Aggiorna la pianta nella lista del padre
                 if (setMyPlants) {
                     setMyPlants(prev => prev.map(p => p.id === newPlantMapped.id ? newPlantMapped : p));
                 }
+                // Chiude il modale per aggiungere eventi cura
                 setIsAddCareEventModalOpen(false);
                 setAddCareEventDate('');
                 setAddCareEventType('ACQUA');
             } else {
+                // Gestisce l'errore
                 let errorMsg = 'Errore sconosciuto';
                 try {
                     const errorData = await res.json();
@@ -149,18 +199,9 @@ export function PlantDetailModal({
         }
     };
 
-    useEffect(() => {
-        if (selectedPlant !== null) {
-            document.body.classList.add('plant-detail-modal-open');
-            setShowAllEvents(false);
-            setActiveTab('timeline');
-        } else {
-            document.body.classList.remove('plant-detail-modal-open');
-        }
-        return () => {
-            document.body.classList.remove('plant-detail-modal-open');
-        };
-    }, [selectedPlant]);
+    // ==========================================
+    // 4. EARLY RETURN
+    // ==========================================
 
     if (!selectedPlant) return null;
 

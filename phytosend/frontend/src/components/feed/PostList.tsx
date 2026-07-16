@@ -13,7 +13,7 @@ interface PostListProps {
 
 /**
  * COMPONENTE POST LIST
- * Componente "Dumb/Presentational" puro: non contiene logica di business o chiamate API.
+ * Non contiene logica di business o chiamate API.
  * Si limita a ciclare un array di dati (PostProps) fornito dal padre e a mapparli in componenti PostCard.
  * Sfrutta il pattern 'ref' (lastPostRef) per l'implementazione dell'Infinite Scroll 
  * tramite l'IntersectionObserver nel componente genitore.

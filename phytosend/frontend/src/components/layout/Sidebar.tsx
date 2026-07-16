@@ -21,37 +21,51 @@ interface SidebarProps {
  * mentre su Mobile si divide in Header superiore e Tab Bar inferiore per l'ergonomia del pollice.
  */
 export function Sidebar({ userRole }: SidebarProps) {
+
+    // ==========================================
+    // 1. HOOK DI NAVIGAZIONE (REACT ROUTER)
+    // ==========================================
     const location = useLocation();
     const navigate = useNavigate();
+
+    // ==========================================
+    // 2. useState
+    // ==========================================
+
+    // Ricerca
     const [query, setQuery] = useState('');
     const [searchType, setSearchType] = useState('plants');
 
+    // Menu a tendina
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Tema (Dark / Light Mode)
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
         console.log("[PhytoSend Theme Debug] Initialized isDarkMode state. documentElement 'data-theme':", initialTheme);
         return initialTheme === 'dark';
     });
 
-    // ==========================================
-    // THEME TOGGLING (DARK / LIGHT MODE)
-    // ==========================================
-    const toggleTheme = () => {
-        const newTheme = !isDarkMode ? 'dark' : 'light';
-        setIsDarkMode(!isDarkMode);
-        // Manipolazione diretta del DOM: cambiamo l'attributo data-theme sul tag <html> (root)
-        // Questo innesca automaticamente tutte le variabili CSS condizionali scritte in index.css
-        document.documentElement.setAttribute('data-theme', newTheme);
-        // Persistenza: salviamo la preferenza per i futuri caricamenti di pagina
-        localStorage.setItem('phytosend_theme', newTheme);
-    };
+    // Foto profilo dell'utente corrente
+    const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
 
+    // Modalità di visualizzazione dei Post Salvati (grid/list) per la comunicazione cross-component
+    // Siccome il pulsante Grid/List dei "Post Salvati" su mobile si trova in questa Sidebar (Header),
+    // ma la logica vera e propria sta dentro la pagina SavedPostsPage, usiamo un Event Listener
+    // sul window object per sincronizzare i due componenti che non hanno un rapporto padre-figlio diretto.
+    const [savedPostsViewMode, setSavedPostsViewMode] = useState<'grid' | 'list'>('grid');
+
+    // ==========================================
+    // 3. useRef
+    // ==========================================
     const menuRef = useRef<HTMLDivElement>(null);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-    const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
+    // ==========================================
+    // 4. useEffect
+    // ==========================================
 
-    // Carica la foto profilo dell'utente corrente
+    // Carica la foto profilo dell'utente corrente (riesegue ad ogni cambio di pagina)
     useEffect(() => {
         const userId = localStorage.getItem('phytosend_userId');
         const token = localStorage.getItem('phytosend_token');
@@ -85,14 +99,7 @@ export function Sidebar({ userRole }: SidebarProps) {
         }
     }, [location.pathname, location.search]);
 
-    // ==========================================
-    // COMUNICAZIONE CROSS-COMPONENT (CUSTOM EVENTS)
-    // ==========================================
-    // Siccome il pulsante Grid/List dei "Post Salvati" su mobile si trova in questa Sidebar (Header),
-    // ma la logica vera e propria sta dentro la pagina SavedPostsPage, usiamo un Event Listener 
-    // sul window object per sincronizzare i due componenti che non hanno un rapporto padre-figlio diretto.
-    const [savedPostsViewMode, setSavedPostsViewMode] = useState<'grid' | 'list'>('grid');
-
+    // Comunicazione cross-component: ascolta gli eventi di sincronizzazione della modalità Post Salvati
     useEffect(() => {
         const handleSync = (e: Event) => {
             const customEvent = e as CustomEvent;
@@ -106,11 +113,7 @@ export function Sidebar({ userRole }: SidebarProps) {
         return () => window.removeEventListener('sync-saved-posts-view-mode', handleSync); // Cleanup vitale
     }, []);
 
-    const toggleSavedPostsViewMode = (mode: 'grid' | 'list') => {
-        setSavedPostsViewMode(mode);
-        window.dispatchEvent(new CustomEvent('change-saved-posts-view-mode', { detail: mode }));
-    };
-
+    // Chiusura menu se si clicca fuori
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node) &&
@@ -122,8 +125,23 @@ export function Sidebar({ userRole }: SidebarProps) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // ==========================================
+    // 5. FUNZIONI HANDLER
+    // ==========================================
+
+    // Verifica se il percorso corrente è attivo (per evidenziare il pulsante nella Sidebar)
     const isActive = (path: string) => location.pathname === path ? 'active' : '';
 
+    // Cambio tema Dark/Light: modifica l'attributo data-theme sul tag <html> (root)
+    // e persiste la scelta nel localStorage per i futuri caricamenti di pagina
+    const toggleTheme = () => {
+        const newTheme = !isDarkMode ? 'dark' : 'light';
+        setIsDarkMode(!isDarkMode);
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('phytosend_theme', newTheme);
+    };
+
+    // Se l'utente clicca Home mentre è già sulla Home, ricarica la pagina (come Instagram/Twitter)
     const handleHomeClick = (e: React.MouseEvent) => {
         if (location.pathname === '/') {
             e.preventDefault();
@@ -131,17 +149,20 @@ export function Sidebar({ userRole }: SidebarProps) {
         }
     };
 
+    // Gestisce l'invio del form di ricerca (premendo Invio)
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         navigate(`/search?q=${encodeURIComponent(query.trim())}&type=${searchType}`);
     };
 
+    // Gestisce la digitazione nella barra di ricerca (ricerca live ad ogni carattere)
     const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setQuery(val);
         navigate(`/search?q=${encodeURIComponent(val)}&type=${searchType}`);
     };
 
+    // Gestisce il cambio del tipo di ricerca (piante ↔ utenti)
     const handleSearchTypeChange = () => {
         const newType = searchType === 'plants' ? 'users' : 'plants';
         setSearchType(newType);
@@ -150,6 +171,13 @@ export function Sidebar({ userRole }: SidebarProps) {
         }
     };
 
+    // Cambia la modalità dei post salvati (grid/list) e notifica la pagina SavedPostsPage
+    const toggleSavedPostsViewMode = (mode: 'grid' | 'list') => {
+        setSavedPostsViewMode(mode);
+        window.dispatchEvent(new CustomEvent('change-saved-posts-view-mode', { detail: mode }));
+    };
+
+    // Effettua il logout: pulisce il localStorage e reindirizza al Login
     const handleLogout = () => {
         localStorage.removeItem('phytosend_role');
         localStorage.removeItem('phytosend_token');
@@ -157,6 +185,11 @@ export function Sidebar({ userRole }: SidebarProps) {
         window.location.href = '/';
     };
 
+    // ==========================================
+    // 6. FUNZIONE RENDER HELPER
+    // ==========================================
+
+    // Renderizza il menu a tendina (usato sia nella versione Desktop che Mobile)
     const renderDropdownMenu = (classNameStr: string) => (
         <div className={classNameStr}>
             <Link to="/saved-posts" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>
