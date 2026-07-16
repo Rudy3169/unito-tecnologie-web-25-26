@@ -4,17 +4,19 @@ import { apiFetch } from '../../api';
 import { WarningModal } from '../common/WarningModal';
 import './CreatePostForm.css';
 
+// Interfaccia per le props del componente CreatePostForm
 interface CreatePostFormProps {
-    onPostCreated: () => void;
-    isOpen: boolean;
-    onClose: () => void;
+    onPostCreated: () => void; // Funzione da chiamare quando il post è stato creato con successo
+    isOpen: boolean; // Indica se la modale è aperta
+    onClose: () => void; // Funzione da chiamare quando la modale viene chiusa
 }
 
+// Interfaccia per i suggerimenti delle piante
 interface PlantSuggestion {
-    id: number;
-    commonName: string;
-    scientificName: string;
-    urlDefaultPhoto: string;
+    id: number; // ID della pianta
+    commonName: string; // Nome comune della pianta
+    scientificName: string; // Nome scientifico della pianta
+    urlDefaultPhoto: string; // URL dell'immagine di default della pianta
 }
 
 /**
