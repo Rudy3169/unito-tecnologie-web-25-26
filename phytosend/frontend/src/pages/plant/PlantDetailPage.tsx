@@ -11,21 +11,26 @@ import './PlantDetailPage.css';
  * Recupera l'ID della pianta direttamente dall'URL tramite React Router.
  */
 export function PlantDetail() {
+    // ==========================================
+    // 1. useState
+    // ==========================================
+
     // Estrae il parametro dinamico "plantId" definito nelle rotte di App.tsx
     const { plantId } = useParams<{ plantId: string }>();
     const navigate = useNavigate(); // Hook per la navigazione programmatica
+
     const token = localStorage.getItem('phytosend_token');
 
-    // ==========================================
-    // STATI DEL COMPONENTE
-    // ==========================================
-    const [plant, setPlant] = useState<BotanicalCard | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    // Stato per memorizzare i dati della pianta una volta recuperati
+    const [plant, setPlant] = useState<BotanicalCard | null>(null); // Pianta corrente
+    const [loading, setLoading] = useState(true); // Flag di caricamento
+    const [error, setError] = useState(''); // Eventuali errori di caricamento
 
     // ==========================================
-    // FETCH DEI DATI BOTANICI
+    // 2. useEffect
     // ==========================================
+
+    // Carica la scheda botanica della pianta una volta che il componente è montato e l'ID è disponibile.
     useEffect(() => {
         if (!plantId) return; // Evita chiamate a vuoto
 
@@ -42,6 +47,7 @@ export function PlantDetail() {
             .finally(() => setLoading(false)); // Ferma il loader a prescindere dal risultato
     }, [plantId]); // Esegue questo effetto ogni volta che cambia l'ID nell'URL
 
+    // Gestione dello stato di caricamento e degli errori prima di renderizzare l'interfaccia utente
     if (loading) {
         return (
             <div className="plant-detail-container">
@@ -50,6 +56,7 @@ export function PlantDetail() {
         );
     }
 
+    // Gestione dell'errore di caricamento (mostra un messaggio di errore e un pulsante per tornare indietro)
     if (error || !plant) {
         return (
             <div className="plant-detail-container">

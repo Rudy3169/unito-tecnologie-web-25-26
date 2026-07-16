@@ -23,22 +23,28 @@ interface SearchCache {
 let moduleCache: SearchCache | null = null;
 
 export function SearchPage() {
-    const [searchParams] = useSearchParams(); // Legge query parameters dall'URL
+    // Hook per leggere query parameters dall'URL
+    const [searchParams] = useSearchParams();
+
+    // Hook per navigare tra le pagine
     const navigate = useNavigate();
 
     // Indica come l'utente è arrivato qui ('PUSH' = nuovo click, 'POP' = tasto Indietro, 'REPLACE' = redirect)
     const navigationType = useNavigationType();
 
+    // Query parameters dall'URL
     const query = searchParams.get('q') || '';
     const type = searchParams.get('type') || 'plants';
 
     // ==========================================
-    // LOGICA DI RIPRISTINO (BACK BUTTON)
+    // 1. useState, useRef e useCallback
     // ==========================================
+
     // Se l'utente preme "Indietro" (POP) e avevamo salvato una cache coerente con la URL attuale, la carichiamo.
     const cachedRef = useRef<SearchCache | null>(null);
     const restoredRef = useRef(false);
 
+    // LOGICA DI RIPRISTINO CACHE (eseguita prima degli state che dipendono da essa)
     if (!restoredRef.current) {
         if (navigationType === 'POP' && moduleCache && moduleCache.query === query && moduleCache.type === type) {
             cachedRef.current = moduleCache;
@@ -47,26 +53,16 @@ export function SearchPage() {
         restoredRef.current = true;
     }
 
-    const [users, setUsers] = useState<UserResult[]>([]);
-    const [plants, setPlants] = useState<PlantResult[]>(cachedRef.current?.plants ?? []);
-    const [loading, setLoading] = useState(cachedRef.current ? false : true);
-    const [page, setPage] = useState(cachedRef.current?.page ?? 0);
-    const [hasMore, setHasMore] = useState(cachedRef.current?.hasMore ?? true);
-    const [restoringScroll, setRestoringScroll] = useState(!!cachedRef.current);
-    const observerRef = useRef<IntersectionObserver | null>(null);
+    const [users, setUsers] = useState<UserResult[]>([]); // Lista degli utenti trovati
+    const [plants, setPlants] = useState<PlantResult[]>(cachedRef.current?.plants ?? []); // Lista delle piante trovate
+    const [loading, setLoading] = useState(cachedRef.current ? false : true); // Indica se stiamo caricando
+    const [page, setPage] = useState(cachedRef.current?.page ?? 0); // Pagina corrente
+    const [hasMore, setHasMore] = useState(cachedRef.current?.hasMore ?? true); // Indica se ci sono altre pagine
+    const [restoringScroll, setRestoringScroll] = useState(!!cachedRef.current); // Indica se stiamo ripristinando lo scroll
 
-    // Controlla se la pianta è stata importata nelle ultime 12 ore
-    const isNew = (dateString?: string) => {
-        if (!dateString) return false;
-        const importDate = new Date(dateString);
-        const now = new Date();
-        const diffInHours = Math.abs(now.getTime() - importDate.getTime()) / 36e5;
-        return diffInHours <= 12;
-    };
+    const observerRef = useRef<IntersectionObserver | null>(null); // Sensore per infinite scroll
+    const containerRef = useRef<HTMLDivElement>(null); // Ref al contenitore visivo per logica di flicker
 
-    // ==========================================
-    // INFINITE SCROLL (INTERSECTION OBSERVER)
-    // ==========================================
     // Un "sensore" (IntersectionObserver) che viene agganciato all'ultimo elemento della lista.
     // Appena quell'elemento entra nello schermo visibile dell'utente (isIntersecting), incrementiamo la pagina.
     const lastElementRef = useCallback((node: HTMLDivElement | null) => {
@@ -82,12 +78,11 @@ export function SearchPage() {
         if (node) observerRef.current.observe(node); // Aggancia il sensore al nuovo ultimo nodo
     }, [loading, hasMore]);
 
-    // Nasconde la pagina durante il ripristino per evitare l'animazione di scroll visibile
-    const containerRef = useRef<HTMLDivElement>(null);
+    // ==========================================
+    // 2. useEffect e useLayoutEffect
+    // ==========================================
 
-    // ==========================================
     // RIPRISTINO DELLO SCROLL SENZA "FLICKER"
-    // ==========================================
     // useLayoutEffect viene eseguito *dopo* che React ha calcolato il DOM, ma *prima* che il browser lo dipinga a schermo.
     // Questo ci permette di scorrere alla posizione salvata nascondendo momentaneamente la pagina, evitando il "salto" visivo.
     useLayoutEffect(() => {
@@ -167,6 +162,19 @@ export function SearchPage() {
                 .finally(() => setLoading(false));
         }
     }, [query, type, page]);
+
+    // ==========================================
+    // 3. FUNZIONI HANDLER E UTILITY
+    // ==========================================
+
+    // Controlla se la pianta è stata importata nelle ultime 12 ore
+    const isNew = (dateString?: string) => {
+        if (!dateString) return false;
+        const importDate = new Date(dateString);
+        const now = new Date();
+        const diffInHours = Math.abs(now.getTime() - importDate.getTime()) / 36e5;
+        return diffInHours <= 12;
+    };
 
     return (
         <div ref={containerRef} className="search-page">

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, Settings, Grid3X3, Camera, Heart, MessageCircle, Fence, Trash2, Pencil, AlertTriangle, ArrowLeft, ChevronUp, Eye } from 'lucide-react';
 import { ProfileSettings } from '../../components/profile/ProfileSettings';
-import { PostsScrollModal } from '../../components/common/PostsScrollModal';
+import { PostsScrollModal } from '../../components/garden/PostsScrollModal';
 import type { PostProps } from '../../types';
 import { apiFetch } from '../../api';
 import { WarningModal } from '../../components/common/WarningModal';
@@ -16,44 +16,42 @@ import './ProfilePage.css';
  * a seconda della presenza o meno del parametro `userId` nell'URL.
  */
 export function Profile() {
-    // Estrae l'eventuale parametro dinamico dalla rotta
-    const { userId: paramUserId } = useParams<{ userId: string }>();
+    const { userId: paramUserId } = useParams<{ userId: string }>(); // Parametro dinamico rotta
+    const navigate = useNavigate(); // Hook navigazione
+    const location = useLocation(); // Hook posizione
 
-    // Recupera i dati di sessione salvati nel browser
-    const currentUserId = localStorage.getItem('phytosend_userId');
-    const token = localStorage.getItem('phytosend_token');
-    const navigate = useNavigate();
-    const location = useLocation();
+    const currentUserId = localStorage.getItem('phytosend_userId'); // ID utente corrente
+    const token = localStorage.getItem('phytosend_token'); // Token di sessione
+
+    const profileUserId = paramUserId || currentUserId; // Risoluzione del profilo da visualizzare
+    const isOwnProfile = profileUserId === currentUserId; // Flag per privilegi modifica profilo
 
     // ==========================================
-    // LOGICA DI RISOLUZIONE DEL PROFILO
+    // 1. useState e useRef
     // ==========================================
-    // Se c'è un parametro nella URL, mostriamo quel profilo, altrimenti mostriamo il nostro
-    const profileUserId = paramUserId || currentUserId;
-
-    // Flag booleano usato nel JSX per mostrare o nascondere tasti sensibili (Modifica Foto, Impostazioni, Cancella Post)
-    const isOwnProfile = profileUserId === currentUserId;
-
-    const [user, setUser] = useState<UserProfile | null>(null);
-    const [posts, setPosts] = useState<PostProps[]>([]);
-    const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
-    const [showSettings, setShowSettings] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [uploadingPhoto, setUploadingPhoto] = useState(false);
-    const [showPhotoMenu, setShowPhotoMenu] = useState(false);
-    const [showLargePhoto, setShowLargePhoto] = useState(false);
-    const [isLargePhotoVisible, setIsLargePhotoVisible] = useState(false);
-    const [avatarTransform, setAvatarTransform] = useState<{ x: number; y: number; scale: number } | null>(null);
-    const [postToDelete, setPostToDelete] = useState<number | null>(null);
+    const [user, setUser] = useState<UserProfile | null>(null); // Dati anagrafici
+    const [posts, setPosts] = useState<PostProps[]>([]); // Post dell'utente
+    const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null); // Indice post modale
+    const [showSettings, setShowSettings] = useState(false); // Modale impostazioni
+    const [loading, setLoading] = useState(true); // Stato caricamento
+    const [uploadingPhoto, setUploadingPhoto] = useState(false); // Caricamento nuova foto in corso
+    const [showPhotoMenu, setShowPhotoMenu] = useState(false); // Menu popup foto profilo
+    const [showLargePhoto, setShowLargePhoto] = useState(false); // Stato apertura foto schermo intero
+    const [isLargePhotoVisible, setIsLargePhotoVisible] = useState(false); // Visibilità animazione foto
+    const [avatarTransform, setAvatarTransform] = useState<{ x: number; y: number; scale: number } | null>(null); // Trasformazioni CSS foto
+    const [postToDelete, setPostToDelete] = useState<number | null>(null); // Post da cancellare
     const [warningModal, setWarningModal] = useState<{ isOpen: boolean; title?: string; message: string; type?: 'warning' | 'error' }>({
         isOpen: false,
         message: '',
-    });
+    }); // Modale alert vari
+    const [showScrollTop, setShowScrollTop] = useState(false); // Pulsante torna su
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const avatarRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null); // Ref input file invisibile
+    const avatarRef = useRef<HTMLDivElement>(null); // Ref div immagine avatar
 
-    const [showScrollTop, setShowScrollTop] = useState(false);
+    // ==========================================
+    // 2. useEffect
+    // ==========================================
 
     useEffect(() => {
         const handleScroll = () => {
@@ -68,13 +66,58 @@ export function Profile() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Carica i dati la prima volta che entriamo nella pagina o quando cambia l'ID dell'utente da guardare
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        setLoading(true);
+        setSelectedPostIndex(null);
+        loadProfile();
+    }, [profileUserId]);
+
+    // Chiude il menu foto quando si clicca fuori
+    useEffect(() => {
+        if (!showPhotoMenu) return;
+        const handleClick = () => setShowPhotoMenu(false);
+        // Piccolo delay per evitare che il click di apertura lo chiuda subito
+        const timer = setTimeout(() => document.addEventListener('click', handleClick), 0);
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('click', handleClick);
+        };
+    }, [showPhotoMenu]);
+
+    // Gestione della classe body per la visualizzazione della modale impostazioni
+    useEffect(() => {
+        if (showSettings) {
+            document.body.classList.add('settings-modal-open');
+        } else {
+            document.body.classList.remove('settings-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('settings-modal-open');
+        };
+    }, [showSettings]);
+
+    // Gestione della classe body per la visualizzazione della foto profilo grande
+    useEffect(() => {
+        if (showLargePhoto) {
+            document.body.classList.add('large-photo-modal-open');
+        } else {
+            document.body.classList.remove('large-photo-modal-open');
+        }
+        return () => {
+            document.body.classList.remove('large-photo-modal-open');
+        };
+    }, [showLargePhoto]);
+
+    // ==========================================
+    // 3. FUNZIONI HANDLER E UTILITY
+    // ==========================================
+
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // ==========================================
-    // CARICAMENTO PROFILO E POST
-    // ==========================================
     const loadProfile = () => {
         if (!profileUserId) {
             // Se per qualche motivo manca l'ID, la sessione è invalida o corrotta -> Ritorno al Login
@@ -124,14 +167,6 @@ export function Profile() {
             .finally(() => setLoading(false));
     };
 
-    // Carica i dati la prima volta che entriamo nella pagina o quando cambia l'ID dell'utente da guardare
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        setLoading(true);
-        setSelectedPostIndex(null);
-        loadProfile();
-    }, [profileUserId]);
-
     // Funzione per aprire la foto del profilo a schermo intero
     const openLargePhoto = () => {
         if (!avatarRef.current) return;
@@ -170,51 +205,6 @@ export function Profile() {
             setAvatarTransform(null);
         }, 300);
     };
-
-    // Chiude il menu foto quando si clicca fuori
-    useEffect(() => {
-        if (!showPhotoMenu) return;
-        const handleClick = () => setShowPhotoMenu(false);
-        // Piccolo delay per evitare che il click di apertura lo chiuda subito
-        const timer = setTimeout(() => document.addEventListener('click', handleClick), 0);
-        return () => {
-            clearTimeout(timer);
-            document.removeEventListener('click', handleClick);
-        };
-    }, [showPhotoMenu]);
-
-    // ==========================================
-    // GESTIONE SCROLL DELLA PAGINA (MODAL LOCK)
-    // ==========================================
-    // I seguenti useEffect aggiungono dinamicamente classi specifiche al tag <body> 
-    // quando una modale viene aperta a tutto schermo. Questo fa scattare le regole definite in index.css 
-    // (overflow: hidden) che impediscono allo sfondo di scorrere.
-    // NOTA: La gestione della classe 'post-modal-open' e dell'evento 'close-post-modal' per il modale
-    // dei post è delegata al componente condiviso PostsScrollModal.
-
-    // Gestione della classe body per la visualizzazione della modale impostazioni
-    useEffect(() => {
-        if (showSettings) {
-            document.body.classList.add('settings-modal-open');
-        } else {
-            document.body.classList.remove('settings-modal-open');
-        }
-        return () => {
-            document.body.classList.remove('settings-modal-open');
-        };
-    }, [showSettings]);
-
-    // Gestione della classe body per la visualizzazione della foto profilo grande
-    useEffect(() => {
-        if (showLargePhoto) {
-            document.body.classList.add('large-photo-modal-open');
-        } else {
-            document.body.classList.remove('large-photo-modal-open');
-        }
-        return () => {
-            document.body.classList.remove('large-photo-modal-open');
-        };
-    }, [showLargePhoto]);
 
     // Gestione like dai post in modale
     const handleToggleLike = (postId: number) => {
@@ -286,8 +276,6 @@ export function Profile() {
             setPostToDelete(null);
         }
     };
-
-    // NOTA: L'auto-scroll al post selezionato è delegato al componente condiviso PostsScrollModal.
 
     // Gestione parametri URL (da notifiche)
     useEffect(() => {

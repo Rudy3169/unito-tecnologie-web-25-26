@@ -11,21 +11,19 @@ import '../../components/notifications/Notifications.css';
  * Utilizzata principalmente su schermi piccoli (mobile) dove il dropdown della campanella risulterebbe scomodo.
  */
 export function NotificationPage() {
-    const navigate = useNavigate();
-    const [notifications, setNotifications] = useState<NotificationData[]>([]);
-    const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const [loading, setLoading] = useState(false);
+    // ==========================================
+    // 1. useState e useCallback
+    // ==========================================
+
+    const navigate = useNavigate(); // Hook per navigazione
+    const [notifications, setNotifications] = useState<NotificationData[]>([]); // Lista notifiche
+    const [page, setPage] = useState(0); // Pagina corrente
+    const [hasMore, setHasMore] = useState(true); // Flag per altre notifiche disponibili
+    const [loading, setLoading] = useState(false); // Stato caricamento
 
     const userId = localStorage.getItem('phytosend_userId');
     const token = localStorage.getItem('phytosend_token');
 
-    // Calcola se c'è almeno una notifica non letta (usato per mostrare/nascondere il tasto "Segna tutte come lette")
-    const hasUnread = notifications.some(n => !n.read);
-
-    // ==========================================
-    // FETCH DELLE NOTIFICHE (PAGINAZIONE)
-    // ==========================================
     // useCallback "memoizza" questa funzione, impedendo che venga ricreata ad ogni render di React,
     // ottimizzando l'esecuzione dell'useEffect sottostante.
     const fetchNotifications = useCallback(async (pageNum: number, reset = false) => {
@@ -56,13 +54,21 @@ export function NotificationPage() {
         }
     }, [userId, token]);
 
+    // ==========================================
+    // 2. useEffect
+    // ==========================================
+
     useEffect(() => {
         fetchNotifications(0, true);
     }, [fetchNotifications]);
 
     // ==========================================
-    // INTERAZIONE CON LE NOTIFICHE
+    // 3. FUNZIONI HANDLER E UTILITY
     // ==========================================
+
+    // Calcola se c'è almeno una notifica non letta (usato per mostrare/nascondere il tasto "Segna tutte come lette")
+    const hasUnread = notifications.some(n => !n.read);
+
     const handleMarkAsRead = async (id: number) => {
         if (!token) return;
         try {

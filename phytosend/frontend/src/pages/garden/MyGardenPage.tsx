@@ -11,7 +11,7 @@ import { PlantCard } from '../../components/garden/PlantCard';
 import { AddPlantModal } from '../../components/garden/AddPlantModal';
 import { DeletePlantModal } from '../../components/garden/DeletePlantModal';
 import { PlantDetailModal } from '../../components/garden/PlantDetailModal';
-import { PostsScrollModal } from '../../components/common/PostsScrollModal';
+import { PostsScrollModal } from '../../components/garden/PostsScrollModal';
 import type { PlantItem, PostItem, PlantSuggestion } from '../../types';
 
 /**
@@ -21,22 +21,24 @@ import type { PlantItem, PostItem, PlantSuggestion } from '../../types';
  * in base al parametro `userId` nell'URL.
  */
 export function MyGarden() {
-    const { userId: paramUserId } = useParams<{ userId: string }>();
+    const { userId: paramUserId } = useParams<{ userId: string }>(); // ID dell'utente passato tramite route
     const [searchParams] = useSearchParams(); // Usato per leggere query string e aprire il popup di una pianta in automatico
-    const navigate = useNavigate();
-    const currentUserId = localStorage.getItem('phytosend_userId');
+    const navigate = useNavigate(); // Hook per la navigazione
+    const currentUserId = localStorage.getItem('phytosend_userId'); // ID dell'utente corrente
 
     // ==========================================
     // RISOLUZIONE DEL PROPRIETARIO DEL GIARDINO
     // ==========================================
-    const gardenUserId = paramUserId || currentUserId;
+    const gardenUserId = paramUserId || currentUserId; // ID dell'utente di cui stiamo visualizzando il giardino
     const isOwnGarden = !paramUserId || paramUserId === currentUserId; // Flag di sicurezza per abilitare i tasti Modifica/Aggiungi
 
     // Nome del proprietario del giardino (per quando visitiamo il giardino di un altro utente)
     const [ownerName, setOwnerName] = useState<string>('');
 
+    // Hook per mostrare/nascondere il pulsante di scroll top
     const [showScrollTop, setShowScrollTop] = useState(false);
 
+    // Gestione dello scroll per il pulsante "Torna su"
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 300) {
@@ -50,6 +52,7 @@ export function MyGarden() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Funzione per scrollare in cima alla pagina
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };

@@ -13,46 +13,24 @@ import '../profile/ProfilePage.css'; // Per riutilizzare la griglia e la modale 
  * Supporta due modalità di visualizzazione interscambiabili: Griglia (stile Instagram) e Lista (stile Feed).
  */
 export function SavedPosts() {
-    const [posts, setPosts] = useState<PostProps[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
-    const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
-    const modalScrollRef = useRef<HTMLDivElement>(null);
+    // ==========================================
+    // 1. useState e useRef
+    // ==========================================
+
+    const [posts, setPosts] = useState<PostProps[]>([]); // Lista post salvati
+    const [loading, setLoading] = useState(true); // Stato caricamento
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid'); // Modalità di visualizzazione
+    const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null); // Indice post in modale
+    const modalScrollRef = useRef<HTMLDivElement>(null); // Ref al contenitore scrollabile
 
     // ==========================================
-    // FETCH DEI POST SALVATI
+    // 2. useEffect
     // ==========================================
-    const caricaPostSalvati = () => {
-        const token = localStorage.getItem('phytosend_token');
-        const userId = localStorage.getItem('phytosend_userId');
-
-        if (!userId) return;
-
-        // Richiede al backend esclusivamente la sottolista di post salvati dall'utente
-        apiFetch(`/api/social/posts/saved?utenteId=${userId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => {
-                if (!res.ok) throw new Error(`Errore server: ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                setPosts(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Errore recupero post salvati:", err);
-                setLoading(false);
-            });
-    };
 
     useEffect(() => {
         caricaPostSalvati();
     }, []);
 
-    // ==========================================
-    // SINCRONIZZAZIONE DELLA VISUALIZZAZIONE (EVENTS)
-    // ==========================================
     // Comunica con l'Header Mobile (esterno a questo componente) tramite eventi globali (CustomEvent)
     // per tenere sincronizzato il bottone Grid/List che si trova in un'altra parte dell'albero React.
     useEffect(() => {
@@ -107,6 +85,34 @@ export function SavedPosts() {
             }, 50);
         }
     }, [selectedPostIndex]);
+
+    // ==========================================
+    // 3. FUNZIONI HANDLER E UTILITY
+    // ==========================================
+
+    const caricaPostSalvati = () => {
+        const token = localStorage.getItem('phytosend_token');
+        const userId = localStorage.getItem('phytosend_userId');
+
+        if (!userId) return;
+
+        // Richiede al backend esclusivamente la sottolista di post salvati dall'utente
+        apiFetch(`/api/social/posts/saved?utenteId=${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => {
+                if (!res.ok) throw new Error(`Errore server: ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                setPosts(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Errore recupero post salvati:", err);
+                setLoading(false);
+            });
+    };
 
     // Funzione per mettere like a un post
     const handleToggleLike = (postId: number) => {

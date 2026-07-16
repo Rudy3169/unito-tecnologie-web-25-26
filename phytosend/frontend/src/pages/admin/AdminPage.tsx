@@ -9,20 +9,23 @@ import './AdminPage.css';
  * L'accesso a questa rotta è protetto sia sul frontend (nel Router) che sul backend (Spring Security).
  */
 export function AdminPanel() {
+    // Stato per memorizzare le statistiche
     const [stats, setStats] = useState<{
-        totalPlants: number | null,
-        totalUsers: number | null,
-        totalPosts: number | null,
-        totalAlivePlants: number | null,
-        totalNotifications: number | null
+        totalPlants: number | null, // Numero totale di piante
+        totalUsers: number | null, // Numero totale di utenti
+        totalPosts: number | null, // Numero totale di post
+        totalAlivePlants: number | null, // Numero totale di piante viventi
+        totalNotifications: number | null // Numero totale di notifiche
     }>({
-        totalPlants: null,
-        totalUsers: null,
-        totalPosts: null,
-        totalAlivePlants: null,
-        totalNotifications: null
+        totalPlants: null, // Numero totale di piante
+        totalUsers: null, // Numero totale di utenti
+        totalPosts: null, // Numero totale di post
+        totalAlivePlants: null, // Numero totale di piante viventi
+        totalNotifications: null // Numero totale di notifiche
     });
+    // Stato per indicare se le statistiche sono in caricamento
     const [isFetchingStats, setIsFetchingStats] = useState(false);
+    // Stato per indicare se il database è in ricaricamento
     const [isReloading, setIsReloading] = useState(false);
 
     // ==========================================
@@ -39,8 +42,10 @@ export function AdminPanel() {
         onConfirm: () => { }
     });
 
+    // Chiude la modale
     const closePopup = () => setModalConfig(prev => ({ ...prev, isOpen: false }));
 
+    // Mostra una modale di avviso
     const showPopup = (title: string, message: string, icon: 'info' | 'success' | 'warning' = 'info') => {
         setModalConfig({ isOpen: true, type: 'alert', title, message, icon, onConfirm: closePopup });
     };
@@ -48,6 +53,7 @@ export function AdminPanel() {
     // ==========================================
     // POLLING DELLE STATISTICHE
     // ==========================================
+    // Funzione per recuperare le statistiche dal server
     const fetchDashboardData = async () => {
         const token = localStorage.getItem('phytosend_token');
         setIsFetchingStats(true);
@@ -72,6 +78,7 @@ export function AdminPanel() {
         }
     };
 
+    // Chiamata per recuperare le statistiche (eseguita al mount e poi ogni 5 secondi)
     useEffect(() => {
         fetchDashboardData();
         // POLLING: Chiede al server lo stato aggiornato ogni 5 secondi.

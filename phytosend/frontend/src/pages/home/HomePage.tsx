@@ -40,17 +40,17 @@ export function HomeFeed() {
     }
 
     // ==========================================
-    // STATI DEL COMPONENTE (STATE MANAGEMENT)
+    // 1. useState, useRef e useCallback
     // ==========================================
 
     // Lista dei post visualizzati nel feed
-    const [posts, setPosts] = useState<PostProps[]>(cachedRef.current?.posts ?? []);
+    const [posts, setPosts] = useState<PostProps[]>(cachedRef.current?.posts ?? []); // Post nel feed
 
     // Stato booleano per la visualizzazione del form di creazione di un nuovo post
-    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [showCreateForm, setShowCreateForm] = useState(false); // Modale creazione
 
     // Memorizza l'ID del post che l'utente sta cercando di eliminare
-    const [postToDelete, setPostToDelete] = useState<number | null>(null);
+    const [postToDelete, setPostToDelete] = useState<number | null>(null); // Post da cancellare
 
     // Stati per l'impaginazione e lo scroll infinito
     const [page, setPage] = useState(cachedRef.current?.page ?? 0); // Pagina corrente richiesta al backend
@@ -58,20 +58,35 @@ export function HomeFeed() {
     const [loading, setLoading] = useState(false); // Flag di caricamento per mostrare un feedback visivo
 
     // Flag per gestire l'animazione invisibile di ripristino dello scroll
-    const [restoringScroll, setRestoringScroll] = useState(!!cachedRef.current);
+    const [restoringScroll, setRestoringScroll] = useState(!!cachedRef.current); // Ripristino scroll
 
     // Riferimenti usati per catturare l'intersezione dello scroll
-    const observerRef = useRef<IntersectionObserver | null>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    // ==========================================
-    // GESTIONE CACHE AL DISMOUNT
-    // ==========================================
+    const observerRef = useRef<IntersectionObserver | null>(null); // Ref observer
+    const containerRef = useRef<HTMLDivElement>(null); // Ref feed container
 
     // Refs utilizzati per avere sempre il valore più aggiornato degli stati
-    const postsRef = useRef(posts);
-    const pageRef = useRef(page);
-    const hasMoreRef = useRef(hasMore);
+    const postsRef = useRef(posts); // Ref posts per dismount cache
+    const pageRef = useRef(page); // Ref pagina corrente per dismount cache
+    const hasMoreRef = useRef(hasMore); // Ref hasMore per dismount cache
+    const lastScrollY = useRef(0); // Posizione scroll per dismount cache
+
+    // Sensore per l'infinite scroll
+    const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+        if (loading) return;
+        if (observerRef.current) observerRef.current.disconnect();
+
+        observerRef.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+
+        if (node) observerRef.current.observe(node);
+    }, [loading, hasMore]);
+
+    // ==========================================
+    // 2. useEffect e useLayoutEffect
+    // ==========================================
 
     // Aggiorna il ref ogni volta che la lista dei post cambia
     useEffect(() => {
@@ -87,8 +102,6 @@ export function HomeFeed() {
     useEffect(() => {
         hasMoreRef.current = hasMore;
     }, [hasMore]);
-
-    const lastScrollY = useRef(0);
 
     // Monitora la posizione dello scroll in tempo reale per bypassare i reset automatici del router
     useEffect(() => {
@@ -129,19 +142,15 @@ export function HomeFeed() {
         }
     }, [restoringScroll, posts]);
 
-    // Sensore per l'infinite scroll
-    const lastElementRef = useCallback((node: HTMLDivElement | null) => {
-        if (loading) return;
-        if (observerRef.current) observerRef.current.disconnect();
+    // Trigger per il caricamento dei post
+    useEffect(() => {
+        if (restoringScroll) return;
+        caricaPosts(page);
+    }, [page]);
 
-        observerRef.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasMore) {
-                setPage(prevPage => prevPage + 1);
-            }
-        });
-
-        if (node) observerRef.current.observe(node);
-    }, [loading, hasMore]);
+    // ==========================================
+    // 3. FUNZIONI HANDLER E UTILITY
+    // ==========================================
 
     // Funzione per caricare i post
     const caricaPosts = (pageNum: number) => {
@@ -169,12 +178,6 @@ export function HomeFeed() {
             .catch(err => console.error("Errore:", err))
             .finally(() => setLoading(false));
     };
-
-    // Trigger per il caricamento dei post
-    useEffect(() => {
-        if (restoringScroll) return;
-        caricaPosts(page);
-    }, [page]);
 
     // Gestisce l'aggiunta di un nuovo post
     const handleAddPost = () => {
