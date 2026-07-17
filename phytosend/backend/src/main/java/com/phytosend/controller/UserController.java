@@ -261,6 +261,10 @@ public class UserController {
         Plant plant = plantRepository.findById(plantId)
                 .orElseThrow(() -> new RuntimeException("Pianta non trovata"));
 
+        if (plant.getGarden() == null || !plant.getGarden().getOwner().getId().equals(userId)) {
+            throw new RuntimeException("Pianta non appartenente all'utente");
+        }
+
         String type = payload.get("type");
         String dateStr = payload.get("date");
         LocalDate date = LocalDate.parse(dateStr);

@@ -1,6 +1,7 @@
 package com.phytosend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.phytosend.repository.BotanicalCardRepository;
@@ -72,7 +73,7 @@ public class AdminController {
      * Endpoint per modificare i dati di una scheda botanica
      */
     @PutMapping("/botanical-cards/{id}")
-    public ResponseEntity<?> updateBotanicalCard(@PathVariable Long id, @RequestBody com.phytosend.dto.BotanicalCardDto cardDto) {
+    public ResponseEntity<?> updateBotanicalCard(@PathVariable @NonNull Long id, @RequestBody com.phytosend.dto.BotanicalCardDto cardDto) {
         return botanicalCardRepository.findById(id).map(card -> {
             if (cardDto.getCommonName() != null) card.setCommonName(cardDto.getCommonName());
             if (cardDto.getScientificName() != null) card.setScientificName(cardDto.getScientificName());
@@ -84,7 +85,7 @@ public class AdminController {
             if (cardDto.getSoil() != null) card.setSoil(cardDto.getSoil());
             if (cardDto.getUrlDefaultPhoto() != null) card.setUrlDefaultPhoto(cardDto.getUrlDefaultPhoto());
             
-            botanicalCardRepository.save(card);
+            botanicalCardRepository.save(java.util.Objects.requireNonNull(card));
             return ResponseEntity.ok("Scheda botanica aggiornata con successo");
         }).orElse(ResponseEntity.status(404).body("Scheda botanica non trovata"));
     }

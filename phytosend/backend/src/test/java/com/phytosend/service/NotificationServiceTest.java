@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,7 +87,8 @@ class NotificationServiceTest {
     }
 
     /**
-     * Verifica che la notifica venga creata anche con actor null (notifica di sistema).
+     * Verifica che la notifica venga creata anche con actor null (notifica di
+     * sistema).
      */
     @Test
     void createNotification_NullActor_SavesSystemNotification() {

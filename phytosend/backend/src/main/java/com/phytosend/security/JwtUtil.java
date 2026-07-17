@@ -40,7 +40,7 @@ public class JwtUtil {
      * @return il nome utente estratto
      */
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, claims -> claims.getSubject());
     }
 
     /**
@@ -126,7 +126,7 @@ public class JwtUtil {
      * @return la data di scadenza del token
      */
     private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        return extractClaim(token, claims -> claims.getExpiration());
     }
 
     /**
