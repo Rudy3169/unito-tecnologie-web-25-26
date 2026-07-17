@@ -1,26 +1,22 @@
-# Infrastruttura di Containerizzazione & Architettura di Monitoraggio (Stack PLG)
+# Infrastruttura di Containerizzazione & Monitoraggio con Prometheus
 
-Questo documento illustra l'architettura di containerizzazione e la suite di **Osservabilità (Observability)** integrate nel progetto **PhytoSend**.
+Questo documento illustra l'architettura di containerizzazione e il sistema di **monitoraggio** integrato nel progetto **PhytoSend**.
 
-L'obiettivo dell'infrastruttura è garantire la portabilità dell'intero sistema, semplificare l'ambiente di sviluppo locale tramite meccanismi di *hot-reloading* e introdurre un sistema di monitoraggio centralizzato di livello industriale per metriche e log.
+L'obiettivo dell'infrastruttura è garantire la portabilità dell'intero sistema, semplificare l'ambiente di sviluppo locale tramite meccanismi di *hot-reloading* e introdurre un sistema di monitoraggio centralizzato per le metriche applicative.
 
 ---
 
 ## 1. Architettura del Sistema
 
-L'infrastruttura è interamente orchestrata tramite **Docker Compose** ed è suddivisa in due macro-aree: i **Servizi Core** (necessari all'esecuzione dell'applicazione) e i **Servizi di Observability** (dedicati alla telemetria e al tracciamento).
+L'infrastruttura è interamente orchestrata tramite **Docker Compose** ed è suddivisa in due macro-aree: i **Servizi Core** (necessari all'esecuzione dell'applicazione) e il **Servizio di Monitoraggio** (dedicato alla telemetria).
 
 ```mermaid
 graph TD
     Client[React + Vite Frontend] -->|API Calls| API[Spring Boot Backend]
     API -->|JPA / JDBC| DB[(PostgreSQL DB)]
   
-    subgraph Observability Stack
+    subgraph Monitoring
         Prom[Prometheus] -->|Scrapes /actuator/prometheus| API
-        Promtail[Promtail Agent] -->|Reads Container Logs| Socket[Docker Socket]
-        Promtail -->|Pushes Logs| Loki[Loki Log DB]
-        Grafana[Grafana Dashboard] -->|Queries Metrics| Prom
-        Grafana -->|Queries Logs| Loki
     end
 ```
 
@@ -33,16 +29,10 @@ graph TD
 * **`phytosend-frontend` (React + Vite)**:
   Interfaccia utente web della SPA (Single Page Application), compilata e servita tramite un server web ottimizzato.
 
-### 1.2. Servizi di Observability (Stack PLG)
+### 1.2. Servizio di Monitoraggio
 
 * **`phytosend-prometheus`**:
   Time-series database preposto al recupero (tramite *scraping* ad intervalli di 5 secondi) e all'archiviazione delle metriche numeriche prestazionali del server Spring Boot.
-* **`phytosend-loki`**:
-  Database log-centrico altamente ottimizzato. A differenza di Elasticsearch, indicizza esclusivamente i metadati dei log, riducendo drasticamente l'impatto sulle risorse di sistema.
-* **`phytosend-promtail`**:
-  Agente locale di log-shipping. È montato direttamente sul socket di Docker (`/var/run/docker.sock`), catturando lo standard output (`stdout`/`stderr`) dei container applicativi e inoltrandolo a Loki.
-* **`phytosend-grafana`**:
-  Piattaforma analitica e di visualizzazione. Interroga Loki e Prometheus per aggregare i dati telemetrici all'interno di cruscotti (dashboard) analitici in tempo reale.
 
 ---
 
@@ -55,9 +45,7 @@ Tutti i servizi comunicano all'interno di una rete virtuale isolata basata su dr
 | `phytosend-frontend`   | `5173`      | HTTP                  | Accesso all'applicazione client                              |
 | `phytosend-backend`    | `8080`      | HTTP                  | Interazione con le API REST e documentazione OpenAPI/Swagger |
 | `phytosend-db`         | `5432`      | TCP                   | Connessione al DBMS PostgreSQL                               |
-| `phytosend-grafana`    | `3000`      | HTTP                  | Portale di monitoraggio e visualizzazione dei dati           |
 | `phytosend-prometheus` | `9090`      | HTTP                  | Console nativa per query diagnostiche in PromQL              |
-| `phytosend-loki`       | `3100`      | HTTP                  | API REST di Loki (controllo stato su `/ready`)             |
 
 ---
 
@@ -101,41 +89,21 @@ Ottimizzato per la fase di scrittura del codice, permette di riflettere istantan
 
 ---
 
-## 4. Flusso di Monitoraggio & Configurazione Telemetrica
+## 4. Monitoraggio con Prometheus
 
-### 4.1. Configurazione di Grafana
+### 4.1. Accesso alla Console Prometheus
 
-Per accedere alla console di visualizzazione e importare le dashboard di sistema:
+Per accedere alla console nativa di Prometheus e verificare il corretto funzionamento dello scraping:
 
-1. Accedere a [http://localhost:3000](http://localhost:3000) utilizzando le seguenti credenziali preconfigurate:
-   * **Username**: `admin`
-   * **Password**: `admin`
-2. **Aggiunta del Data Source Prometheus**:
-   * Navigare su *Connections* ➔ *Data Sources* ➔ *Add data source* ➔ Selezionare **Prometheus**.
-   * Impostare l'URL di connessione interna: `http://prometheus:9090`.
-   * Cliccare su **Save & test**.
-3. **Aggiunta del Data Source Loki**:
-   * Tornare su *Data Sources* ➔ *Add data source* ➔ Selezionare **Loki**.
-   * Impostare l'URL di connessione interna: `http://loki:3100`.
-   * Cliccare su **Save & test**.
+1. Accedere a [http://localhost:9090](http://localhost:9090).
+2. Navigare su *Status* ➔ *Targets* per verificare che l'endpoint `phytosend-backend` sia in stato **UP**.
+3. Utilizzare la barra di query in PromQL per interrogare le metriche (es. `http_server_requests_seconds_count`).
 
-### 4.2. Importazione Dashboard JVM e Richieste HTTP
+### 4.2. Metriche Esposte dal Backend
 
-È stata predisposta l'integrazione con la dashboard Spring Boot standard (ID Grafana: **`12900`**).
+Grazie all'integrazione di **Spring Boot Actuator** e **Micrometer Prometheus**, il backend espone automaticamente metriche dettagliate su:
 
-* Cliccare su **`+`** (in alto a destra) ➔ **Import dashboard**.
-* Inserire l'ID `12900` e cliccare su **Load**.
-* Associare la sorgente Prometheus precedentemente creata e completare l'importazione.
-* Il pannello mostrerà metriche dettagliate su:
-  * Percentuale di CPU del processo e del sistema.
-  * Allocazione e Garbage Collection della memoria JVM (Heap e Non-Heap).
-  * Statistiche e tempi medi delle chiamate HTTP per singola URI.
-  * Connessioni attive del pool di database HikariCP.
-
-### 4.3. Analisi dei Log Centralizzata
-
-Tramite la sezione **Explore** di Grafana è possibile analizzare i flussi di log del sistema integrando i metadati di Docker:
-
-* Selezionare come sorgente dati **Loki**.
-* Filtrare i log tramite query LogQL (es. `{container="phytosend-backend"}`).
-* Attivando il flag **Live**, è possibile ispezionare l'output del server in tempo reale, semplificando le attività di debugging e tracciamento delle eccezioni.
+* Percentuale di CPU del processo e del sistema.
+* Allocazione e Garbage Collection della memoria JVM (Heap e Non-Heap).
+* Statistiche e tempi medi delle chiamate HTTP per singola URI.
+* Connessioni attive del pool di database HikariCP.
