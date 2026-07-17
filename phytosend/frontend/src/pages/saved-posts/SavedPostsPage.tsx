@@ -10,7 +10,7 @@ import '../profile/ProfilePage.css'; // Per riutilizzare la griglia e la modale 
 /**
  * COMPONENTE SAVED POSTS PAGE
  * Mostra i post che l'utente ha salvato (segnalibro).
- * Supporta due modalità di visualizzazione interscambiabili: Griglia (stile Instagram) e Lista (stile Feed).
+ * Supporta due modalità di visualizzazione interscambiabili: Griglia e Lista.
  */
 export function SavedPosts() {
     // ==========================================
@@ -55,7 +55,7 @@ export function SavedPosts() {
         };
     }, [viewMode]);
 
-    // Gestione della classe body per la testata Instagram-style su mobile
+    // Gestione della classe body per la testata su mobile
     useEffect(() => {
         if (selectedPostIndex !== null) {
             document.body.classList.add('post-modal-open');
